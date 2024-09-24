@@ -18,8 +18,9 @@ mamba env create -f reproducibility/environment.yml
 We use multiple singularity containers for different methods and / or environments. To ensure reproducibility, please build these containers before executing the workflow.
 
 #### R
-The R version we use for this workflow is 4.4.1, and [renv](https://rstudio.github.io/renv/index.html) is used to track specific versions of packages. Please find files related to renv in `reproducibility/r/metadata`, and use `reproducibility/r/r.def` to build a corresponding container:
+The R version we use for this workflow is 4.4.1, and [renv](https://rstudio.github.io/renv/index.html) is used to track specific versions of packages. Please find files related to renv in `reproducibility/r/metadata`, and use `r.def` in `reproducibility/r` to build a corresponding container:
 ```bash
-singularity build --fakeroot --force /path/to/the/built/container reproducibility/r/r.def
+cd reproducibility/r
+singularity build --fakeroot --force /path/to/the/built/container r.def
 ```
 
