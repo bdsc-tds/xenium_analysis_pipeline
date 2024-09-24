@@ -1,0 +1,9 @@
+name: xenium_analysis_pipeline
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12.6
+  - snakemake=8.20.4
+  - cookiecutter=2.6.0
+

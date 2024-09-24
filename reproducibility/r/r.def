@@ -1,0 +1,45 @@
+BootStrap: docker
+From: rocker/r-base:4.4.1
+
+%setup
+  mkdir -p ${SINGULARITY_ROOTFS}/opt/_renv/renv
+
+%files
+  metadata/renv.lock /opt/_renv
+  metadata/.Rprofile /opt/_renv
+  metadata/renv/activate.R /opt/_renv/renv
+  metadata/renv/settings.json /opt/_renv/renv
+
+%post
+# Set up build time environment variables, such as versions
+
+# Set up run time environment variables
+
+# DNS
+  # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+  # sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list
+  sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list.d/debian.sources
+
+# Force ipv4
+  echo 'Acquire::ForceIPv4 "true";' | tee /etc/apt/apt.conf.d/99force-ipv4
+
+# Set locale 
+  apt-get update
+  apt-get install -y locales gnupg-agent
+  sed -i '/^#.* en_.*.UTF-8 /s/^#//' /etc/locale.gen
+  locale-gen
+
+# Install essential packages
+  apt-get install -y --no-install-recommends software-properties-common dirmngr ca-certificates
+
+# Configure tzdata to prevent asking for input
+  export DEBIAN_FRONTEND=noninteractive
+  export TZ="Europe/Zurich"
+
+# Install system packages
+  apt-get install -y git vim libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+
+# Install "renv" for R
+  R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
+  R -e "renv::restore(lockfile = '/opt/_renv/renv.lock')"
+
