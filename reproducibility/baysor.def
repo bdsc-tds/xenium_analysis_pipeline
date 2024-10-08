@@ -1,0 +1,94 @@
+BootStrap: docker
+From: condaforge/mambaforge:24.7.1-2
+Stage: conda
+
+BootStrap: docker
+From: mambaorg/micromamba:noble
+Stage: main
+
+%files from conda
+    /opt/conda /pkgs/conda
+
+%environment
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+%post
+# Set up build time environment variables, such as versions
+    export JULIA_VERSION=1.10.5
+    export BAYSOR_VERSION=v0.7.0
+
+    export RUSTUP_HOME=/opt/rustup
+    export CARGO_HOME=/opt/cargo
+    export JULIA_DEPOT_PATH=/opt/.julia
+    export JULIAUP_DEPOT_PATH=/opt/.julia
+
+    export PATH=/opt/conda/bin:/opt/conda/condabin:"${CARGO_HOME}"/bin:"${JULIA_DEPOT_PATH}"/bin:"${PATH}"
+
+# Set up run time environment variables
+    echo "export RUSTUP_HOME='${RUSTUP_HOME}'" >>$SINGULARITY_ENVIRONMENT
+    echo "export CARGO_HOME='${CARGO_HOME}'" >>$SINGULARITY_ENVIRONMENT
+    echo "export JULIA_DEPOT_PATH='${JULIA_DEPOT_PATH}'" >>$SINGULARITY_ENVIRONMENT
+    echo "export JULIAUP_DEPOT_PATH='${JULIAUP_DEPOT_PATH}'" >>$SINGULARITY_ENVIRONMENT
+
+    echo "export PATH='/opt/conda/bin:/opt/conda/condabin:${CARGO_HOME}/bin:${JULIA_DEPOT_PATH}/bin:${PATH}'" >>$SINGULARITY_ENVIRONMENT
+
+# Configure tzdata to prevent asking for input
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+# Set sources.
+    sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list
+
+# Force ipv4
+    echo 'Acquire::ForceIPv4 "true";' | tee /etc/apt/apt.conf.d/99force-ipv4
+
+# Setup locales.
+    apt-get update
+    apt-get install -y locales gnupg-agent
+    sed -i '/^#.* en_.*.UTF-8 /s/^#//' /etc/locale.gen
+    locale-gen
+
+# Install essential packages.
+    apt-get install -y --no-install-recommends software-properties-common lsb-release dirmngr apt-transport-https ca-certificates build-essential 
+
+# Install system packages
+    apt-get install -y unzip vim wget curl libglpk-dev libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev
+
+    apt-get clean
+
+# Change to directories for packages
+    cd /opt
+
+# Put conda binaries to the right directory.
+    rm -rf conda
+    mv /pkgs/conda /opt
+    rm -rf /pkgs
+
+# Install rust
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Install julia
+    cargo install juliaup
+    juliaup add "${JULIA_VERSION}"
+    juliaup default "${JULIA_VERSION}"
+
+# Install Baysor
+    # julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/kharchenkolab/Baysor.git", rev=ENV["BAYSOR_VERSION"])); Pkg.build()'
+
+    # julia -e 'using Pkg; Pkg.add(PackageSpec(url="https://github.com/kharchenkolab/Baysor.git", rev="develop")); Pkg.build()'
+
+    mkdir _baysor
+    cd _baysor
+    wget -O baysor.zip https://github.com/kharchenkolab/Baysor/releases/download/"${BAYSOR_VERSION}"/baysor-x86_x64-linux-"${BAYSOR_VERSION}"_build.zip
+    unzip baysor.zip
+    mv bin/baysor ..
+    cd ..
+    rm -rf _baysor
+
+    ln -s /opt/baysor/bin/baysor /usr/local/bin/baysor
+
+# Back to root directory
+    cd /
