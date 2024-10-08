@@ -1,0 +1,65 @@
+import os
+include: "scripts/utils/config_utils.py"
+
+# Ensure that only one configuration file is used.
+if len(workflow.configfiles) > 1:
+    raise RuntimeError(f"Error! At most one configuration file is allowed to be passed via command line options, but {len(workflow.configfiles)} are detected.")
+elif len(workflow.configfiles) == 0:
+    configfile: 'config/config.yml'
+assert len(workflow.configfiles) == 1
+
+process_config(
+    config,
+    root_path=os.path.dirname(
+        os.path.normpath(
+            os.path.abspath(
+                workflow.configfiles[0]
+            )
+        )
+    )
+)
+
+
+#######################################
+#              Wildcards              #
+#######################################
+
+import config_constants as cc
+
+
+"""
+Explanation of wildcards:
+- sample_id: The name of an sample to be processed with a format of "disease/gene panel/donor/sample".
+- segmentation_id: The name of a segmentation method to be used.
+"""
+
+SAMPLE_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_SAMPLES_NAME
+)
+SEGMENTATION_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_SEGMENTATION_NAME
+)
+
+wildcard_constraints:
+    sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
+    segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID])
+
+
+########################################
+#           Predefined rules           #
+########################################
+
+include: 'rules/segmentation.smk'
+
+
+#######################################
+#                Rules                #
+#######################################
+
+rule all:
+    input:
+        
