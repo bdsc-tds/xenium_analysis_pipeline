@@ -1,0 +1,9 @@
+executor: slurm
+jobs: 500
+
+default-resources:
+  slurm_account: your_account
+  slurm_partition: cpu
+  threads: 1
+  mem_mb: 10240
+  runtime: 600
