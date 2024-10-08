@@ -1,0 +1,9 @@
+_base_path: /path/to/raw/data
+
+diseases_1:
+  gene_panel_1:
+    donor_1: sample_1
+    donor_2:
+      - sample_2
+      - sample_3
+
