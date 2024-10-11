@@ -4,6 +4,7 @@
 **/.local
 **/.jupyter
 **/.condarc
+**/.keras
 
 **/__pycache__
 **/.RData
