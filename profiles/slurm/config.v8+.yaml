@@ -5,5 +5,5 @@ default-resources:
   slurm_account: your_account
   slurm_partition: cpu
   threads: 1
-  mem_mb: 10240
+  mem_mb: 1024
   runtime: 600
