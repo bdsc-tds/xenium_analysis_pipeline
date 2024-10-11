@@ -2,6 +2,7 @@ _base_path: /path/to/raw/data
 
 diseases_1:
   gene_panel_1:
+    _gene_panel_file: /path/to/or/name/of/gene/panel/file
     donor_1: sample_1
     donor_2:
       - sample_2

@@ -1,5 +1,8 @@
+from typing import Any
 import os
+import json
 include: "scripts/utils/config_utils.py"
+include: "scripts/utils/raw_data_utils.py"
 
 # Ensure that only one configuration file is used.
 if len(workflow.configfiles) > 1:
@@ -53,6 +56,7 @@ wildcard_constraints:
 #           Predefined rules           #
 ########################################
 
+include: 'rules/reprocess_raw_data.smk'
 include: 'rules/segmentation.smk'
 
 

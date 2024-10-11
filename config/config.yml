@@ -8,6 +8,11 @@ containers:
 
 experiments: experiments.yml
 
+reprocess:
+  level: 1
+  _threads: 16
+  _memory: 64
+
 segmentation:
   methods:
     - 10x
@@ -30,5 +35,5 @@ segmentation:
     _other_options:
 
   _normalisation:
-    localcores: 16
-    localmem: 64
+    _threads: 16
+    _memory: 64
