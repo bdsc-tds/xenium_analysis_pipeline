@@ -32,10 +32,11 @@ SINGULARITY_BIND_DIRS=( )
 # Help message.
 help()
 {
-    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -n,--dry-run: dry run.
+        --dag OUTPUT: draw dag and save to OUTPUT.pdf.
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
         -h,--help: print this message.
@@ -46,7 +47,7 @@ help()
 
 # Allowed command line arguments.
 SHORT_OPTS=m:,c:,n,v,h
-LONG_OPTS=mode:,core:,dry-run,until:,verbose,help
+LONG_OPTS=mode:,core:,dry-run,dag:,unlock,verbose,help
 OPTS=$(getopt -n xenium_analysis_pipeline --options $SHORT_OPTS --longoptions $LONG_OPTS -- "$@")
 eval set -- "$OPTS"
 
@@ -75,6 +76,7 @@ LOCAL=1
 EXEC_OPT=(--profile "$LOCAL_PROFILE")
 CORE_OPT=(--cores 1)
 DRY_RUN_OPT=
+DAG_OPT=
 UNLOCK=0
 VERBOSE=0
 
@@ -117,7 +119,18 @@ do
             DRY_RUN_OPT=-n
             shift 1
             ;;
-        
+
+        --dag)
+            DAG_OPT="$2"
+
+            if [[ -z $DAG_OPT ]]; then
+                echo "Empty value for --dag."
+                help 1
+            fi
+
+            break
+            ;;
+
         --unlock)
             UNLOCK=1
             break
@@ -145,8 +158,15 @@ do
     esac
 done
 
-# Unlock the working directory.
+# Draw dag and save to disk.
 # Priority: 1 (highest; other options will be ommitted)
+if [[ -v DAG_OPT && -n $DAG_OPT ]]; then
+    $CONDA_BIN run --live-stream -n $ENV_NAME snakemake --dag | dot -Tpdf > $DAG_OPT.pdf
+    exit 0
+fi
+
+# Unlock the working directory.
+# Priority: 2 (2nd highest; other options will be ommitted)
 if [ $UNLOCK -eq 1 ]; then
     $CONDA_BIN run --live-stream -n $ENV_NAME snakemake --unlock
     exit 0
@@ -172,7 +192,7 @@ else
 fi
 
 # Dry run mode.
-# Priority: 2
+# Priority: 3
 if [ -n "$DRY_RUN_OPT" ]; then
     COMPLETE_CMD=("${COMPLETE_CMD[@]}" "$DRY_RUN_OPT")
 fi
