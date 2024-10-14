@@ -31,7 +31,7 @@ segmentation:
   baysor:
     _config: "workflow/configs/baysor_xenium.toml"
     _threads: 16
-    _memory: 100
+    _memory: 300
     _other_options:
 
   _normalisation:
