@@ -17,6 +17,47 @@ def get_gene_panel4reprocessRawData(wildcards) -> str:
 
     return ret
 
+def get_input2_or_params4changeParquetCompressionType(wildcards, for_input: bool = True) -> str:
+    gene_panel_file: str | None = get_gene_panel_file(wildcards.sample_id, config)
+
+    with open(checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0], "r", encoding="utf-8") as fh:
+        versions: dict[str, Any] = json.load(fh)
+    
+    matched: bool = get_dict_value(
+        versions,
+        "match",
+        str(get_dict_value(
+            config,
+            "reprocess",
+            "level"
+        ))
+    )
+
+    use_raw_data: bool = True if gene_panel_file is None or matched else False
+    if use_raw_data:
+        ret: str = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{wildcards.sample_id}'
+    else:
+        ret = f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/results'
+
+    if for_input:
+        return ret
+
+    if use_raw_data:
+        return normalise_path(
+            ret,
+            pat_anchor_file="transcripts.parquet",
+            return_dir=False,
+            check_exist=True
+        )
+
+    return normalise_path(
+        ret,
+        candidate_paths=("outs",),
+        pat_anchor_file="transcripts.parquet",
+        return_dir=False,
+        check_exist=False
+    )
+
 
 #######################################
 #                Rules                #
@@ -86,3 +127,23 @@ rule reprocessRawData:
         "--panel={params.abs_gene_panel} "
         "--localcores={threads} "
         "--localmem={params.localmem} &> {params.abs_log}"
+
+rule changeParquetCompressionType:
+    input:
+        get_input2_or_params4changeParquetCompressionType
+    output:
+        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet')
+    log:
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/changeParquetCompressionType.log'
+    params:
+        input_file=lambda wildcards: get_input2_or_params4changeParquetCompressionType(wildcards, for_input=False)
+    resources:
+        mem_mb=10240
+    conda:
+        "../envs/pyarrow.yml"
+    shell:
+        "python3 workflow/scripts/change_parquet_compresson_type.py "
+        "-i {params.input_file} "
+        "-t snappy "
+        "-l {log} "
+        "-o {output}"

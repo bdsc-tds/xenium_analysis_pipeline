@@ -1,56 +1,10 @@
 #######################################
-#              Functions              #
-#######################################
-
-def get_input2_or_params4runBaysor(wildcards, for_input: bool = True) -> str:
-    gene_panel_file: str | None = get_gene_panel_file(wildcards.sample_id, config)
-
-    with open(checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0], "r", encoding="utf-8") as fh:
-        versions: dict[str, Any] = json.load(fh)
-    
-    matched: bool = get_dict_value(
-        versions,
-        "match",
-        str(get_dict_value(
-            config,
-            "reprocess",
-            "level"
-        ))
-    )
-
-    use_raw_data: bool = True if gene_panel_file is None or matched else False
-    if use_raw_data:
-        ret: str = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{wildcards.sample_id}'
-    else:
-        ret = f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/results'
-
-    if for_input:
-        return ret
-
-    if use_raw_data:
-        return normalise_path(
-            ret,
-            pat_anchor_file="transcripts.parquet",
-            return_dir=False,
-            check_exist=True
-        )
-
-    return normalise_path(
-        ret,
-        candidate_paths=("outs",),
-        pat_anchor_file="transcripts.parquet",
-        return_dir=False,
-        check_exist=False
-    )
-
-
-#######################################
 #                Rules                #
 #######################################
 
 rule runBaysor:
     input:
-        get_input2_or_params4runBaysor
+        data_file=f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet'
     output:
         protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation.csv'),
         protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_2d.json'),
@@ -59,9 +13,7 @@ rule runBaysor:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/runBaysor.log'
     params:
         work_dir=f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results',
-        abs_input=lambda wildcards: os.path.abspath(
-            get_input2_or_params4runBaysor(wildcards, for_input=False)
-        ),
+        abs_input=lambda wildcards, input: os.path.abspath(input["data_file"]),
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/logs/runBaysor.log'
         ),
