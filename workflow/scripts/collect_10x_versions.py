@@ -30,7 +30,9 @@ def parse_args():
         default=None,
         help="path to the log file",
     )
-    sys_args_parser.add_argument("-o", required=True, type=str, help="output json file")
+    sys_args_parser.add_argument(
+        "-o", required=True, type=str, help="path to the output json file"
+    )
 
     ret = sys_args_parser.parse_args()
     if not os.path.isfile(ret.i):
