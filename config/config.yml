@@ -1,0 +1,39 @@
+output_path: results
+
+containers:
+  r: 
+  10x: 
+  baysor: 
+  proseg: 
+
+experiments: experiments.yml
+
+reprocess:
+  level: 1
+  _threads: 16
+  _memory: 64
+
+segmentation:
+  methods:
+    - 10x
+    - baysor
+
+  10x:
+    expansion-distance:
+      - 0
+      - 5
+      - 15
+
+    localcores: 16
+    localmem: 64
+    _other_options:
+
+  baysor:
+    _config: "workflow/configs/baysor_xenium.toml"
+    _threads: 16
+    _memory: 600
+    _other_options:
+
+  _normalisation:
+    _threads: 16
+    _memory: 64

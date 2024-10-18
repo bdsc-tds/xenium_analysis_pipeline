@@ -1,0 +1,72 @@
+BootStrap: docker
+From: condaforge/mambaforge:24.7.1-2
+Stage: conda
+
+BootStrap: docker
+From: mambaorg/micromamba:noble
+Stage: main
+
+%files from conda
+    /opt/conda /pkgs/conda
+
+%environment
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+%post
+# Set up build time environment variables, such as versions
+    export PROSEG_VERSION=1.1.7
+
+    export RUSTUP_HOME=/opt/rustup
+    export CARGO_HOME=/opt/cargo
+
+    export PATH=/opt/conda/bin:/opt/conda/condabin:"${CARGO_HOME}"/bin:"${PATH}"
+
+# Set up run time environment variables
+    echo "export RUSTUP_HOME='${RUSTUP_HOME}'" >>$SINGULARITY_ENVIRONMENT
+    echo "export CARGO_HOME='${CARGO_HOME}'" >>$SINGULARITY_ENVIRONMENT
+
+    echo "export PATH='/opt/conda/bin:/opt/conda/condabin:${CARGO_HOME}/bin:${PATH}'" >>$SINGULARITY_ENVIRONMENT
+
+# Configure tzdata to prevent asking for input
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+# Set sources.
+    sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list
+
+# Force ipv4
+    echo 'Acquire::ForceIPv4 "true";' | tee /etc/apt/apt.conf.d/99force-ipv4
+
+# Setup locales.
+    apt-get update
+    apt-get install -y locales gnupg-agent
+    sed -i '/^#.* en_.*.UTF-8 /s/^#//' /etc/locale.gen
+    locale-gen
+
+# Install essential packages.
+    apt-get install -y --no-install-recommends software-properties-common lsb-release dirmngr apt-transport-https ca-certificates build-essential 
+
+# Install system packages
+    apt-get install -y vim curl
+
+    apt-get clean
+
+# Change to directories for packages
+    cd /opt
+
+# Put conda binaries to the right directory.
+    rm -rf conda
+    mv /pkgs/conda /opt
+    rm -rf /pkgs
+
+# Install rust
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Install proseg
+    cargo install --version "${PROSEG_VERSION}" proseg
+
+# Back to root directory
+    cd /

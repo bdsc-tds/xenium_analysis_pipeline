@@ -1,0 +1,6 @@
+jobs: 50
+
+default-resources:
+  threads: 1
+  mem_mb: 1024
+  runtime: 60

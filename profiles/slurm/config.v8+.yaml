@@ -1,0 +1,15 @@
+executor: slurm
+jobs: 500
+
+default-resources:
+  slurm_account: your_account
+  slurm_partition: cpu
+  threads: 1
+  mem_mb: 1024
+  runtime: 1440
+
+set-resources:
+  runBaysor:
+    runtime: 4320
+  runProseg:
+    runtime: 4320

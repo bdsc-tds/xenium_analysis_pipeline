@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.7
+  - beautifulsoup4=4.12.3
