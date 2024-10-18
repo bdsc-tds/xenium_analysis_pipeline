@@ -9,7 +9,7 @@
 **/__pycache__
 **/.RData
 **/.Rproj.user
-**/.Rproj
+**/*.Rproj
 
 **/logs/
 **/results/
