@@ -138,7 +138,7 @@ rule changeParquetCompressionType:
     params:
         input_file=lambda wildcards: get_input2_or_params4changeParquetCompressionType(wildcards, for_input=False)
     resources:
-        mem_mb=10240
+        mem_mb=20480
     conda:
         "../envs/pyarrow.yml"
     shell:
