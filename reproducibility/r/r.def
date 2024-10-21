@@ -58,16 +58,24 @@ Stage: main
     locale-gen
 
 # Install essential packages
-    apt-get install -y --no-install-recommends software-properties-common dirmngr ca-certificates
+    apt-get install -y --no-install-recommends software-properties-common dirmngr ca-certificates lsb-release
 
 # Configure tzdata to prevent asking for input
     export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
     export MAMBA_ROOT_PREFIX=/opt/conda
     export DEBIAN_FRONTEND=noninteractive
     export TZ="Europe/Zurich"
+    export LIBARROW_MINIMAL="false"
 
 # Install system packages
-    apt-get install -y git vim libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+    apt-get install -y git vim cmake wget libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+
+# Install apache arrow
+    wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+    apt-get install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+    apt-get update
+    apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev
+    apt-get clean
 
 # Install "renv" for R
     R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
