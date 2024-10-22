@@ -58,6 +58,7 @@ wildcard_constraints:
 
 include: 'rules/reprocess_raw_data.smk'
 include: 'rules/segmentation.smk'
+include: 'rules/standard_seurat_analysis.smk'
 
 
 #######################################
