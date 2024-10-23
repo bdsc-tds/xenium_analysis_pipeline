@@ -16,7 +16,7 @@ Stage: main
 
 %post
 # Set up build time environment variables, such as versions
-    export PROSEG_VERSION=1.1.7
+    export PROSEG_VERSION=1.1.8
 
     export RUSTUP_HOME=/opt/rustup
     export CARGO_HOME=/opt/cargo
