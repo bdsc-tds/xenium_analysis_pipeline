@@ -38,13 +38,12 @@ segmentation:
     _threads: 16
     _memory: 64
 
-standard-seurat-analysis:
+standard_seurat_analysis:
   object:
     default_xenium_assay: "Xenium"
-    working_xenium_assay: "SCT" 
-    default_xenium_layer: "counts" 
-    working_xenium_layer: "data" 
-    spatial_dimname: "spatial"
+    working_xenium_assay: "SCT"
+    default_xenium_layer: "counts"
+    working_xenium_layer: "data"
 
   QC: # couls be also panel-dependent 
     min_counts: 10

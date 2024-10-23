@@ -4,11 +4,10 @@ sink(log, type = "message")
 
 library(Seurat)
 
-xr_dir <- snakemake@input[["xr_dir"]]
 spatial_dimname <- snakemake@param[["spatial_dimname"]]
 
 xe <- LoadXenium(
-  data.dir = file.path(xr_dir, "outs")
+  data.dir = snakemake@params[["data_dir"]]
 )
 
 # Create new Dimred from spatial coordinates for easier exploration, usage and ploting spatial data
@@ -29,5 +28,5 @@ if (!is.null(coords <- xe@images[["fov"]]@boundaries[["centroids"]]@coords)) {
 # Save object 
 saveRDS(
   xe, 
-  file = file.path(snakemake@output[["xe"]])
+  file = file.path(snakemake@output[[1]])
 )
