@@ -365,8 +365,8 @@ def process_config(
     Different segmentation methods will be used as wildcards. Particularly, multiple expansion distances can be used for the 10x method (Xenium Ranger), and thus each of them is treated as an independend method for segmentation.
 
     Args:
-        data (dict[str, Any]): _description_
-        root_path (str): _description_
+        data (dict[str, Any]): Configuration dictionary parsed from an yaml file.
+        root_path (str): The root path to the yaml file.
     """
 
     if cc.WILDCARDS_NAME in data:
