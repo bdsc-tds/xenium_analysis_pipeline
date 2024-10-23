@@ -58,8 +58,41 @@ Please edit `config/config.yml` for the configuration of the workflow. A detaile
 
 ### Configuration for execution
 
-The execution of this workflow is controlled by profiles. Please refer to [the Snakemake manuel](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles) for the details.
+We have developed a bash script, `run.sh`, to make the execution easy for users. Before execution, users need to configure a few entries in it under _USER SETUP_ section.
 
-We have provided two examples of profiles under `profiles`. One is for local execution, which locates in `profiles/local`; the other is for cluster execution, specifically slurm, which locates in `profiles/slurm`. Users can edit these profiles according to their specific needs.
+- `MODULES`: Modules to be loaded prior to execution on clusters.
 
-Besides, users can define their own profiles for execution. They only need to specify the paths to their customised profiles in `run.sh`. See the section below for more details.
+- `CONDA_BIN`: The name of or path to either `mamba` or `conda`.
+
+- `ENV_NAME`: The name of or path to the conda environment (by default `xenium_analysis_pipeline`).
+
+- `LOCAL_PROFILE` and `CLUSTER_PROFILE`:
+  The execution of this workflow is controlled by profiles. Please refer to [the Snakemake manuel](https://snakemake.readthedocs.io/en/stable/executing/cli.html#profiles) for the details.
+
+  We have provided two examples of profiles under `profiles`. One is for local execution, which locates in `profiles/local`; the other is for cluster execution, specifically slurm, which locates in `profiles/slurm`. Users can edit these profiles according to their specific needs.
+
+  Besides, users can define their own profiles for execution, e.g., when they use a cluster other than slurm. They only need to specify in proper places the paths to their customised profiles.
+
+- `SINGULARITY_BIND_DIRS`: An array of directories to bind to containers. Each element should be in the following form: _LOCAL_DIR:SINGULARITY_DIR_. Non-existing local directories will be filtered out.
+
+## Execution
+
+The workflow should be executed from the root directory of this repo. To get a self-explanatory help message, type
+
+```bash
+# the current working directory is the root of this repo
+./run.sh --help
+```
+
+which prints
+
+```
+Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+        -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
+        -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
+        -n,--dry-run: dry run.
+        --dag OUTPUT: draw dag and save to OUTPUT.pdf.
+        --unlock: unlock the working directory.
+        -v,--verbose: print more information.
+        -h,--help: print this message.
+```

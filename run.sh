@@ -8,7 +8,7 @@
 # For slurm clusters: modules to be loaded
 MODULES="singularityce"
 
-# The path to either `mamba` or `conda`.
+# The name of or path to either `mamba` or `conda`.
 CONDA_BIN=mamba
 
 # The name of or path to the conda environment.
@@ -22,7 +22,8 @@ CLUSTER_PROFILE=profiles/slurm
 
 # Array of directories to bind to containers.
 # Each element should be in the following form: LOCAL_DIR:SINGULARITY_DIR
-SINGULARITY_BIND_DIRS=( )
+# Non-existing local directories will be filtered out.
+SINGULARITY_BIND_DIRS=(  )
 
 
 ###############################
