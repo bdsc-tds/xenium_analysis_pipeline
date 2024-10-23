@@ -1,10 +1,10 @@
 output_path: results
 
 containers:
-  r: 
-  10x: 
-  baysor: 
-  proseg: 
+  r:
+  10x:
+  baysor:
+  proseg:
 
 experiments: experiments.yml
 
