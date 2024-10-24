@@ -40,8 +40,8 @@ segmentation:
 
 standard_seurat_analysis:
   object:
-    working_xenium_assay: "SCT"
-    working_xenium_layer: "data"
+    # working_xenium_assay: "SCT"
+    # working_xenium_layer: "data" @Mariia Do you use them anywhere?
 
   qc:
     min_counts: 10
@@ -51,7 +51,7 @@ standard_seurat_analysis:
     min_cells: 1
 
   dim_reduction:
-    assay: "SCT"
+    # assay: "SCT" @Mariia Do you need this?
     n_dims: 50
 
   clustering:
@@ -62,36 +62,35 @@ cell-type-annotation:
   approaches:
     - reference-based
     - marker-based
-    
+
   reference-based: # or reference-based-methods
     - RCTD
     - SingleR
     - Seurat
     - TANGRAM
     - XGBoost
-    
+
   references:
     - matching-NSCLC
     - external-NSCLC
     - matching-breast
     - external-breast
-    
+
   matching-annotation-levels: # mb, not exclusively for matching reference.
     - Level1
     - Level2
     - Level3
     - Level4
-    
+
 domain-identification:
   methods:
-   - BANKSY
-   - spatial-graph 
-   
+    - BANKSY
+    - spatial-graph
+
   BANKSY:
     alpha: 0.5
     n_dims: 20
-  
+
   spatial-graph:
     k_knn: 20
     radius: 30
-  
