@@ -37,6 +37,18 @@ This section specifies the paths to the prebuilt singularity containers, followi
 
 This section specifies the path, either absolute or relative, to the experiment file. If a relative path is provided, it must be relative to the `config.yml` file. Please refer to the above section (experiment.yml) for details.
 
+## Reprocess (key: `reprocess`)
+
+This section controls the step of reprocessing of each experiment. This step is useful when experiments, using default gene panels, were performed at different time points and thus processed by different versions of 10X xeniumranger. To eliminate the possible discrepancy due to renamed transcripts, this step reprocess every experiment with a specific version of xeniumranger. Whether to reprocess an experiment or not is determined by comparing the versions of 10X xeniumranger. The reprocessed results are then used as input to segementation.
+
+Note that if customised gene panels are used, the results from 10X xeniumranger should be invariant to versions.
+
+- `level`: The amount of discrepancy allowed between versions of 10X xeniumranger. Level 0 requires both versions to share the same major version, and level 1 requires both versions to share the same major and minor versions, and so on. Valid values are among [0, 1, 2, 3].
+
+- `_threads`: The maximum number of threads to use.
+
+- `_memory`: The maximum amount of memory (in GB) to use.
+
 ## Segmentation (key: `segmentation`)
 
 This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x`, `baysor`, `proseg`, and `segger`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
