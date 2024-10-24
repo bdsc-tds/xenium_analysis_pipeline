@@ -92,5 +92,3 @@ def _get_gene_panel_file(file_name: str) -> str:
             file_name,
         ]
     )
-
-

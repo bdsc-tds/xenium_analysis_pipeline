@@ -464,4 +464,3 @@ def process_config(
         set_dict_value(data, "segmentation", k, value=v)
 
     return None
-
