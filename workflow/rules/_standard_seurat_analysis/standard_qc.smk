@@ -18,7 +18,8 @@ rule runStandardQC:
                 config,
                 "standard_seurat_analysis",
                 "qc",
-                "min_counts"
+                "min_counts",
+                replace_none=10
             )
         ),
         min_features=lambda wildcards: get_dict_value(
@@ -31,7 +32,8 @@ rule runStandardQC:
                 config,
                 "standard_seurat_analysis",
                 "qc",
-                "min_features"
+                "min_features",
+                replace_none=5
             )
         ),
         max_counts=lambda wildcards: get_dict_value(
@@ -44,7 +46,8 @@ rule runStandardQC:
                 config,
                 "standard_seurat_analysis",
                 "qc",
-                "max_counts"
+                "max_counts",
+                replace_none=float("inf")
             )
         ),
         max_features=lambda wildcards: get_dict_value(
@@ -57,7 +60,8 @@ rule runStandardQC:
                 config,
                 "standard_seurat_analysis",
                 "qc",
-                "max_features"
+                "max_features",
+                replace_none=float("inf")
             )
         ),
         min_cells=lambda wildcards: get_dict_value(
@@ -70,7 +74,8 @@ rule runStandardQC:
                 config,
                 "standard_seurat_analysis",
                 "qc",
-                "min_cells"
+                "min_cells",
+                replace_none=1
             )
         ),
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
