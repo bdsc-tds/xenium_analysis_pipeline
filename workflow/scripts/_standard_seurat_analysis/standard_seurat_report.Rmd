@@ -1,9 +1,8 @@
 ---
-title: 'Report: Standard Seurat Analysis for sample `r params$sample_id`'
+title: "Report: Standard Seurat Analysis for sample `r params$sample_id` segmented by `r params$segmentation_id`"
 author: "Mariia Bilous"
 date: "`r Sys.Date()`"
 output: html_document
-
 ---
 
 ```{r setup, include=FALSE}
@@ -17,32 +16,36 @@ library(dplyr)
 ```
 
 # Load raw and QC seurat objects
+
 ```{r}
 xe_raw <- readRDS(params$xe_raw_path)
 xe     <- readRDS(params$xe_path)
 ```
 
-Get QC parameters 
+Get QC parameters
+
 ```{r}
 qc_params <- xe@misc$QC_metadata
 ```
 
 Mark filtered cells and genes
+
 ```{r}
 xe_raw@meta.data <- xe_raw@meta.data %>%
   mutate(is_QC = rownames(.) %in% colnames(xe))
 ```
 
 Get cell/gene filtering
+
 ```{r}
 # Cells
 removed_cells <- ncol(xe_raw) - ncol(xe)
 total_cells <- ncol(xe_raw)
 percentage_removed_cells <- 100 * removed_cells / total_cells
 
-msg_cells <- sprintf("N = %d cells out of %d were removed (i.e., %.2f%%)", 
-                     as.integer(removed_cells), 
-                     as.integer(total_cells), 
+msg_cells <- sprintf("N = %d cells out of %d were removed (i.e., %.2f%%)",
+                     as.integer(removed_cells),
+                     as.integer(total_cells),
                      percentage_removed_cells)
 
 # Genes
@@ -50,19 +53,19 @@ removed_genes <- nrow(xe_raw) - nrow(xe)
 total_genes <- nrow(xe_raw)
 percentage_removed_genes <- 100 * removed_genes / total_genes
 
-msg_genes <- sprintf("N = %d genes out of %d were removed (i.e., %.2f%%)", 
-                     as.integer(removed_genes), 
-                     as.integer(total_genes), 
+msg_genes <- sprintf("N = %d genes out of %d were removed (i.e., %.2f%%)",
+                     as.integer(removed_genes),
+                     as.integer(total_genes),
                      percentage_removed_genes)
 ```
 
+# Generate QC plots
 
-# Generate QC plots 
 ```{r, fig.height=7}
 fields_to_plot <- c("nCount", "nFeature")
 fields_to_plot_names <- paste0(fields_to_plot, paste0("_", params$default_assay))
 
-p_qc_cells <- xe_raw@meta.data %>% 
+p_qc_cells <- xe_raw@meta.data %>%
   ggplot(aes_string(x = fields_to_plot_names[1], y = fields_to_plot_names[2], color = "is_QC")) +
   geom_point() +
   scale_color_manual(values = c("gray","black")) +
@@ -89,17 +92,18 @@ p_qc_genes <- gene_df %>% ggplot(aes_string(x = colnames(gene_df)[1], y = colnam
 plot(p_qc_cells + p_qc_genes)
 ```
 
-# Dimred and clustering 
+# Dimred and clustering
 
 ## nPCs
+
 ```{r, fig.height=3}
 st_analysis_params <- xe@misc$standard_seurat_analysis_meta
 ElbowPlot(xe, ndims = st_analysis_params$n_dims) + geom_vline(xintercept = st_analysis_params$n_dims)
 ```
 
-## UMAP and clustering 
+## UMAP and clustering
+
 ```{r, fig.height=8}
 UMAPPlot(xe, group.by = "SCT_seurat_clusters", label = T, repel = T) & theme_void() & theme(aspect.ratio = 1)
 DimPlot(xe, reduction = "spatial", group.by = "SCT_seurat_clusters") & theme_void() & coord_fixed()
 ```
-
