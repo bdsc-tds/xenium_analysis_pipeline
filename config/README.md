@@ -42,24 +42,22 @@ This section specifies the path, either absolute or relative, to the experiment 
 This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x`, `baysor`, `proseg`, and `segger`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
 
 1. `10x`
+   10X Xenium Ranger is used for segmentation. Users can specify some options of the method using the following keys (for the meaning for each option please refer to the official documentation):
 
-10X Xenium Ranger is used for segmentation. Users can specify some options of the method using the following keys (for the meaning for each option please refer to the official documentation):
+   - `expansion-distance`: Either an integer or a list of integers. Each value is treated as an independent segmentation method, which is named as "10x\_{value}um".
 
-- `expansion-distance`: Either an integer or a list of integers. Each value is treated as an independent segmentation method, which is named as "10x\_{value}um".
+   - `localcores`: The maximum number of threads to use. Either an integer or a list of integers. In the former case, it will be broadcasted into a list if the value of `expansion-distance` is a list.
 
-- `localcores`: The maximum number of threads to use. Either an integer or a list of integers. In the former case, it will be broadcasted into a list if the value of `expansion-distance` is a list.
+   - `localmem`: The maximum amount of memory (in GB) to use. Similar to `localcores`.
 
-- `localmem`: The maximum amount of memory (in GB) to use. Similar to `localcores`.
-
-- `_other_options`: For options other than those above, in a form similar to: "--option_1 value_1 --option_2 value_2".
+   - `_other_options`: For options other than those above, in a form similar to: "--option_1 value_1 --option_2 value_2".
 
 2. `baysor`
+   [Baysor](https://github.com/kharchenkolab/Baysor) is used for segmentation. Users can specify some options of the method using the following keys:
 
-[Baysor](https://github.com/kharchenkolab/Baysor) is used for segmentation. Users can specify some options of the method using the following keys:
+   - `_config`: The path, either absolute or relative, to the configuration file in TOML format for Baysor. If a relative path is given, it must be relative to the current working directory. By default the recommended configuration (stored in `workflow/configs/baysor_xenium.toml`) by developers of Baysor is used, assuming the current working directory is the root of this repo.
 
-- `_config`: The path, either absolute or relative, to the configuration file in TOML format for Baysor. If a relative path is given, it must be relative to the current working directory. By default the recommended configuration (stored in `workflow/configs/baysor_xenium.toml`) by developers of Baysor is used, assuming the current working directory is the root of this repo.
-
-- `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
+   - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
 
 In addition, after acquiring results from Baysor, Proseg, and Segger, an extra step is performed where those results are normalised into the same format for the sake of downstream analysis. The corresponding arguments are specified under `_normalisation`, including:
 
@@ -72,11 +70,20 @@ In addition, after acquiring results from Baysor, Proseg, and Segger, an extra s
 This section specifies parameters in the standard Seurat analysis workflow.
 
 1. `qc`
+   Global QC thresholds. If any of the following QC thresholds are not suitable for certain gene panels, users should specify them accordingly in `experiments.yml`.
 
-Global QC thresholds. If any of the following QC thresholds are not suitable for certain gene panels, users should specify them accordingly in `experiments.yml`.
+   - `min_counts`: `10` by default.
+   - `min_features`: `5` by default
+   - `max_counts`: `.inf` by default
+   - `max_features`: `.inf` by default
+   - `min_cells`: `1` by default
 
-- `min_counts`: `10` by default.
-- `min_features`: `5` by default
-- `max_counts`: `.inf` by default
-- `max_features`: `.inf` by default
-- `min_cells`: `1` by default
+2. `dim_reduction`
+   Parameters used in dimension reduction.
+
+   - `n_dims`: Number of dimensions to keep. `50` by default.
+
+3. `clustering`
+   Parameters used in clustering.
+
+   - `resolution`: Parameter for `Seurat::FindClusters`. `0.8` by default.
