@@ -6,7 +6,7 @@ rule runStandardQC:
     input:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/raw_seurat.rds'
     output:
-        temp(f'{config["outputDir"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds') # @Senbai, should I use the same name for all the temp objects or its better to use "qc_seurat", "longnorm_seurat", "sctransform_seurat" etc?
+        temp(f'{config["outputDir"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds')
     params:
         min_counts=lambda wildcards: get_dict_value(
             config,
@@ -76,6 +76,6 @@ rule runStandardQC:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         default_layer=sec.SEURAT_DEFAULT_LAYER
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/runStandardQC.log'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardQC.log'
     script:
         "workflow/scripts/_standard_seurat_analysis/standard_qc.R"

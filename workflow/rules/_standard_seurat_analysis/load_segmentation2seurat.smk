@@ -30,7 +30,7 @@ rule loadSegmentation2Seurat:
         data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input=False),
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/loadSegmentation2Seurat.log'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/loadSegmentation2Seurat.log'
     container:
         config["containers"]["r"]
     script:
