@@ -34,4 +34,4 @@ rule loadSegmentation2Seurat:
     container:
         config["containers"]["r"]
     script:
-        'workflow/scripts/load_segmentation2seurat.R'
+        "workflow/scripts/load_segmentation2seurat.R"
