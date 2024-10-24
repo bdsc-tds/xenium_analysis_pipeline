@@ -4,7 +4,7 @@ sink(log, type = "message")
 
 library(Seurat)
 
-spatial_dimname <- snakemake@param[["spatial_dimname"]]
+spatial_dimname <- snakemake@params[["spatial_dimname"]]
 
 xe <- LoadXenium(
   data.dir = snakemake@params[["data_dir"]]
@@ -22,7 +22,7 @@ if (!is.null(coords <- xe@images[["fov"]]@boundaries[["centroids"]]@coords)) {
     rownames(coords) <- colnames(xe) 
     xe[[spatial_dimname]] <- CreateDimReducObject(embeddings = as.matrix(st), assay = DefaultAssay(xe))
   } else warning("Spatial coordinates are not in the expected format.")
-} else warning("Spatial coordinates not found in the 'xe' object.")
+} else warning("Spatial coordinates not found in the Seurat object.")
 
   
 # Save object 

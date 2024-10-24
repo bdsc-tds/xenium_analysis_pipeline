@@ -6,7 +6,7 @@ rule runStandardQC:
     input:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/raw_seurat.rds'
     output:
-        temp(f'{config["outputDir"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds')
+        temp(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds')
     params:
         min_counts=lambda wildcards: get_dict_value(
             config,
@@ -20,7 +20,8 @@ rule runStandardQC:
                 "qc",
                 "min_counts",
                 replace_none=10
-            )
+            ),
+            inexist_key_ok=True
         ),
         min_features=lambda wildcards: get_dict_value(
             config,
@@ -34,7 +35,8 @@ rule runStandardQC:
                 "qc",
                 "min_features",
                 replace_none=5
-            )
+            ),
+            inexist_key_ok=True
         ),
         max_counts=lambda wildcards: get_dict_value(
             config,
@@ -48,7 +50,8 @@ rule runStandardQC:
                 "qc",
                 "max_counts",
                 replace_none=float("inf")
-            )
+            ),
+            inexist_key_ok=True
         ),
         max_features=lambda wildcards: get_dict_value(
             config,
@@ -62,7 +65,8 @@ rule runStandardQC:
                 "qc",
                 "max_features",
                 replace_none=float("inf")
-            )
+            ),
+            inexist_key_ok=True
         ),
         min_cells=lambda wildcards: get_dict_value(
             config,
@@ -76,11 +80,14 @@ rule runStandardQC:
                 "qc",
                 "min_cells",
                 replace_none=1
-            )
+            ),
+            inexist_key_ok=True
         ),
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         default_layer=sec.SEURAT_DEFAULT_LAYER
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardQC.log'
+    container:
+        config["containers"]["r"]
     script:
-        "workflow/scripts/_standard_seurat_analysis/standard_qc.R"
+        "../../scripts/_standard_seurat_analysis/standard_qc.R"

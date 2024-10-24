@@ -5,9 +5,9 @@
 rule runStandardSctransformDimRedClust:
     input:
         # f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognorm_seurat.rds'
-        f'{config["outputDir"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds'
     output:
-        protected(f'{config["outputDir"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
+        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         n_dims=lambda wildcards: get_dict_value(
@@ -26,5 +26,7 @@ rule runStandardSctransformDimRedClust:
         )
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardSctransformDimRedClust.log'
+    container:
+        config["containers"]["r"]
     script:
-        "workflow/scripts/_standard_seurat_analysis/standard_sctransform_dimred_clust.R"
+        "../../scripts/_standard_seurat_analysis/standard_sctransform_dimred_clust.R"

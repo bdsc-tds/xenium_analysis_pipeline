@@ -75,7 +75,10 @@ def set_dict_value(
 
 
 def get_dict_value(
-    x: dict[Any, Any], *keys: str | int | float | tuple, replace_none: Any = None
+    x: dict[Any, Any] | None,
+    *keys: str | int | float | tuple,
+    replace_none: Any = None,
+    inexist_key_ok: bool = False,
 ) -> Any:
     """Get a value from a given dictionary using given keys.
 
@@ -89,12 +92,15 @@ def get_dict_value(
     Returns:
         Any: Retrieved value.
     """
+    if x is not None:
+        for k in keys:
+            if k not in x:
+                if inexist_key_ok:
+                    x = None
+                    break
+                raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
 
-    for k in keys:
-        if k not in x:
-            raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
-
-        x = x[k]
+            x = x[k]
 
     if x is None:
         return replace_none
@@ -118,11 +124,12 @@ def _convert2list(
     raise RuntimeError(f"Error! Cannot convert {x} to a list with length {length}.")
 
 
-def _merge_dicts(x: list[dict] | set[dict] | tuple[dict]) -> dict:
+def _merge_dicts(x: list[dict | None] | set[dict | None] | tuple[dict | None]) -> dict:
     ret: dict = {}
 
     for i in x:
-        ret.update(i)
+        if i is not None:
+            ret.update(i)
 
     return ret
 
@@ -160,9 +167,6 @@ def _flatten_struct(
                 continue
 
             if __is_key4layer(key, layer, key_layer2pat_include):
-                if key == "_qc":
-                    pass
-
                 flattened = _flatten_struct(
                     value,
                     layer=layer + 1,
@@ -351,7 +355,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         ),
         1,
         drop_layers=(2,),
-        val_func=lambda vs: {vs[0]: vs[1]},
+        val_func=lambda vs: {vs[0]: vs[1]} if len(vs) > 1 else vs[0],
         key_val_func=None,
         vals_func=_merge_dicts,
     )
