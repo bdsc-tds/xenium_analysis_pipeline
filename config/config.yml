@@ -40,16 +40,14 @@ segmentation:
 
 standard_seurat_analysis:
   object:
-    default_xenium_assay: "Xenium"
     working_xenium_assay: "SCT"
-    default_xenium_layer: "counts"
     working_xenium_layer: "data"
 
-  QC: # couls be also panel-dependent 
+  qc:
     min_counts: 10
     min_features: 5
-    max_counts: Inf
-    max_features: Inf
+    max_counts: .inf
+    max_features: .inf
     min_cells: 1
 
   dim-reduction:
