@@ -19,6 +19,8 @@ Some reserved keys are listed as follows:
 
 - `_gene_panel_file`: The path or the name to the gene panel file. It should be specified as the direct child of the second layer (gene panels). Leaving blank implies that the gene panel is user defined and thus invariant to the different versions of 10X xeniumranger.
 
+- `_qc`: Gene panel specific QC thresholds. Only specify QC thresholds if the global ones are not suitable for specific gene panels. Check the folling section for global QC thresholds.
+
 # config.yml
 
 This file specifies the path to the experiment file and options for configuring tasks.
@@ -64,3 +66,17 @@ In addition, after acquiring results from Baysor, Proseg, and Segger, an extra s
 - `localcores`: The maximum number of threads to use.
 
 - `localmem`: The maximum amount of memory (in GB) to use.
+
+## Standard Seurat analysis (key: `standard_seurat_analysis`)
+
+This section specifies parameters in the standard Seurat analysis workflow.
+
+1. `qc`
+
+Global QC thresholds. If any of the following QC thresholds are not suitable for certain gene panels, users should specify them accordingly in `experiments.yml`.
+
+- `min_counts`: `10` by default.
+- `min_features`: `5` by default
+- `max_counts`: `.inf` by default
+- `max_features`: `.inf` by default
+- `min_cells`: `1` by default
