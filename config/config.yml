@@ -50,7 +50,7 @@ standard_seurat_analysis:
     max_features: .inf
     min_cells: 1
 
-  dim-reduction:
+  dim_reduction:
     assay: "SCT"
     n_dims: 50
 
