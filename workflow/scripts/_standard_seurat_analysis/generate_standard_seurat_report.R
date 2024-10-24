@@ -4,11 +4,11 @@ sink(log, type = "message")
 
 # Get parameters for the report
 pr <- list(
-  xe_raw_path <- snakemake@input[["raw"]],
-  xe_path <- snakemake@input[["preprocessed"]],
-  default_assay <- snakemake@params[["default_assay"]],
-  segmentation_id <- snakemake@params[["segmentation_id"]],
-  sample_id <- snakemake@params[["sample_id"]]
+  xe_raw_path = snakemake@input[["raw"]],
+  xe_path = snakemake@input[["preprocessed"]],
+  default_assay = snakemake@params[["default_assay"]],
+  segmentation_id = snakemake@params[["segmentation_id"]],
+  sample_id = snakemake@params[["sample_id"]]
 )
 
 rmarkdown::render(
