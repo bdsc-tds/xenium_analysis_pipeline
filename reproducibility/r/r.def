@@ -68,7 +68,7 @@ Stage: main
     export LIBARROW_MINIMAL="false"
 
 # Install system packages
-    apt-get install -y git vim cmake wget libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+    apt-get install -y git vim cmake wget pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
 
 # Install apache arrow
     wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
