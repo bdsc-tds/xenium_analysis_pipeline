@@ -44,7 +44,7 @@ standard_seurat_analysis:
     min_features: 5
     max_counts: Inf
     max_features: Inf
-    min_cells: 1
+    min_cells: 5
 
   dim_reduction:
     n_dims: 50
