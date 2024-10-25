@@ -38,14 +38,14 @@ xe@meta.data[["nCount"]] <- xe@meta.data[[paste0("nCount", "_", default_assay)]]
 
 # Filter Cells
 xe <- xe %>% subset(
-  (nFeature > min_features & nFeature < max_features) &
-    (nCount > min_counts & nCount < max_counts)
+  (nFeature >= min_features & nFeature <= max_features) &
+    (nCount >= min_counts & nCount <= max_counts)
 )
 message(paste("N =", n_cells_raw - ncol(xe), " cells were removed"))
 
 # Filter Genes 
 gene_cells <- rowSums(GetAssayData(xe, assay = default_assay, layer = default_layer) > 0)
-genes_to_keep <- gene_cells[gene_cells > min_cells] %>% names()
+genes_to_keep <- gene_cells[gene_cells >= min_cells] %>% names()
 
 xe <- xe[genes_to_keep,]
 message(paste("N =", n_genes_raw - nrow(xe), " genes were removed"))
