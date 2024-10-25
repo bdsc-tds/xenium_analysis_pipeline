@@ -2,7 +2,7 @@
 Utility functions for processing the configuration dictionary to prepare for the execution of the workflow. The configuration dictionary parsed automatically by Snakemake will be modified in place.
 """
 
-from typing import Any
+from typing import Any, Callable
 
 import re
 import os
@@ -75,7 +75,10 @@ def set_dict_value(
 
 
 def get_dict_value(
-    x: dict[Any, Any], *keys: str | int | float | tuple, replace_none: Any = None
+    x: dict[Any, Any] | None,
+    *keys: str | int | float | tuple,
+    replace_none: Any = None,
+    inexist_key_ok: bool = False,
 ) -> Any:
     """Get a value from a given dictionary using given keys.
 
@@ -89,19 +92,24 @@ def get_dict_value(
     Returns:
         Any: Retrieved value.
     """
+    if x is not None:
+        for k in keys:
+            if k not in x:
+                if inexist_key_ok:
+                    x = None
+                    break
+                raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
 
-    for k in keys:
-        if k not in x:
-            raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
-
-        x = x[k]
+            x = x[k]
 
     if x is None:
         return replace_none
     return x
 
 
-def _convert2list(x: Any, length: int = 1, *, match_length: bool = True) -> list[Any]:
+def _convert2list(
+    x: Any, length: int = 1, *, match_length: bool = True, convert2list: bool = True
+) -> list | tuple | set:
     assert length > 0
 
     if not isinstance(x, (list, set, tuple)) or not match_length and length > 1:
@@ -111,45 +119,59 @@ def _convert2list(x: Any, length: int = 1, *, match_length: bool = True) -> list
         return (x if isinstance(x, list) else list(x)) * length
 
     if (not match_length and length == 1) or (match_length and len(x) == length):
-        return x if isinstance(x, list) else list(x)
+        return x if (isinstance(x, list) or not convert2list) else list(x)
 
     raise RuntimeError(f"Error! Cannot convert {x} to a list with length {length}.")
+
+
+def _merge_dicts(x: list[dict | None] | set[dict | None] | tuple[dict | None]) -> dict:
+    ret: dict = {}
+
+    for i in x:
+        if i is not None:
+            ret.update(i)
+
+    return ret
 
 
 def _flatten_struct(
     x: Any,
     *,
     layer: int = 0,
-    key_pats2layer_include: dict[str, tuple[int, ...] | None] | None = None,
-    key_pats2layer_exclude: dict[str, tuple[int, ...] | None] | None = None,
+    key_layer2pat_include: dict[tuple[int, ...] | str, str | Callable] | None = None,
+    key_layer2pat_exclude: dict[tuple[int, ...] | str, str | Callable] | None = None,
 ) -> tuple[list[Any], ...]:
-    if key_pats2layer_include is None:
-        key_pats2layer_include = {r"^(?!_+).+": None}
+    if key_layer2pat_include is None:
+        key_layer2pat_include = {"_": r"^(?!_+).+"}
 
-    def __is_key_pats4layer(
-        _key: str, _layer: int, key_pats2layer: dict[str, tuple[int, ...] | None]
+    def __is_key4layer(
+        _key: str,
+        _layer: int,
+        key_layer2pat: dict[tuple[int, ...] | str, str | Callable],
     ) -> bool:
-        assert key_pats2layer is not None
-        for k, v in key_pats2layer.items():
-            if re.match(k, _key) and (v is None or _layer in v):
-                return True
+        assert key_layer2pat is not None
+        for k, v in key_layer2pat.items():
+            if k == "_" or _layer in k:
+                if isinstance(v, str):
+                    return re.match(v, _key) is not None
+                return v(_key)
         return False
 
     ret: list = []
 
     if isinstance(x, dict):
         for key, value in x.items():
-            if key_pats2layer_exclude is not None and __is_key_pats4layer(
-                key, layer, key_pats2layer_exclude
+            if key_layer2pat_exclude is not None and __is_key4layer(
+                key, layer, key_layer2pat_exclude
             ):
                 continue
 
-            if __is_key_pats4layer(key, layer, key_pats2layer_include):
+            if __is_key4layer(key, layer, key_layer2pat_include):
                 flattened = _flatten_struct(
                     value,
                     layer=layer + 1,
-                    key_pats2layer_include=key_pats2layer_include,
-                    key_pats2layer_exclude=key_pats2layer_exclude,
+                    key_layer2pat_include=key_layer2pat_include,
+                    key_layer2pat_exclude=key_layer2pat_exclude,
                 )
                 flattened = _convert2list(key, len(flattened[0])), *list(flattened)
 
@@ -165,32 +187,31 @@ def _flatten_struct(
 
         return tuple(ret)
     else:
-        _ret: list = _convert2list(
-            x, len(x) if isinstance(x, (list, set, tuple)) else 1
-        )
+        _ret = _convert2list(x, len(x) if isinstance(x, (list, set, tuple)) else 1)
 
         for i in _ret:
             if (
                 i is not None
-                and key_pats2layer_exclude is not None
-                and __is_key_pats4layer(i, layer, key_pats2layer_exclude)
+                and key_layer2pat_exclude is not None
+                and __is_key4layer(i, layer, key_layer2pat_exclude)
             ):
                 continue
 
-            if i is None or __is_key_pats4layer(i, layer, key_pats2layer_include):
+            if i is None or __is_key4layer(i, layer, key_layer2pat_include):
                 ret.append(i)
 
         return (ret,)
 
 
 def _collect_experiments(
-    flattened: tuple[list[str], ...],
+    flattened: tuple[list[str | int | float], ...],
     layer: int,
     *,
     drop_layers: tuple[int, ...] | None = None,
-    sep4key: str = os.path.sep,
-    sep4val: str | None = os.path.sep,
-    sep4key_val: str | None = os.path.sep,
+    key_func: Callable = lambda vs: os.path.sep.join(vs),
+    val_func: Callable | None = lambda vs: os.path.sep.join(vs),
+    key_val_func: Callable | None = lambda ks, vs: os.path.sep.join(ks + vs),
+    vals_func: Callable | None = None,
     simplify: bool = False,
 ) -> dict[str, Any]:
     assert 0 <= layer < len(flattened)
@@ -201,35 +222,41 @@ def _collect_experiments(
     ret: dict[str, Any] = {}
 
     for idx, _ in enumerate(flattened[0]):
-        k: str = sep4key.join(
+        k: str = key_func(
             [
                 flattened[i][idx]
                 for i in range(layer + 1)
-                if drop_layers is None or not i in drop_layers
+                if drop_layers is None or i not in drop_layers
             ]
         )
 
         if k == "":
             raise KeyError("Error! Invalid empty key generated.")
 
-        v: list[str] | str = [
-            flattened[i][idx]
-            for i in range(layer + 1, len(flattened))
-            if drop_layers is None or not i in drop_layers
-        ]
+        v: tuple[str | int | float, ...] | str | int | float = ()
+        for i in range(layer + 1, len(flattened)):
+            if drop_layers is None or i not in drop_layers:
+                v += (flattened[i][idx],)
 
-        if sep4val is not None:
-            v = sep4val.join(v)
+        if val_func is not None:
+            v = val_func(v)
 
-        if sep4key_val is not None:
-            v = sep4key_val.join([k, *v])
+        if key_val_func is not None:
+            v = key_val_func(
+                _convert2list(k, match_length=False),
+                _convert2list(v, match_length=False, convert2list=False),
+            )
 
-        if isinstance(v, list) and len(v) == 1:
+        if isinstance(v, (list, tuple)) and len(v) == 1:
             v = v[0]
 
         if k not in ret:
             ret[k] = []
         ret[k].append(v)
+
+    if vals_func is not None:
+        for key, value in ret.items():
+            ret[key] = vals_func(value)
 
     if simplify:
         for key, value in ret.items():
@@ -253,15 +280,16 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
 
     flattened = _flatten_struct(
         data,
-        key_pats2layer_exclude={
-            "|".join(
+        key_layer2pat_exclude={
+            "_": "|".join(
                 [
                     cc.EXPERIMENTS_CONFIG_PATH_NAME,
                     cc.EXPERIMENTS_BASE_PATH_NAME,
                     cc.EXPERIMENTS_COLLECTIONS_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                    cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                 ]
-            ): None
+            )
         },
     )
 
@@ -284,28 +312,61 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
     gene_panel_files: dict[str, Any] = _collect_experiments(
         _flatten_struct(
             data,
-            key_pats2layer_include={
-                r"^(?!_+).+": (0, 1, 3),
-                cc.EXPERIMENTS_GENE_PANEL_FILES_NAME: (2,),
+            key_layer2pat_include={
+                (0, 1, 3): r"^(?!_+).+",
+                (2,): cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
             },
-            key_pats2layer_exclude={
-                "|".join(
+            key_layer2pat_exclude={
+                "_": "|".join(
                     [
                         cc.EXPERIMENTS_CONFIG_PATH_NAME,
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                     ]
-                ): None
+                )
             },
         ),
         1,
         drop_layers=(2,),
-        sep4val=None,
-        sep4key_val=None,
+        val_func=None,
+        key_val_func=None,
         simplify=True,
     )
 
-    return wildcards, data[cc.EXPERIMENTS_BASE_PATH_NAME], collections, gene_panel_files
+    gene_panel_qc_thresholds = _collect_experiments(
+        _flatten_struct(
+            data,
+            key_layer2pat_include={
+                (0, 1, 3): r"^(?!_+).+",
+                (2,): cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                (4,): lambda v: isinstance(v, (int, float)),
+            },
+            key_layer2pat_exclude={
+                (0, 1, 2, 3): "|".join(
+                    [
+                        cc.EXPERIMENTS_CONFIG_PATH_NAME,
+                        cc.EXPERIMENTS_BASE_PATH_NAME,
+                        cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                    ]
+                ),
+            },
+        ),
+        1,
+        drop_layers=(2,),
+        val_func=lambda vs: {vs[0]: vs[1]} if len(vs) > 1 else vs[0],
+        key_val_func=None,
+        vals_func=_merge_dicts,
+    )
+
+    return (
+        wildcards,
+        data[cc.EXPERIMENTS_BASE_PATH_NAME],
+        collections,
+        gene_panel_files,
+        gene_panel_qc_thresholds,
+    )
 
 
 def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
@@ -365,8 +426,8 @@ def process_config(
     Different segmentation methods will be used as wildcards. Particularly, multiple expansion distances can be used for the 10x method (Xenium Ranger), and thus each of them is treated as an independend method for segmentation.
 
     Args:
-        data (dict[str, Any]): _description_
-        root_path (str): _description_
+        data (dict[str, Any]): Configuration dictionary parsed from an yaml file.
+        root_path (str): The root path to the yaml file.
     """
 
     if cc.WILDCARDS_NAME in data:
@@ -392,6 +453,7 @@ def process_config(
             cc.EXPERIMENTS_BASE_PATH_NAME: _experiments[1],
             cc.EXPERIMENTS_COLLECTIONS_NAME: _experiments[2],
             cc.EXPERIMENTS_GENE_PANEL_FILES_NAME: _experiments[3],
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME: _experiments[4],
         },
     )
 
@@ -406,4 +468,3 @@ def process_config(
         set_dict_value(data, "segmentation", k, value=v)
 
     return None
-

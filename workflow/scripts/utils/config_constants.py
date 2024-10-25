@@ -21,6 +21,8 @@ EXPERIMENTS_CONFIG_PATH_NAME: str = "_config_path"
 EXPERIMENTS_BASE_PATH_NAME: str = "_base_path"
 # Child of `experiments` (second level); for the name of or path to the gene panel files.
 EXPERIMENTS_GENE_PANEL_FILES_NAME: str = "_gene_panel_file"
+# Child of `experiments` (second level); for QC thresholds on gene panel level.
+EXPERIMENTS_GENE_PANEL_QC_NAME: str = "_qc"
 # Child of `experiments` (second level); colletions of samples on different levels
 EXPERIMENTS_COLLECTIONS_NAME: str = "_collections"
 # Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on disease level

@@ -3,8 +3,16 @@ _base_path: /path/to/raw/data
 diseases_1:
   gene_panel_1:
     _gene_panel_file: /path/to/or/name/of/gene/panel/file
+
+    _qc:
+      # Comment out any of them if they are the same as the global QC thresholds.
+      min_counts: 10
+      min_features: 5
+      max_counts: Inf
+      max_features: Inf
+      min_cells: 1
+
     donor_1: sample_1
     donor_2:
       - sample_2
       - sample_3
-
