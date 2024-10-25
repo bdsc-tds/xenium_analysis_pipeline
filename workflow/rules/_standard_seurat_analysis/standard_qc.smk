@@ -49,7 +49,7 @@ rule runStandardQC:
                 "standard_seurat_analysis",
                 "qc",
                 "max_counts",
-                replace_none=float("inf")
+                replace_none="Inf"
             ),
             inexist_key_ok=True
         ),
@@ -64,7 +64,7 @@ rule runStandardQC:
                 "standard_seurat_analysis",
                 "qc",
                 "max_features",
-                replace_none=float("inf")
+                replace_none="Inf"
             ),
             inexist_key_ok=True
         ),

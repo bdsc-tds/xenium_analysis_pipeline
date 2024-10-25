@@ -46,8 +46,8 @@ standard_seurat_analysis:
   qc:
     min_counts: 10
     min_features: 5
-    max_counts: .inf
-    max_features: .inf
+    max_counts: Inf
+    max_features: Inf
     min_cells: 1
 
   dim_reduction:

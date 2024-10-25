@@ -5,6 +5,16 @@ sink(log, type = "message")
 library(Seurat) 
 library(dplyr)
 
+convert2numeric <- function(val) {
+  if (is.numeric(val)) return(val)
+
+  ret <- as.numeric(val)
+
+  stopifnot(!is.na(ret))
+
+  return(ret)
+}
+
 default_assay <- snakemake@params[["default_assay"]]
 default_layer <- snakemake@params[["default_layer"]] # @Mariia, this variable is not used below
 
@@ -12,11 +22,11 @@ default_layer <- snakemake@params[["default_layer"]] # @Mariia, this variable is
 xe <- readRDS(snakemake@input[[1]])
 
 # QC thresholds, either global or gene panel specific
-min_counts <- snakemake@params[["min_counts"]]
-min_features <- snakemake@params[["min_features"]]
-max_counts <- snakemake@params[["max_counts"]]
-max_features <- snakemake@params[["max_features"]]
-min_cells <- snakemake@params[["min_cells"]]
+min_counts <- convert2numeric(snakemake@params[["min_counts"]])
+min_features <- convert2numeric(snakemake@params[["min_features"]])
+max_counts <- convert2numeric(snakemake@params[["max_counts"]])
+max_features <- convert2numeric(snakemake@params[["max_features"]])
+min_cells <- convert2numeric(snakemake@params[["min_cells"]])
 
 # Dims of raw data 
 n_cells_raw <- ncol(xe)

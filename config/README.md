@@ -86,8 +86,8 @@ This section specifies parameters in the standard Seurat analysis workflow.
 
    - `min_counts`: `10` by default.
    - `min_features`: `5` by default
-   - `max_counts`: `.inf` by default
-   - `max_features`: `.inf` by default
+   - `max_counts`: `Inf` by default
+   - `max_features`: `Inf` by default
    - `min_cells`: `1` by default
 
 2. `dim_reduction`
