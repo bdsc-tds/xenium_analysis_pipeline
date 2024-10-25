@@ -39,10 +39,6 @@ segmentation:
     _memory: 64
 
 standard_seurat_analysis:
-  object:
-    # working_xenium_assay: "SCT"
-    # working_xenium_layer: "data" @Mariia Do you use them anywhere?
-
   qc:
     min_counts: 10
     min_features: 5
@@ -51,7 +47,6 @@ standard_seurat_analysis:
     min_cells: 1
 
   dim_reduction:
-    # assay: "SCT" @Mariia Do you need this?
     n_dims: 50
 
   clustering:

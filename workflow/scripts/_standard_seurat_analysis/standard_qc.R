@@ -16,7 +16,7 @@ convert2numeric <- function(val) {
 }
 
 default_assay <- snakemake@params[["default_assay"]]
-default_layer <- snakemake@params[["default_layer"]] # @Mariia, this variable is not used below
+default_layer <- snakemake@params[["default_layer"]]
 
 # Read raw seurat
 xe <- readRDS(snakemake@input[[1]])
@@ -44,7 +44,7 @@ xe <- xe %>% subset(
 message(paste("N =", n_cells_raw - ncol(xe), " cells were removed"))
 
 # Filter Genes 
-gene_cells <- rowSums(GetAssayData(xe, assay = default_assay, layer = "counts") > 0)
+gene_cells <- rowSums(GetAssayData(xe, assay = default_assay, layer = default_layer) > 0)
 genes_to_keep <- gene_cells[gene_cells > min_cells] %>% names()
 
 xe <- xe[genes_to_keep,]
