@@ -55,7 +55,7 @@ def normalise_path(
             break
 
     raise FileNotFoundError(
-        f"Error! The provided file pattern {pat_anchor_file} does not match any files in the floowing directory: {','.join(_candidate_dirs)}"
+        f"Error! The provided file pattern {pat_anchor_file} does not match any files in the following directory: {','.join(_candidate_dirs)}"
     )
 
 

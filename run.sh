@@ -22,7 +22,7 @@ CLUSTER_PROFILE=profiles/slurm
 
 # Array of directories to bind to containers.
 # Each element should be in the following form: LOCAL_DIR:SINGULARITY_DIR
-# Non-existing local directories will be filtered out.
+# Inexistent local directories will be filtered out.
 SINGULARITY_BIND_DIRS=(  )
 
 
