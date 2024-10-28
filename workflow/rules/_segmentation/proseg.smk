@@ -39,7 +39,7 @@ def get_input2_or_params4runProseg(wildcards, for_input: bool = True) -> str:
     return normalise_path(
         ret,
         candidate_paths=("outs",),
-        pat_anchor_file=r"transcripts\.parquet$",
+        pat_anchor_file="transcripts.parquet",
         pat_flags=re.IGNORECASE,
         return_dir=False,
         check_exist=False
