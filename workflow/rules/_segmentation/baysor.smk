@@ -106,8 +106,6 @@ rule adjustBaysorResults:
         polygons=f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/processed_results/segmentation_polygons_2d.json'
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/adjustBaysorResults.log'
-    resources:
-        mem_mb=20480
     shell:
         "python3 workflow/scripts/adjust_baysor_results.py "
         "--inseg {input.segmentation} "
