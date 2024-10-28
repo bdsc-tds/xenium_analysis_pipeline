@@ -65,9 +65,22 @@ This section specifies with key `methods` a number of methods that could be used
    - `_other_options`: For options other than those above, in a form similar to: "--option_1 value_1 --option_2 value_2".
 
 2. `baysor`
-   [Baysor](https://github.com/kharchenkolab/Baysor) is used for segmentation. Users can specify some options of the method using the following keys:
+   [Baysor (v0.7.0+)](https://github.com/kharchenkolab/Baysor) is used for segmentation. Users can specify some options of the method using the following keys:
 
    - `_config`: The path, either absolute or relative, to the configuration file in TOML format for Baysor. If a relative path is given, it must be relative to the current working directory. By default the recommended configuration (stored in `workflow/configs/baysor_xenium.toml`) by developers of Baysor is used, assuming the current working directory is the root of this repo.
+
+   - `_threads`: The maximum number of threads to use.
+
+   - `_memory`: The maximum amount of memory (in GB) to use.
+
+   - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
+
+3. `proseg`
+   [Proseg (v1.1.8+)](https://github.com/dcjones/proseg) is used for segmentation. Users can specify some options of the method using the following keys:
+
+   - `_threads`: The maximum number of threads to use.
+
+   - `_memory`: The maximum amount of memory (in GB) to use.
 
    - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
 
