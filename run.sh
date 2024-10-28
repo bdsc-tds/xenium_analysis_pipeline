@@ -70,7 +70,7 @@ IFS=''
 
 # Constants.
 SINGULARITY_BIND_OPT="--bind $SINGULARITY_BIND"
-OTHER_OPT=(--rerun-triggers mtime --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv $SINGULARITY_BIND_OPT" -kp)
+OTHER_OPT=(--rerun-triggers mtime --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv --env RUST_BACKTRACE=full $SINGULARITY_BIND_OPT" -kp)
 
 # Variables.
 LOCAL=1
