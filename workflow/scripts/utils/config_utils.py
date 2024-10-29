@@ -340,7 +340,9 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
             key_layer2pat_include={
                 (0, 1, 3): r"^(?!_+).+",
                 (2,): cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-                (4,): lambda v: isinstance(v, (int, float)),
+                (4,): lambda v: (
+                    v == "Inf" if isinstance(v, str) else isinstance(v, (int, float))
+                ),
             },
             key_layer2pat_exclude={
                 (0, 1, 2, 3): "|".join(
