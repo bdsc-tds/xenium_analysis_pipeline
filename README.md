@@ -73,7 +73,7 @@ We have developed a bash script, `run.sh`, to make the execution easy for users.
 
   Besides, users can define their own profiles for execution, e.g., when they use a cluster other than slurm. They only need to specify in proper places the paths to their customised profiles.
 
-- `SINGULARITY_BIND_DIRS`: An array of directories to bind to containers. Each element should be in the following form: _LOCAL_DIR:SINGULARITY_DIR_. Non-existing local directories will be filtered out.
+- `SINGULARITY_BIND_DIRS`: An array of directories to bind to containers. Each element should be in the following form: _LOCAL_DIR:SINGULARITY_DIR_. Inexistent local directories will be filtered out.
 
 ## Execution
 

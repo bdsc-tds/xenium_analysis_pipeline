@@ -11,5 +11,7 @@ default-resources:
 set-resources:
   runBaysor:
     runtime: 4320
+  adjustBaysorResults:
+    mem_mb: max(input.size_mb * 10, 2048)
   runProseg:
     runtime: 4320

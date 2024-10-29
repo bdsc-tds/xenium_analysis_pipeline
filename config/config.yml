@@ -17,6 +17,7 @@ segmentation:
   methods:
     - 10x
     - baysor
+    - proseg
 
   10x:
     expansion-distance:
@@ -30,8 +31,13 @@ segmentation:
 
   baysor:
     _config: "workflow/configs/baysor_xenium.toml"
+    _threads: 8
+    _memory: 200
+    _other_options:
+
+  proseg:
     _threads: 16
-    _memory: 600
+    _memory: 200
     _other_options:
 
   _normalisation:
