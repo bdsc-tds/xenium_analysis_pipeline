@@ -96,3 +96,15 @@ Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --dag OUTP
         -v,--verbose: print more information.
         -h,--help: print this message.
 ```
+
+## Solutions to known problems
+
+1. Snakemake fails to create conda environments due to the lack of writing permission of `/tmp/conda`.
+
+   Such an issue occurs most often on devices with multiple users, such as HPCs and servers. In this case, the reason is simply that `/tmp/conda` is possessed by other users. A possible solution is to firstly create a folder in `/tmp`, such as `/tmp/your_id`, and then add `/tmp/your_id:/tmp` to `SINGULARITY_BIND_DIRS` inside `run.sh`. After this you can rerun the command, and those environments should be correctly created.
+
+   Additionally, for HPCs, users might need to remove `/tmp/your_id:/tmp` from `SINGULARITY_BIND_DIRS` after creating environments as directory `/tmp/your_id` is not likely present in compute nodes.
+
+2. For those steps involving 10X xeniumranger, sometimes I get the folowing error: "PermissionError: [Errno 13] Permission denied".
+
+   10X xeniumranger copies files from raw data during processing. This error could be because the user, as the owner of the raw data, deprives him-/herself of write permission to it. When 10X xeniumranger conducts copy operation, it also copies the modes of files, and hence this error when it needs to write to the copied files. Although it is a safe behaviour to prevent from accidental change of the raw data, users have to have write permission to the raw data when they are also the owner.
