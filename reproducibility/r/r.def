@@ -74,7 +74,7 @@ Stage: main
     wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
     apt-get install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
     apt-get update
-    apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev
+    apt-get install -y libarrow-dev=17.0.0-1 libarrow-glib-dev=17.0.0-1 libarrow-dataset-dev=17.0.0-1 libarrow-dataset-glib-dev=17.0.0-1 libarrow-acero-dev=17.0.0-1 libarrow-flight-dev=17.0.0-1 libarrow-flight-glib-dev=17.0.0-1 libarrow-flight-sql-dev=17.0.0-1 libarrow-flight-sql-glib-dev=17.0.0-1 libgandiva-dev=17.0.0-1 libgandiva-glib-dev=17.0.0-1 libparquet-dev=17.0.0-1 libparquet-glib-dev=17.0.0-1
     apt-get clean
 
 # Install "renv" for R
