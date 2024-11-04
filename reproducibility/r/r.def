@@ -44,6 +44,9 @@ Stage: main
     export TZ="Europe/Zurich"
 
 %post
+# Set up build time environment variables, such as versions
+    export LIBARROW_VERSION=17.0.0-1
+
 # DNS
     # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list.d/debian.sources
@@ -74,7 +77,7 @@ Stage: main
     wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
     apt-get install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
     apt-get update
-    apt-get install -y libarrow-dev libarrow-glib-dev libarrow-dataset-dev libarrow-dataset-glib-dev libarrow-acero-dev libarrow-flight-dev libarrow-flight-glib-dev libarrow-flight-sql-dev libarrow-flight-sql-glib-dev libgandiva-dev libgandiva-glib-dev libparquet-dev libparquet-glib-dev
+    apt-get install -y gir1.2-arrow-dataset-1.0="${LIBARROW_VERSION}" gir1.2-arrow-flight-1.0="${LIBARROW_VERSION}" gir1.2-arrow-flight-sql-1.0="${LIBARROW_VERSION}" gir1.2-arrow-1.0="${LIBARROW_VERSION}" gir1.2-gandiva-1.0="${LIBARROW_VERSION}" gir1.2-parquet-1.0="${LIBARROW_VERSION}" libarrow-dev="${LIBARROW_VERSION}" libarrow-glib-dev="${LIBARROW_VERSION}" libarrow-dataset-dev="${LIBARROW_VERSION}" libarrow-dataset-glib-dev="${LIBARROW_VERSION}" libarrow-acero-dev="${LIBARROW_VERSION}" libarrow-flight-dev="${LIBARROW_VERSION}" libarrow-flight-glib-dev="${LIBARROW_VERSION}" libarrow-flight-sql-dev="${LIBARROW_VERSION}" libarrow-flight-sql-glib-dev="${LIBARROW_VERSION}" libgandiva-dev="${LIBARROW_VERSION}" libgandiva-glib-dev="${LIBARROW_VERSION}" libparquet-dev="${LIBARROW_VERSION}" libparquet-glib-dev="${LIBARROW_VERSION}"
     apt-get clean
 
 # Install "renv" for R
