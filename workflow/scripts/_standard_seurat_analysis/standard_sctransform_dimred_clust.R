@@ -15,7 +15,7 @@ dims <- 1:n_dims
 xe <- readRDS(snakemake@input[[1]])
 
 # Run standard SCTransform and downstream analysis
-xe <- xe %>% SCTransform(assay = default_assay) %>% RunPCA(npcs = n_dims) %>% FindNeighbors(dims = dims) %>% FindClusters(resolution = resolution)
+xe <- xe %>% SCTransform(assay = default_assay) %>% RunPCA(npcs = n_dims) %>% FindNeighbors(dims = dims, return.neighbor = TRUE) %>% FindClusters(resolution = resolution)
 xe <- xe %>% RunUMAP(dims = dims)
 
 # `seurat_clusters` gets owerwritten every time `Seurat::FindClusters()` is called. Save it in a new "protected" column

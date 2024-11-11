@@ -37,7 +37,7 @@ segmentation:
 
   proseg:
     _threads: 16
-    _memory: 200
+    _memory: 100
     _other_options:
 
   _normalisation:
@@ -58,30 +58,50 @@ standard_seurat_analysis:
   clustering:
     resolution: 0.8
 
-# just a plan, will be adjusted
-cell-type-annotation:
+cell_type_annotation:
   approaches:
-    - reference-based
-    - marker-based
+    - reference_based
+    # - marker-based # placeholder
 
-  reference-based: # or reference-based-methods
-    - RCTD
-    - SingleR
-    - Seurat
-    - TANGRAM
-    - XGBoost
+  reference_based:
+    methods:
+      - rctd
+      - singler
+      - seurat
+      - tangram
+      - xgboost
 
-  references:
-    - matching-NSCLC
-    - external-NSCLC
-    - matching-breast
-    - external-breast
+    rctd:
+      _mode:
+        - single_cell
+        - cluster
+      _other_options:
 
-  matching-annotation-levels: # mb, not exclusively for matching reference.
-    - Level1
-    - Level2
-    - Level3
-    - Level4
+    singler:
+      _mode:
+        - single_cell
+        - cluster
+      _other_options:
+
+    seurat:
+      _mode:
+        - single_cell
+        - cluster
+      _other_options:
+
+    tangram:
+      _mode:
+        - single_cell
+        - cluster
+      _other_options:
+
+    xgboost:
+      _mode:
+        - single_cell
+        - cluster
+      _other_options:
+
+  # marker_based: # placeholder
 
 domain-identification:
   methods:

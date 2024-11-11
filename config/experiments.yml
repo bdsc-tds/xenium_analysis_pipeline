@@ -1,6 +1,20 @@
 _base_path: /path/to/raw/data
 
 diseases_1:
+  _cell_type_annotation:
+    reference_based:
+      matched_reference:
+        path:
+        levels:
+          -
+
+      external_reference:
+        path:
+        levels:
+          -
+
+    # marker_based: # placeholder
+
   gene_panel_1:
     _gene_panel_file: /path/to/or/name/of/gene/panel/file
 
@@ -10,7 +24,7 @@ diseases_1:
       min_features: 5
       max_counts: Inf
       max_features: Inf
-      min_cells: 1
+      min_cells: 5
 
     donor_1: sample_1
     donor_2:

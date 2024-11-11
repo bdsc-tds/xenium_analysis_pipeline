@@ -17,9 +17,17 @@ Some reserved keys are listed as follows:
 
 - `_base_path`: The parent directory to the first layer (diseases) of the organised data. It should be specified as siblings of the first layer (diseases).
 
-- `_gene_panel_file`: The path or the name to the gene panel file. It should be specified as the direct child of the second layer (gene panels). Leaving blank implies that the gene panel is user defined and thus invariant to the different versions of 10X xeniumranger.
+- `_cell_type_annotation`: Disease specific configuration for cell type annotation using different approaches listed below. It should be specified as a direct child of the first layer (diseases).
 
-- `_qc`: Gene panel specific QC thresholds. Only specify QC thresholds if the global ones are not suitable for specific gene panels. Check the folling section for global QC thresholds.
+  - `reference_based`: Single-cell RNA sequencing datasets are used as references for the annotation. Such reference datasets come either from a matched experiment (`matched_reference`), where samples are taken from the same tissue, or from an externel experiment (`external_reference`), where public datasets are used. Both types of references share the following specifications:
+
+    - `path`: Path to the reference datasets.
+
+    - `levels`: #todo
+
+- `_gene_panel_file`: The path or the name to the gene panel file. It should be specified as a direct child of the second layer (gene panels). Leaving blank implies that the gene panel is user defined and thus invariant to the different versions of 10X xeniumranger.
+
+- `_qc`: Gene panel specific QC thresholds. It should be specified as a direct child of the second layer (gene panels). Only specify QC thresholds if the global ones are not suitable for specific gene panels. Please check the following section for global QC thresholds.
 
 # config.yml
 
@@ -112,3 +120,24 @@ This section specifies parameters in the standard Seurat analysis workflow.
    Parameters used in clustering.
 
    - `resolution`: Parameter for `Seurat::FindClusters`. `0.8` by default.
+
+## Cell type annotation (key: `cell_type_annotation`)
+
+This section specifies with key `approaches` some approaches to use for cell type annotation. For now only reference based approach (specified with key `reference_based`) is available.
+
+More detailed configuration for each approach is configured in a separate dictionary with the approach name being the key. Removing any approaches inside `approaches` will rule them out from the workflow.
+
+1. `reference_based`
+   Use reference-based methods for cell type annotation, where disease-specific single-cell RNA sequencing datasets are used as references (please refer to the details in section `experiments.yml` above).
+
+   With key `methods`, this section specifies a number of methods that could be used for cell type annotation, including `rctd`, `singler`, `seurat`, `tangram`, and `xgboost`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
+
+   1.1 `rctd`
+
+   1.2 `singler`
+
+   1.3 `seurat`
+
+   1.4 `tangram`
+
+   1.5 `xgboost`
