@@ -14,6 +14,9 @@ WILDCARDS_DONORS_NAME: str = "_donors"
 WILDCARDS_SAMPLES_NAME: str = "_samples"
 # Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods.
 WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
+# Child of `WILDCARDS_NAME` (second level); a list of values for annotation methods.
+WILDCARDS_ANNOTATION_NAME: str = "_annotation"
+
 
 # Child of `experiments` (second level); for the path to the experiments configuration file on the disk.
 EXPERIMENTS_CONFIG_PATH_NAME: str = "_config_path"
