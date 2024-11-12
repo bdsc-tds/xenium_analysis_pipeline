@@ -34,6 +34,7 @@ import config_constants as cc
 Explanation of wildcards:
 - sample_id: The name of an sample to be processed with a format of "disease/gene panel/donor/sample".
 - segmentation_id: The name of a segmentation method to be used.
+- annotation_id: The name of cell-type annotation to be used in a format "approach/reference_type/method/level/_mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell" 
 """
 
 SAMPLE_ID = get_dict_value(
@@ -46,10 +47,16 @@ SEGMENTATION_ID = get_dict_value(
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SEGMENTATION_NAME
 )
+ANNOTATION_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_ANNOTATION_NAME
+)
 
 wildcard_constraints:
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
     segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID])
+    annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID])
 
 
 ########################################
