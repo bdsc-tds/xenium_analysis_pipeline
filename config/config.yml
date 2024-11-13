@@ -64,6 +64,11 @@ cell_type_annotation:
     # - marker-based # placeholder
 
   reference_based:
+  
+    reference_type:
+      - matched_reference
+      - external_reference 
+      
     methods:
       - rctd
       - singler
@@ -76,6 +81,8 @@ cell_type_annotation:
         - single_cell
         - cluster
       _other_options:
+        - "--UMI_min_sigma 100" # low UMI in single-cell mode
+        - "--UMI_min_sigma 300" # higher UMI in single-cell mode
 
     singler:
       _mode:
