@@ -409,6 +409,7 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
 
     return methods, ret
 
+#def _process_annotation(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]: # placeholder 
 
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
@@ -469,4 +470,6 @@ def process_config(
     for k, v in _segmentation[1].items():
         set_dict_value(data, "segmentation", k, value=v)
 
+    # Process `annotation` section.
+    # to write 
     return None
