@@ -19,32 +19,13 @@ class_level       <- snakemake@params[["class_level"]] # optional, should be NUL
 ref_layer  <- 'counts' 
 test_layer <- 'counts' 
 
-# Validate inputs
-if (!file.exists(reference_path) || !file.exists(query_path)) {
-  stop("One or more input files are missing!")
-}
+# Load reference and query data
+source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_load_data.R")) # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
 
-## Load Chromium (reference) data 
-chrom <- readRDS(reference_path) # `chrom_file_path` from snakemake
+# Generate reference object
+source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_generate_reference_obj.R")) 
 
-## Load Xenium (query) data 
-xe <- readRDS(query_path)
-
-
-## Generate reference object 
-chrom <- generate_reference_obj(
-    chrom = chrom,
-    query_features = rownames(xe),
-    donor_id = xe@misc$sample_metadata[["donor"]],
-    reference_type = reference_type,
-    annotation_level = annotation_level,
-    ref_assay = ref_assay,
-    REF_MIN_UMI = REF_MIN_UMI,
-    REF_MAX_UMI = REF_MAX_UMI,
-    CELL_MIN_INSTANCE = CELL_MIN_INSTANCE
-)
-
-# Create reference object 
+# Create RCTD-specific reference object 
 ref.obj <- Reference(
   GetAssayData(chrom, assay = ref_assay, layer = ref_layer), 
   cell_types = chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor(), 
