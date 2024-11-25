@@ -3,7 +3,7 @@
 library(Seurat)
 library(dplyr)
 library(spacexr)
-source(snakemake@source("../../scripts/_celltype_annotation/annotation_utils.R"))
+source(snakemake@source("../../../scripts/_celltype_annotation/annotation_utils.R"))
 
 ###### snakemake params  ###### 
 
