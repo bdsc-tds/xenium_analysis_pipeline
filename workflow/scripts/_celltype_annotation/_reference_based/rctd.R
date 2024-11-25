@@ -4,7 +4,7 @@ library(Seurat)
 library(dplyr)
 library(spacexr)
 
-# Load common reference-based paramenters
+# Load common reference-based parameters
 source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/header.R")) 
 
 # parameters specific for RCTD and panel (or disease)
@@ -47,7 +47,7 @@ chrom <- generate_reference_obj(
 # Create reference object 
 ref.obj <- Reference(
   GetAssayData(chrom, assay = ref_assay, layer = ref_layer), 
-  cell_types = chrom_i@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor(), 
+  cell_types = chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor(), 
   min_UMI = REF_MIN_UMI, 
   require_int = (xe@misc$sample_metadata[["segmentation_method"]]!="proseg"))
 
