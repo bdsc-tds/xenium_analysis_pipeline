@@ -18,7 +18,7 @@ get_path_to_reference_4referencebased_annotation(wildcards) -> str:
   reference_path = lambda wildcards: get_dict_value(
     config,
     "experiments",
-    "_cell_type_annotation", # TODO: make constant @Senbai, Im lost >.<
+    "_cell_type_annotation", # TODO: make constant @Senbai?
     extract_layers_from_experiments(wildcards.sample_id, [0])[0], # get disease 
     extract_layers_from_experiments(wildcards.annotation_id, [0,1])[0], # get annotation_approach == reference_based and reference_type # NOT SURE this function can be used with wildcards.annotation_id
     "path"
@@ -49,7 +49,7 @@ rule runRCTD:
       protected(f'{get_output_folder_4referencebased_annotation}/scores.csv')
     params:
       annotation_id = lambda wildcards: wildcards.annotation_id,
-      #class_level = "Level2", #TODO: think how to provide class_level (Level{min(i-1, 1)}) for Level{i}                   
+      #class_level = "Level2", #TODO: think how to provide class_level (Level{min(i-1, 1)}) for Level{i}. Extract levels hierarchi from experiments.yml?              
       ref_default_assay = sac.REF_SEURAT_DEFAULT_ASSAY, 
       xe_default_assay = sac.XE_SEURAT_DEFAULT_ASSAY, 
       REF_MIN_UMI = sac.REF_MIN_UMI, 
@@ -63,4 +63,4 @@ rule runRCTD:
     container:
         config["containers"]["r"]
     script:
-        "path/to/your_script.R"
+        "../../../scripts/_celltype_annotation/_reference_based/rctd.R"
