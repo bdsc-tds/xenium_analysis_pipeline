@@ -57,7 +57,7 @@ rule runRCTD:
       XE_MIN_UMI = sac.XE_MIN_UMI,
       XE_MIN_counts = sac.XE_MIN_counts,
       CELL_MIN_INSTANCE = sac.CELL_MIN_INSTANCE, # RCTD-specific -> move to config or experiment
-      UMI_min_sigma = 100 # RCTD-specific -> move to config or experiment. Replace with one from `config -> ... -> rctd -> _mode -> _other_options`
+      UMI_min_sigma = 100 # RCTD-specific -> move to config or experiment. Replace with one from `config -> ... -> rctd -> _mode -> _other_options` (shoould be increased for 5k panel)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/{{annotation_id}.replace("/", "_")}.log'
     container:
