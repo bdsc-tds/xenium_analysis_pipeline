@@ -36,10 +36,14 @@ class_level       <- snakemake@params[["class_level"]] # optional, should be NUL
 ###### end of snakemake params  ###### 
 
 
-# Annotation method specific, should not be modified, so not in snakemake
+# Annotation method specific, *should not be modified*, so not in snakemake
 ref_layer  <- 'counts' 
 test_layer <- 'counts' 
 
+# Validate inputs
+if (!file.exists(reference_path) || !file.exists(query_path)) {
+  stop("One or more input files are missing!")
+}
 
 ## Load Chromium (reference) data 
 chrom <- readRDS(reference_path) # `chrom_file_path` from snakemake
@@ -62,7 +66,11 @@ chrom <- generate_reference_obj(
 )
 
 # Create reference object 
-ref.obj <- Reference(GetAssayData(chrom_i, assay = ref_assay, layer = ref_layer), ref_labels, min_UMI = MIN_UMIs, require_int = (xe@misc$sample_metadata[["segmentation_method"]]!="proseg"))
+ref.obj <- Reference(
+  GetAssayData(chrom, assay = ref_assay, layer = ref_layer), 
+  cell_types = chrom_i@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor(), 
+  min_UMI = REF_MIN_UMI, 
+  require_int = (xe@misc$sample_metadata[["segmentation_method"]]!="proseg"))
 
 # Create query object
 coords   <- xe@meta.data %>% select(ST_1, ST_2)
@@ -106,15 +114,15 @@ rownames(labels)<- colnames(xe)
 # Define minimum weight threshold and calculate boolean scores and candidate counts
 scores_bool <- scores > 0.01
 n_candidates <- rowSums(scores_bool)
-hc_idx <- n_candidates < 2
+high_confidence_cells <- n_candidates < 2
 
 # Update labels based on the threshold
 labels <- labels %>%
-  mutate(second_type_updated = if_else(hc_idx, NA_character_, second_type))
+  mutate(second_type_updated = if_else(high_confidence_cells, NA_character_, second_type))
 
 # Save annotation
-saveRDS(RCTD, skakemake@output[[1]])
-write.csv(labels, skakemake@output[[2]])
-write.csv(scores, skakemake@output[[3]])
+saveRDS(RCTD, snakemake@output[[1]])
+write.csv(labels, snakemake@output[[2]])
+write.csv(scores, snakemake@output[[3]])
 
 
