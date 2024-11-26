@@ -2,7 +2,7 @@
 #              Functions              #
 #######################################
 
-include: "../../../scripts/_celltype_annotation/annotation_utils.py" # @Senbai, any better way? 
+#include: "../../../scripts/_celltype_annotation/annotation_utils.py" # @Senbai, any better way? -> moved to parent .smk (~/workflow/rules/celltype_annotation.smk)
 
 
 #######################################
