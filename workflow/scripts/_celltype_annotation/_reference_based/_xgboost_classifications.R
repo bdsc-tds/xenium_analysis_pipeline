@@ -19,7 +19,7 @@ run_regressions_classification_fixed_features <- function(
     Y,
     do.cross.val = TRUE,
     train.index = NULL,
-    xgb_objective = "multi:softmax",
+    xgb_objective = "multi:softprob",
     nrounds = 1000,
     max_depth = 2,
     eta = 0.03,
@@ -43,17 +43,14 @@ run_regressions_classification_fixed_features <- function(
     
   if (do.cross.val) {
     ## checking to add
-    print("here1")
     data.train <- xgb.DMatrix(data = X[train.index,],
                               label = Y[train.index])
     
     data.test  <- xgb.DMatrix(data = X[-train.index,],
                               label = Y[-train.index])
-    print("here2")
     watchlist <- list(train = data.train, test = data.test)
     
     set.seed(1) # needed?
-    print("here3")
     fit.train <- xgb.train(
       data = data.train,
       max_depth = max_depth,
@@ -65,7 +62,6 @@ run_regressions_classification_fixed_features <- function(
       num_class = num_class,
       ...
     )
-    print("here4")
    # nrounds <-
    #   which.min(fit.train$evaluation_log[[3]])
     
