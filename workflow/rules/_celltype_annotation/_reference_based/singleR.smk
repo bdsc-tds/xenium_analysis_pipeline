@@ -26,11 +26,11 @@ rule runSingleR:
       REF_MAX_UMI = sac.REF_MAX_UMI, 
       XE_MIN_UMI = sac.XE_MIN_UMI,
       XE_MIN_counts = sac.XE_MIN_counts,
-      # singleR-specific params? if its too much efford, no problem to keep them fixed and defined in the Rscript 
-      singleR_genes = "de",
-      de_method = "t",
-      aggr_ref = TRUE, # not sure 
-      aggr_ref = list(rank = 50, power = 0.7) # not sure
+      # singleR-specific params
+      singleR_genes = sac.singleR_genes,
+      de_method = sac.singleR_de_method, 
+      aggr_ref = sac.singleR_aggr_ref, 
+      aggr_args = sac.singleR_aggr_args # list(rank = 50, power = 0.7) # not sure how to 
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/{{annotation_id}.replace("/", "_")}.log'
     container:
