@@ -26,9 +26,9 @@ rule runXGBoost:
       REF_MAX_UMI = sac.REF_MAX_UMI, 
       XE_MIN_UMI = sac.XE_MIN_UMI,
       XE_MIN_counts = sac.XE_MIN_counts,
-      # xgboost-specific paramif its too much efford, no problem to keep them fixed and defined in the Rscript 
-      nrounds = 1000
-      eta = 0.3 
+      # xgboost-specific params
+      nrounds = sac.xgb_nrounds,
+      eta = sac.xgb_eta 
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/{{annotation_id}.replace("/", "_")}.log'
     container:
