@@ -1,4 +1,4 @@
-import scripts._standard_seurat_analysis.standard_seurat_constants as sec
+import scripts._celltype_annotation.celltype_annotation_constants.py as sac
 include: "../../../scripts/_celltype_annotation/annotation_utils.py" # @Senbai, can I import funcrions that will be used by all listed below .smk like this?
 
 
