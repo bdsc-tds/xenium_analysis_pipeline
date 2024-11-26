@@ -45,13 +45,21 @@ regressions_classification <- run_regressions_classification_fixed_features(
 )
 
 # Annotate with XGBoost 
-labels   <- predict(regressions_classification$fit, GetAssayData(xe, assay = xe_assay, layer = test_layer)[xe_chrom_common_genes,] %>% Matrix::t())
-labels   <- Y.ref_map[as.character(labels)]
+
+# Predict probabilities
+y_pred_prob <- predict(model_softprob, dtest)
+y_pred_prob <- matrix(y_pred_prob, ncol = length(Y.ref_map), byrow = TRUE)
+colnames(y_pred_prob) <- Y.ref_map %>% as.vector()
+rownames(y_pred_prob) <- colnames(xe)
+
+# Convert probabilities to class labels
+labels <- max.col(y_pred_prob) - 1  # Subtract 1 because `max.col` returns 1-based index
+labels <- Y.ref_map[as.character(labels)] # convert numbers to cell types 
 names(labels) <- colnames(xe)
 
 # Save annotation
 saveRDS(regressions_classification, snakemake@output[[1]])
 write.csv(labels, snakemake@output[[2]])
-#write.csv(scores, snakemake@output[[3]]) # no score-like values in xgboost? 
+write.csv(y_pred_prob, snakemake@output[[3]]) 
 
 
