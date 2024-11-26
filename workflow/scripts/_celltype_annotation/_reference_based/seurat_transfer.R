@@ -29,7 +29,7 @@ xe_chrom_common_genes <- intersect(rownames(xe), rownames(chrom))
 
 # Annotate with Seurat transfer 
 
-dims <- 1:50 # can be provided via snakemake
+dims <- snakemake@params[["dims"]] %||% 1:50
 
 anchors       <- FindTransferAnchors(reference = chrom, query = xe, features = xe_chrom_common_genes, dims = dims)
 predictions   <- TransferData(anchorset = anchors, refdata = ref_labels, dims = dims)

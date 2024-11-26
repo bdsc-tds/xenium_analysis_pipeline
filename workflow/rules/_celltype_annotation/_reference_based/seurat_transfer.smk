@@ -25,8 +25,8 @@ rule runSeuratTransfer:
       REF_MIN_UMI = sac.REF_MIN_UMI, 
       REF_MAX_UMI = sac.REF_MAX_UMI, 
       XE_MIN_UMI = sac.XE_MIN_UMI,
-      XE_MIN_counts = sac.XE_MIN_counts
-      # dims = 1:50
+      XE_MIN_counts = sac.XE_MIN_counts,
+      dims = sac.dims # 1:50
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/{{annotation_id}.replace("/", "_")}.log'
     container:
