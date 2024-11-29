@@ -5,6 +5,8 @@ sink(log, type = "message")
 library(Seurat) 
 library(dplyr)
 
+options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
+
 default_assay <- snakemake@params[["default_assay"]]
 n_dims <- snakemake@params[["n_dims"]]
 resolution <- snakemake@params[["resolution"]]

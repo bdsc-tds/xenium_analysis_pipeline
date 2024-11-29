@@ -9,6 +9,12 @@ rule runStandardSctransformDimRedClust:
     output:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
     params:
+        future_globals_maxSize=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "_future_globals_maxSize",
+            replace_none=1
+        ) * 10**9,
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         n_dims=lambda wildcards: get_dict_value(
             config,
