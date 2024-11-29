@@ -31,7 +31,7 @@ segmentation:
 
   baysor:
     _config: "workflow/configs/baysor_xenium.toml"
-    _threads: 8
+    _threads: 1
     _memory: 200
     _other_options:
 
@@ -45,6 +45,8 @@ segmentation:
     _memory: 64
 
 standard_seurat_analysis:
+  _future_globals_maxSize: 1
+
   qc:
     min_counts: 10
     min_features: 5

@@ -109,7 +109,7 @@ This section specifies parameters in the standard Seurat analysis workflow.
    - `min_features`: `5` by default
    - `max_counts`: `Inf` by default
    - `max_features`: `Inf` by default
-   - `min_cells`: `1` by default
+   - `min_cells`: `5` by default
 
 2. `dim_reduction`
    Parameters used in dimension reduction.
@@ -120,6 +120,10 @@ This section specifies parameters in the standard Seurat analysis workflow.
    Parameters used in clustering.
 
    - `resolution`: Parameter for `Seurat::FindClusters`. `0.8` by default.
+
+In addition, there are some reserved keys, specified as follows:
+
+1. `_future_globals_maxSize`: A number (`1` by default) with unit GB is specified here to deal with the [issue](https://github.com/satijalab/seurat/issues/1845) of "Global size exceeds maximum allowed size" when running Seurat (see the solution [here](https://satijalab.org/seurat/archive/v3.0/future_vignette.html)).
 
 ## Cell type annotation (key: `cell_type_annotation`)
 
