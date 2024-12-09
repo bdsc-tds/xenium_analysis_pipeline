@@ -86,11 +86,12 @@ generate_reference_obj <- function(
   
   # Filter non-tumor cells or donor-specific cells based on reference type
   if (DONOR_IN_REF) {
+    print(donor_id)
     orig_cell_type <- unique(chrom[[annotation_level]] %>% pull())
     orig_ncells <- ncol(chrom)
     
     chrom$isDonorSpecific <- grepl(paste(ref_donors, collapse = "|"), chrom[[annotation_level]] %>% pull())
-    chrom <- subset(chrom, subset = ((isDonorSpecific == FALSE) | (patient == donor_id)))
+    chrom <- subset(chrom, subset = ((isDonorSpecific == FALSE) | (donor == donor_id)))
     
     message(sprintf("For the reference dataset, %d cells were removed from the original dataset.", orig_ncells - ncol(chrom)))
     message(sprintf("The following cell types are missing: %s", paste(setdiff(orig_cell_type, unique(chrom[[annotation_level]] %>% pull())), collapse = ", ")))
@@ -141,6 +142,10 @@ generate_class_df <- function(
   # Initialize class_df as NULL
   class_df <- NULL
   
+  if (class_level == annotation_level) {
+    class_level <- NULL
+  }
+  
   # Check if class_level is specified and present in chrom metadata
   if (!is.null(class_level)) {
     if (class_level %in% names(chrom@meta.data)) {
@@ -148,8 +153,11 @@ generate_class_df <- function(
       class_df <- chrom@meta.data %>%
         select(all_of(c(annotation_level, class_level))) %>%
         distinct() %>%
-        rename(class = all_of(class_level)) %>%
-        column_to_rownames(var = annotation_level)
+        rename(class = all_of(class_level))
+      
+      # Set annotation_level as row names
+      rownames(class_df) <- class_df[[annotation_level]]
+      class_df <- class_df[setdiff(names(class_df), annotation_level)]
     } else {
       warning(sprintf("`class_level` '%s' does not exist in the reference meta.data; RCTD will be run with `class_df = NULL`", class_level))
     }

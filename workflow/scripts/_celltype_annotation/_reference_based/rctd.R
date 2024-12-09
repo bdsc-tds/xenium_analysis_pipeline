@@ -5,10 +5,9 @@ library(dplyr)
 library(spacexr)
 
 # Load common reference-based parameters
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/header.R")) 
+source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_header.R")) 
 
 # parameters specific for RCTD and panel (or disease)
-CELL_MIN_INSTANCE <- snakemake@params[["CELL_MIN_INSTANCE"]] # ideally, should de decreased for the breast panel, but lets keep it like this 
 UMI_min_sigma     <- snakemake@params[["UMI_min_sigma"]] # only used in RCTD (should be passed to snakemake via _other_options?)
 class_level       <- snakemake@params[["class_level"]] # optional, should be NULL if not provided
 
@@ -26,9 +25,12 @@ source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/
 source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_generate_reference_obj.R")) 
 
 # Create RCTD-specific reference object 
+ref_labels <-  chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor()
+names(ref_labels) <- colnames(chrom)
+
 ref.obj <- Reference(
   GetAssayData(chrom, assay = ref_assay, layer = ref_layer), 
-  cell_types = chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor(), 
+  cell_types = ref_labels, 
   min_UMI = REF_MIN_UMI, 
   require_int = (xe@misc$sample_metadata[["segmentation_method"]]!="proseg"))
 
@@ -53,7 +55,8 @@ RCTD <- create.RCTD(
   counts_MIN = XE_MIN_counts, #10
   UMI_min_sigma = UMI_min_sigma, #100, but 300 by default
   max_cores = parallel::detectCores(),
-  CELL_MIN_INSTANCE = CELL_MIN_INSTANCE
+  CELL_MIN_INSTANCE = CELL_MIN_INSTANCE,
+  class_df = class_df
 )
 
 message(paste("N = ", ncol(xe) - RCTD@spatialRNA@counts@Dim[[2]], "cells were removed by create.RCTD()" ))
@@ -67,7 +70,11 @@ rownames(scores) <- colnames(xe)
 
 # Get labels 
 annotations.df  <- RCTD@results$results_df[colnames(xe),]
-labels          <- annotations.df %>% select(first_type, second_type) # #TODO: second_type_updated 
+if("scond_type" %in% colnames(annotations.df)){
+  annotations.df <- annotations.df %>% mutate(second_type = scond_type)
+  annotations.df$scond_type <- NULL
+}
+labels          <- annotations.df %>% select(first_type, second_type) 
 rownames(labels)<- colnames(xe)
 
 # Update second type for highly confident cells 
