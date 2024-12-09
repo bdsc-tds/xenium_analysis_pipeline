@@ -94,7 +94,7 @@ generate_reference_obj <- function(
     chrom <- subset(chrom, subset = ((isDonorSpecific == FALSE) | (donor == donor_id)))
     
     message(sprintf("For the reference dataset, %d cells were removed from the original dataset.", orig_ncells - ncol(chrom)))
-    message(sprintf("The following cell types are missing: %s", paste(setdiff(orig_cell_type, unique(chrom[[annotation_level]] %>% pull())), collapse = ", ")))
+    message(sprintf("The following cell types were removed: %s", paste(setdiff(orig_cell_type, unique(chrom[[annotation_level]] %>% pull())), collapse = ", ")))
   }
   
   # Subset reference data to panel genes

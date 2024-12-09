@@ -16,7 +16,7 @@ test_layer <- 'counts'
 source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_load_data.R")) # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
 
 ## Make sure chrom data are log-normalized
-DefaultAssay(chrom) <- ref.assay
+DefaultAssay(chrom) <- ref_assay
 chrom               <- NormalizeData(chrom)
 
 # Generate reference object
