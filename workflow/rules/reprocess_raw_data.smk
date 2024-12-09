@@ -137,8 +137,6 @@ rule changeParquetCompressionType:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/changeParquetCompressionType.log'
     params:
         input_file=lambda wildcards: get_input2_or_params4changeParquetCompressionType(wildcards, for_input=False)
-    resources:
-        mem_mb=20480
     conda:
         "../envs/pyarrow.yml"
     shell:
