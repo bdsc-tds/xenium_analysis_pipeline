@@ -124,6 +124,50 @@ def _convert2list(
     raise RuntimeError(f"Error! Cannot convert {x} to a list with length {length}.")
 
 
+def _merge_flattened_lists(
+    left: list,
+    right: list,
+    *,
+    pad_layers: dict[int, int | float | str | None] | None = None,
+) -> list:
+    if len(left) < len(right):
+        less = left
+        more = right
+    else:
+        less = right
+        more = left
+
+    if len(less) == 0:
+        return more
+
+    ret: list = []
+
+    if pad_layers is None:
+        assert len(left) == len(right)
+    else:
+        if len(left) == len(right):
+            pad_layers = None
+
+    idx_less: int = 0
+    for idx, e in enumerate(more):
+        assert isinstance(e, list)
+
+        if pad_layers is None or idx not in pad_layers:
+            assert isinstance(less[idx_less], list)
+
+            ret.append([*e, *less[idx_less]])
+            idx_less += 1
+        else:
+            ret.append(
+                [
+                    *e,
+                    *_convert2list(pad_layers[idx], len(less[0])),
+                ]
+            )
+
+    return ret
+
+
 def _merge_dicts(x: list[dict | None] | set[dict | None] | tuple[dict | None]) -> dict:
     ret: dict = {}
 
@@ -140,6 +184,7 @@ def _flatten_struct(
     layer: int = 0,
     key_layer2pat_include: dict[tuple[int, ...] | str, str | Callable] | None = None,
     key_layer2pat_exclude: dict[tuple[int, ...] | str, str | Callable] | None = None,
+    pad_layers: dict[int, int | float | str | None] | None = None,
 ) -> tuple[list[Any], ...]:
     if key_layer2pat_include is None:
         key_layer2pat_include = {"_": r"^(?!_+).+"}
@@ -172,18 +217,13 @@ def _flatten_struct(
                     layer=layer + 1,
                     key_layer2pat_include=key_layer2pat_include,
                     key_layer2pat_exclude=key_layer2pat_exclude,
+                    pad_layers=pad_layers,
                 )
                 flattened = _convert2list(key, len(flattened[0])), *list(flattened)
 
-                if len(ret) == 0:
-                    ret = list(flattened)
-                else:
-                    assert len(ret) == len(flattened)
-
-                    for idx, e in enumerate(ret):
-                        assert isinstance(e, list) and isinstance(flattened[idx], list)
-
-                        e.extend(flattened[idx])
+                ret = _merge_flattened_lists(
+                    ret, list(flattened), pad_layers=pad_layers
+                )
 
         return tuple(ret)
     else:
@@ -212,7 +252,7 @@ def _collect_experiments(
     val_func: Callable | None = lambda vs: os.path.sep.join(vs),
     key_val_func: Callable | None = lambda ks, vs: os.path.sep.join(ks + vs),
     vals_func: Callable | None = None,
-    simplify: bool = False,
+    simplify: Callable | None = None,
 ) -> dict[str, Any]:
     assert 0 <= layer < len(flattened)
 
@@ -258,10 +298,8 @@ def _collect_experiments(
         for key, value in ret.items():
             ret[key] = vals_func(value)
 
-    if simplify:
-        for key, value in ret.items():
-            if len(value) == 1:
-                ret[key] = value[0]
+    if simplify is not None:
+        return simplify(ret)
 
     return ret
 
@@ -331,7 +369,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         drop_layers=(2,),
         val_func=None,
         key_val_func=None,
-        simplify=True,
+        simplify=lambda x: {k: v[0] if len(v) == 1 else v for k, v in x.items()},
     )
 
     gene_panel_qc_thresholds = _collect_experiments(
@@ -354,12 +392,16 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                     ]
                 ),
             },
+            pad_layers={3: None},
         ),
         1,
         drop_layers=(2,),
-        val_func=lambda vs: {vs[0]: vs[1]} if len(vs) > 1 else vs[0],
+        val_func=lambda vs: (
+            None if vs[0] is None else ({vs[0]: vs[1]} if len(vs) > 1 else vs[0])
+        ),
         key_val_func=None,
         vals_func=_merge_dicts,
+        simplify=lambda x: {k: v for k, v in x.items() if len(v) > 0},
     )
 
     return (
