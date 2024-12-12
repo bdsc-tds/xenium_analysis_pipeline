@@ -14,8 +14,8 @@ WILDCARDS_DONORS_NAME: str = "_donors"
 WILDCARDS_SAMPLES_NAME: str = "_samples"
 # Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods.
 WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
-# Child of `WILDCARDS_NAME` (second level); a list of values for annotation methods.
-WILDCARDS_ANNOTATION_NAME: str = "_annotation"
+# Child of `WILDCARDS_NAME` (second level); a list of values for cell type annotation.
+WILDCARDS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"
 
 
 # Child of `experiments` (second level); for the path to the experiments configuration file on the disk.
@@ -26,11 +26,13 @@ EXPERIMENTS_BASE_PATH_NAME: str = "_base_path"
 EXPERIMENTS_GENE_PANEL_FILES_NAME: str = "_gene_panel_file"
 # Child of `experiments` (second level); for QC thresholds on gene panel level.
 EXPERIMENTS_GENE_PANEL_QC_NAME: str = "_qc"
-# Child of `experiments` (second level); colletions of samples on different levels
+# Child of `experiments` (second level); colletions of samples on different levels.
 EXPERIMENTS_COLLECTIONS_NAME: str = "_collections"
-# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on disease level
+# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on disease level.
 EXPERIMENTS_COLLECTIONS_DISEASES_NAME: str = "_diseases"
-# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on gene panel level
+# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on gene panel level.
 EXPERIMENTS_COLLECTIONS_GENE_PANELS_NAME: str = "_gene_panels"
-# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on donors level
+# Child of EXPERIMENTS_COLLECTIONS_NAME (third level); a collection of samples on donors level.
 EXPERIMENTS_COLLECTIONS_DONORS_NAME: str = "_donors"
+# Child of `experiments` (second level); for cell type annotation on disease level.
+EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"

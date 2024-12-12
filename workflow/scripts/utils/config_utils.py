@@ -168,14 +168,52 @@ def _merge_flattened_lists(
     return ret
 
 
-def _merge_dicts(x: list[dict | None] | set[dict | None] | tuple[dict | None]) -> dict:
+def _merge_dicts(
+    x: list[dict | None] | set[dict | None] | tuple[dict | None], exist_ok: bool = False
+) -> dict | None:
+    def __merge_to(keep: Any, add: Any, *, exist_ok: bool = False) -> dict | list:
+        assert keep is not None and add is not None
+
+        if add is None or isinstance(add, (dict, list)) and len(add) == 0:
+            return keep
+
+        if isinstance(keep, dict) + isinstance(add, dict) == 1:
+            raise RuntimeError(
+                f"Error! Cannot merge as at least one of the following is not a dictionary: {keep}, {add}"
+            )
+
+        if isinstance(keep, dict) + isinstance(add, dict) == 0:
+            return [
+                *_convert2list(keep, match_length=False),
+                *_convert2list(add, match_length=False),
+            ]
+
+        for k, v in add.items():
+            if k is None:
+                continue
+
+            if k in keep:
+                if exist_ok:
+                    keep[k] = __merge_to(keep[k], v, exist_ok=exist_ok)
+                else:
+                    raise RuntimeError(f"Error! Duplicate keys {k} found.")
+            else:
+                keep[k] = v
+
+        return keep
+
+    if len(x) == 0:
+        return None
+
     ret: dict = {}
 
     for i in x:
-        if i is not None:
-            ret.update(i)
+        if i is None:
+            continue
 
-    return ret
+        ret = __merge_to(ret, i, exist_ok=exist_ok)
+
+    return ret if len(ret) > 0 else None
 
 
 def _flatten_struct(
@@ -248,8 +286,8 @@ def _collect_experiments(
     layer: int,
     *,
     drop_layers: tuple[int, ...] | None = None,
-    key_func: Callable = lambda vs: os.path.sep.join(vs),
-    val_func: Callable | None = lambda vs: os.path.sep.join(vs),
+    key_func: Callable = os.path.sep.join,
+    val_func: Callable | None = os.path.sep.join,
     key_val_func: Callable | None = lambda ks, vs: os.path.sep.join(ks + vs),
     vals_func: Callable | None = None,
     simplify: Callable | None = None,
@@ -326,6 +364,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                     cc.EXPERIMENTS_COLLECTIONS_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                    cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                 ]
             )
         },
@@ -361,6 +400,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
                 )
             },
@@ -389,6 +429,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
                 ),
             },
@@ -401,7 +442,40 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         ),
         key_val_func=None,
         vals_func=_merge_dicts,
-        simplify=lambda x: {k: v for k, v in x.items() if len(v) > 0},
+        simplify=lambda x: {k: v for k, v in x.items() if v is not None and len(v) > 0},
+    )
+
+    cell_type_annotation = _collect_experiments(
+        _flatten_struct(
+            data,
+            key_layer2pat_include={
+                (0, 2, 3, 4): r"^(?!_+).+",
+                (1,): cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+                (5,): lambda v: isinstance(v, (int, str)),
+            },
+            key_layer2pat_exclude={
+                (0, 1, 2, 3, 4): "|".join(
+                    [
+                        cc.EXPERIMENTS_CONFIG_PATH_NAME,
+                        cc.EXPERIMENTS_BASE_PATH_NAME,
+                        cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                    ]
+                ),
+            },
+        ),
+        0,
+        drop_layers=(1,),
+        val_func=lambda v: (
+            {
+                os.path.join(v[0], v[1]): {
+                    v[2]: str(v[3]) if isinstance(v[3], int) else v[3]
+                }
+            }
+        ),
+        key_val_func=None,
+        vals_func=lambda x: _merge_dicts(x, exist_ok=True),
     )
 
     return (
@@ -410,6 +484,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         collections,
         gene_panel_files,
         gene_panel_qc_thresholds,
+        cell_type_annotation,
     )
 
 
@@ -451,7 +526,66 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
 
     return methods, ret
 
-#def _process_annotation(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]: # placeholder 
+
+def _process_cell_type_annotation(
+    data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
+) -> dict[str, list[str]]:
+    wildcards: dict[str, list[str]] = {}
+
+    for k_1, v_1 in data_from_experiments.items():
+        for k_2, v_2 in list(v_1.items()):
+            if "path" not in v_2 or v_2["path"] is None or v_2["path"] == "":
+                del data_from_experiments[k_1][k_2]
+                continue
+
+            if "levels" not in v_2 or v_2["levels"] is None or len(v_2["levels"]) == 0:
+                raise RuntimeError(
+                    f"Error! Entry 'levels' of {k_1}'s {k_2} should be specified."
+                )
+
+            approach: str = extract_layers_from_experiments(k_2, 0)[0]
+
+            _wildcards = [
+                os.path.join(i[0], j, i[1], m)
+                for i in [
+                    [k_2, _v] for _v in _convert2list(v_2["levels"], match_length=False)
+                ]
+                for j in data_from_config[approach]["methods"]
+                for m in data_from_config[approach]["modes"]
+            ]
+
+            if k_1 not in wildcards:
+                wildcards[k_1] = _wildcards
+            else:
+                wildcards[k_1].extend(_wildcards)
+
+        if len(v_1) == 0:
+            raise RuntimeError(
+                f"Error! At least one reference type among 'matched_reference' and 'external_reference' should be provided for disease {k_1}."
+            )
+
+    for k_1, v_1 in data_from_config.items():
+        for k_2, v_2 in v_1.items():
+            if k_2 in ["methods", "modes"]:
+                continue
+
+            updated_method: dict = {}
+
+            for k_3, v_3 in v_2.items():
+                tmp = _convert2list(v_3, len(v_1["modes"]))
+
+                for idx, _v in enumerate(v_1["modes"]):
+                    if _v not in updated_method:
+                        updated_method[_v] = {}
+
+                    assert k_3 not in updated_method[_v]
+
+                    updated_method[_v][k_3] = tmp[idx]
+
+            set_dict_value(data_from_config, k_1, k_2, value=updated_method)
+
+    return wildcards
+
 
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
@@ -512,6 +646,14 @@ def process_config(
     for k, v in _segmentation[1].items():
         set_dict_value(data, "segmentation", k, value=v)
 
-    # Process `annotation` section.
-    # to write 
-    return None
+    # Process `cell_type_annotation` section.
+    _cell_type_annotation = _process_cell_type_annotation(
+        _experiments[5], get_dict_value(data, "cell_type_annotation")
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+        value=_cell_type_annotation,
+    )
