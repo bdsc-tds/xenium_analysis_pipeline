@@ -61,16 +61,7 @@ standard_seurat_analysis:
     resolution: 0.8
 
 cell_type_annotation:
-  approaches:
-    - reference_based
-    # - marker-based # placeholder
-
   reference_based:
-  
-    reference_type:
-      - matched_reference
-      - external_reference 
-      
     methods:
       - rctd
       - singler
@@ -78,41 +69,30 @@ cell_type_annotation:
       - tangram
       - xgboost
 
+    modes:
+      - single_cell
+      - cluster
+
     rctd:
-      _mode:
-        - single_cell
-        - cluster
       _other_options:
         - "--UMI_min_sigma 100" # low UMI in single-cell mode
-        - "--UMI_min_sigma 300" # higher UMI in single-cell mode
+        - "--UMI_min_sigma 300" # higher UMI in cluster mode
 
     singler:
-      _mode:
-        - single_cell
-        - cluster
       _other_options:
 
     seurat:
-      _mode:
-        - single_cell
-        - cluster
       _other_options:
 
     tangram:
-      _mode:
-        - single_cell
-        - cluster
       _other_options:
 
     xgboost:
-      _mode:
-        - single_cell
-        - cluster
       _other_options:
 
   # marker_based: # placeholder
 
-domain-identification:
+domain-identification: # placeholder
   methods:
     - BANKSY
     - spatial-graph
