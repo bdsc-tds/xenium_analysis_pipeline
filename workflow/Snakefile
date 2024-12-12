@@ -40,9 +40,9 @@ import config_constants as cc
 
 """
 Explanation of wildcards:
-- sample_id: The name of an sample to be processed with a format of "disease/gene panel/donor/sample".
+- sample_id: The name of an sample to be processed with a format of "disease/gene_panel/donor/sample".
 - segmentation_id: The name of a segmentation method to be used.
-- annotation_id: The name of cell-type annotation to be used in a format "approach/reference_type/method/level/_mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell" 
+- annotation_id: The name of cell-type annotation to be used in a format "approach/reference_type/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
 """
 
 SAMPLE_ID = get_dict_value(
@@ -75,6 +75,7 @@ include: 'rules/reprocess_raw_data.smk'
 include: 'rules/segmentation.smk'
 include: 'rules/standard_seurat_analysis.smk'
 include: 'rules/celltype_annotation.smk'
+
 
 #######################################
 #              Functions              #

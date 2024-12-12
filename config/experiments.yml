@@ -3,6 +3,8 @@ _base_path: /path/to/raw/data
 diseases_1:
   _cell_type_annotation:
     reference_based:
+      # Empty path (either `None` or "") indicates that the corresponding reference is unavailable.
+      # Please do not comment out sub-dictionaries.
       matched_reference:
         path:
         levels:
