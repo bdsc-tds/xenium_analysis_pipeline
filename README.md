@@ -87,10 +87,12 @@ The workflow should be executed from the root directory of this repo. To get a s
 which prints
 
 ```
-Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULES ] [ -U | --until RULES ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -n,--dry-run: dry run.
+        -R,--forcerun RULES: force the re-execution or creation of the given rules or files.
+        -U,--until RULES: runs the pipeline until it finishes the specified rules or generated the files.
         --dag OUTPUT: draw dag and save to OUTPUT.pdf.
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
