@@ -4,6 +4,7 @@ import shutil
 import json
 include: "scripts/utils/config_utils.py"
 include: "scripts/utils/raw_data_utils.py"
+include: "scripts/utils/run_time_utils.py"
 
 # Ensure that only one configuration file is used.
 if len(workflow.configfiles) > 1:
@@ -55,15 +56,15 @@ SEGMENTATION_ID = get_dict_value(
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SEGMENTATION_NAME
 )
-ANNOTATION_ID = get_dict_value(
+ANNOTATION_ID = [j for i in get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_ANNOTATION_NAME
-)
+    cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME
+).values() for j in i]
 
 wildcard_constraints:
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
-    segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID])
+    segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID]),
     annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID])
 
 
@@ -74,7 +75,7 @@ wildcard_constraints:
 include: 'rules/reprocess_raw_data.smk'
 include: 'rules/segmentation.smk'
 include: 'rules/standard_seurat_analysis.smk'
-include: 'rules/celltype_annotation.smk'
+include: 'rules/cell_type_annotation.smk'
 
 
 #######################################
@@ -147,11 +148,43 @@ def get_output4cleanup() -> list[str]:
 
     return ret
 
+def get_output4cell_type_annotation() -> list[str]:
+    prefix: str = f'{config["output_path"]}/segmentation'
+    filenames: list[str] = ["output.rds", "labels.csv", "scores.csv"]
+
+    samples_by_disease: dict[str, list[str]] = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_COLLECTIONS_NAME,
+        cc.EXPERIMENTS_COLLECTIONS_DISEASES_NAME
+    )
+
+    annotation_by_disease: dict[str, list[str]] = get_dict_value(
+        config,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME
+    )
+
+    samples_annotation: list[list[str]] = cross_samples_annotation_by_disease(
+        samples_by_disease,
+        annotation_by_disease
+    )
+
+    return [os.path.join(
+        prefix,
+        i,
+        j[0],
+        "cell_type_annotation",
+        j[1],
+        k
+    ) for i in SEGMENTATION_ID for j in samples_annotation for k in filenames]
+
 def get_input2all(
     wildcards,
     *,
     reports: bool = True,
-    cleanup: bool = False
+    cleanup: bool = False,
+    cell_type_annotation: bool = True
 ) -> list[str]:
     ret: list[str] = []
 
@@ -160,6 +193,9 @@ def get_input2all(
 
     if cleanup:
         ret.extend(get_output4cleanup())
+
+    if cell_type_annotation:
+        ret.extend(get_output4cell_type_annotation())
     
     return ret
 
