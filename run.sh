@@ -72,6 +72,13 @@ IFS=''
 SINGULARITY_BIND_OPT="--bind $SINGULARITY_BIND"
 OTHER_OPT=(--rerun-triggers mtime --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv --env RUST_BACKTRACE=full $SINGULARITY_BIND_OPT" -kp)
 
+# Options related to $CONDA_BIN
+if [ "$CONDA_BIN" = mamba ]; then
+    CONDA_OPT=
+elif [ "$CONDA_BIN" = conda ]; then
+    CONDA_OPT="--no-capture-output"
+fi
+
 # Variables.
 LOCAL=1
 EXEC_OPT=(--profile "$LOCAL_PROFILE")
