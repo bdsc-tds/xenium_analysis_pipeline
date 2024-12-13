@@ -21,9 +21,9 @@ Some reserved keys are listed as follows:
 
   - `reference_based`: Single-cell RNA sequencing datasets are used as references for the annotation. Such reference datasets come either from a matched experiment (`matched_reference`), where samples are taken from the same tissue, or from an externel experiment (`external_reference`), where public datasets are used. Both types of references share the following specifications:
 
-    - `path`: Path to the reference datasets.
+    - `path`: Absolute path to the reference datasets. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific disease. However, please note that at least one `path` of `matched_reference` and `external_reference` should be specified for annotating cell types.
 
-    - `levels`: #todo
+    - `levels`: #TODO
 
 - `_gene_panel_file`: The path or the name to the gene panel file. It should be specified as a direct child of the second layer (gene panels). Leaving blank implies that the gene panel is user defined and thus invariant to the different versions of 10X xeniumranger.
 
