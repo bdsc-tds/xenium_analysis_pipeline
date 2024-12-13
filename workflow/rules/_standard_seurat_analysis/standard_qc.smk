@@ -79,7 +79,7 @@ rule runStandardQC:
                 "standard_seurat_analysis",
                 "qc",
                 "min_cells",
-                replace_none=1
+                replace_none=5
             ),
             inexist_key_ok=True
         ),
