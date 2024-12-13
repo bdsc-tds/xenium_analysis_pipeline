@@ -36,3 +36,7 @@ EXPERIMENTS_COLLECTIONS_GENE_PANELS_NAME: str = "_gene_panels"
 EXPERIMENTS_COLLECTIONS_DONORS_NAME: str = "_donors"
 # Child of `experiments` (second level); for cell type annotation on disease level.
 EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"
+# Child of `experiments` (second level); for path to reference file for cell type annotation on disease level.
+EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILE_NAME: str = (
+    "_cell_type_annotation_reference_file"
+)
