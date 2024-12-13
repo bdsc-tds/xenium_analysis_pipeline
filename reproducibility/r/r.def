@@ -20,7 +20,7 @@ Stage: mamba
     cd /
 
 BootStrap: docker
-From: rocker/r-base:4.4.1
+From: rocker/r-base:4.4.2
 Stage: main
 
 %setup
