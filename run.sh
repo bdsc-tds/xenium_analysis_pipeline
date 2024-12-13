@@ -33,10 +33,12 @@ SINGULARITY_BIND_DIRS=(  )
 # Help message.
 help()
 {
-    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULES ] [ -U | --until RULES ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -n,--dry-run: dry run.
+        -R,--forcerun RULES: force the re-execution or creation of the given rules or files.
+        -U,--until RULES: runs the pipeline until it finishes the specified rules or generated the files.
         --dag OUTPUT: draw dag and save to OUTPUT.pdf.
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
@@ -47,8 +49,8 @@ help()
 }
 
 # Allowed command line arguments.
-SHORT_OPTS=m:,c:,n,v,h
-LONG_OPTS=mode:,core:,dry-run,dag:,unlock,verbose,help
+SHORT_OPTS=m:,c:,n,R:,-U:,v,h
+LONG_OPTS=mode:,core:,dry-run,forcerun:,until:,dag:,unlock,verbose,help
 OPTS=$(getopt -n xenium_analysis_pipeline --options $SHORT_OPTS --longoptions $LONG_OPTS -- "$@")
 eval set -- "$OPTS"
 
@@ -84,6 +86,8 @@ LOCAL=1
 EXEC_OPT=(--profile "$LOCAL_PROFILE")
 CORE_OPT=(--cores 1)
 DRY_RUN_OPT=
+FORCE_RUN_OPT=()
+UNTIL_OPT=()
 DAG_OPT=
 UNLOCK=0
 VERBOSE=0
@@ -126,6 +130,28 @@ do
         -n | --dry-run)
             DRY_RUN_OPT=-n
             shift 1
+            ;;
+
+        -R | --forcerun)
+            FORCE_RUN_OPT=(--forcerun "$2")
+
+            if [ ${#FORCE_RUN_OPT[@]} -eq 1 ]; then
+                echo "Empty value for -R,--forcerun."
+                help 1
+            fi
+
+            shift 2
+            ;;
+
+        -U | --until)
+            UNTIL_OPT=(--until "$2")
+
+            if [ ${#UNTIL_OPT[@]} -eq 1 ]; then
+                echo "Empty value for -U,--until."
+                help 1
+            fi
+
+            shift 2
             ;;
 
         --dag)
@@ -203,6 +229,18 @@ fi
 # Priority: 3
 if [ -n "$DRY_RUN_OPT" ]; then
     COMPLETE_CMD=("${COMPLETE_CMD[@]}" "$DRY_RUN_OPT")
+fi
+
+# Force run rules.
+# Priority: 3
+if [[ -n "${FORCE_RUN_OPT[*]}" ]]; then
+    COMPLETE_CMD=("${COMPLETE_CMD[@]}" "${FORCE_RUN_OPT[@]}")
+fi
+
+# Stop after rules.
+# Priority: 3
+if [[ -n "${UNTIL_OPT[*]}" ]]; then
+    COMPLETE_CMD=("${COMPLETE_CMD[@]}" "${UNTIL_OPT[@]}")
 fi
 
 if [ $VERBOSE -eq 1 ]; then
