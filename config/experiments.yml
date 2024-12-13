@@ -6,12 +6,12 @@ diseases_1:
       # Empty path (either `None` or "") indicates that the corresponding reference is unavailable.
       # Please do not comment out sub-dictionaries.
       matched_reference:
-        path:
+        path: /path/to/reference
         levels:
           -
 
       external_reference:
-        path:
+        path: /path/to/reference
         levels:
           -
 
