@@ -42,10 +42,11 @@ Stage: main
     export MAMBA_ROOT_PREFIX=/opt/conda
     export DEBIAN_FRONTEND=noninteractive
     export TZ="Europe/Zurich"
+    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/lib:$LD_LIBRARY_PATH
 
 %post
 # Set up build time environment variables, such as versions
-    export LIBARROW_VERSION=17.0.0-1
+    export LIBARROW_VERSION=18.1.0
 
 # DNS
     # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -68,16 +69,25 @@ Stage: main
     export MAMBA_ROOT_PREFIX=/opt/conda
     export DEBIAN_FRONTEND=noninteractive
     export TZ="Europe/Zurich"
-    export LIBARROW_MINIMAL="false"
+    export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/lib:$LD_LIBRARY_PATH
 
 # Install system packages
-    apt-get install -y git vim cmake wget pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+    apt-get install -y ninja-build git vim cmake wget curl pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
 
-# Install apache arrow
-    wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-    apt-get install -y ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-    apt-get update
-    apt-get install -y gir1.2-arrow-dataset-1.0="${LIBARROW_VERSION}" gir1.2-arrow-flight-1.0="${LIBARROW_VERSION}" gir1.2-arrow-flight-sql-1.0="${LIBARROW_VERSION}" gir1.2-arrow-1.0="${LIBARROW_VERSION}" gir1.2-gandiva-1.0="${LIBARROW_VERSION}" gir1.2-parquet-1.0="${LIBARROW_VERSION}" libarrow-dev="${LIBARROW_VERSION}" libarrow-glib-dev="${LIBARROW_VERSION}" libarrow-dataset-dev="${LIBARROW_VERSION}" libarrow-dataset-glib-dev="${LIBARROW_VERSION}" libarrow-acero-dev="${LIBARROW_VERSION}" libarrow-flight-dev="${LIBARROW_VERSION}" libarrow-flight-glib-dev="${LIBARROW_VERSION}" libarrow-flight-sql-dev="${LIBARROW_VERSION}" libarrow-flight-sql-glib-dev="${LIBARROW_VERSION}" libgandiva-dev="${LIBARROW_VERSION}" libgandiva-glib-dev="${LIBARROW_VERSION}" libparquet-dev="${LIBARROW_VERSION}" libparquet-glib-dev="${LIBARROW_VERSION}"
+# Install Clang
+    apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang
+
+# Install apache arrow from source
+    mkdir /pkgs
+    cd /pkgs
+    git clone --branch apache-arrow-${LIBARROW_VERSION} --single-branch https://github.com/apache/arrow.git
+    cd arrow/cpp
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local -DARROW_ACERO="ON" -DARROW_AZURE="ON" -DARROW_BUILD_STATIC="ON" -DARROW_BUILD_UTILITIES="ON" -DARROW_COMPUTE="ON" -DARROW_CSV="ON" -DARROW_DATASET="ON" -DARROW_FILESYSTEM="ON" -DARROW_FLIGHT="ON" -DARROW_FLIGHT_SQL="ON" -DARROW_GANDIVA="ON" -DARROW_GCS="ON" -DARROW_HDFS="ON" -DARROW_JSON="ON" -DARROW_MIMALLOC="ON" -DARROW_ORC="ON" -DARROW_PARQUET="ON" -DARROW_WITH_BROTLI="ON" -DARROW_WITH_BZ2="ON" -DARROW_WITH_LZ4="ON" -DARROW_WITH_RE2="ON" -DARROW_WITH_SNAPPY="ON" -DARROW_WITH_UTF8PROC="ON" -DARROW_WITH_ZLIB="ON" -DARROW_WITH_ZSTD="ON" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_EXPORT_COMPILE_COMMANDS="ON"-DPARQUET_BUILD_EXECUTABLES="ON" -DPARQUET_BUILD_EXECUTABLES="ON" -DPARQUET_REQUIRE_ENCRYPTION="ON"
+    cmake --build .
+    make install
+
     apt-get clean
 
 # Install "renv" for R
