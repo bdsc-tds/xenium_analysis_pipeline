@@ -21,10 +21,22 @@ rule runReferenceBasedRCTD:
       XE_MIN_counts=cac.XE_MIN_counts,
       CELL_MIN_INSTANCE=cac.CELL_MIN_INSTANCE, # RCTD-specific -> move to config or experiment
       UMI_min_sigma=100 # RCTD-specific -> move to config or experiment. Replace with one from `config -> ... -> rctd -> _mode -> _other_options` (shoould be increased for 5k panel)
-    # wildcard_constraints:
-    #     annotation_id=r"10x_\d+um"
-    # log:
-    #     f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/{{annotation_id}.replace("/", "_")}.log'
+    wildcard_constraints:
+        annotation_id=r"reference_based/.+/rctd/.+"
+    threads:
+        lambda wildcards: get_dict_value(
+            config,
+            "cell_type_annotation",
+            "reference_based",
+            "rctd",
+            extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
+            "_threads",
+            replace_none=20
+        )
+    resources:
+        mem_mb=lambda wildcards, input: max((os.path.getsize(input["query"]) >> 20) * 50, 20480)
+    log:
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedRCTD.log'
     container:
         config["containers"]["r"]
     script:

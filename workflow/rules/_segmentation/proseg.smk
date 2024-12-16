@@ -90,6 +90,8 @@ rule runProseg2Baysor:
         polygons=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson')
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg2Baysor.log'
+    resources:
+        mem_mb=lambda wildcards, input: max(input.size_mb * 10, 2048)
     container:
         config["containers"]["proseg"]
     shell:
