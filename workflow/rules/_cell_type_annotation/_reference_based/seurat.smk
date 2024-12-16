@@ -2,7 +2,7 @@
 #                Rules                #
 #######################################
 
-rule runReferenceBasedXGBoost:
+rule runReferenceBasedSeurat:
     input:
       query=get_path2query4annotation,
       reference=get_path2reference4reference_based_annotation
@@ -18,14 +18,12 @@ rule runReferenceBasedXGBoost:
       REF_MAX_UMI=cac.REF_MAX_UMI,
       XE_MIN_UMI=cac.XE_MIN_UMI,
       XE_MIN_counts=cac.XE_MIN_counts,
-      # xgboost-specific params
-      nrounds=cac.xgb_nrounds,
-      eta=cac.xgb_eta
+      dims=cac.dims # 1:50
     wildcard_constraints:
-        annotation_id=r"reference_based/.+/xgboost/.+"
+        annotation_id=r"reference_based/.+/seurat/.+"
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedXGBoost.log'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedSeurat.log'
     container:
         config["containers"]["r"]
     script:
-        "../../../scripts/_celltype_annotation/_reference_based/xgboost.R"
+        "../../../scripts/_celltype_annotation/_reference_based/seurat.R"
