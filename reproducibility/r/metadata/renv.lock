@@ -1089,6 +1089,26 @@
       ],
       "Hash": "40415719b5a479b87949f3aa0aee737c"
     },
+    "bluster": {
+      "Package": "bluster",
+      "Version": "1.16.0",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor 3.20",
+      "Requirements": [
+        "BiocNeighbors",
+        "BiocParallel",
+        "Matrix",
+        "Rcpp",
+        "S4Vectors",
+        "assorthead",
+        "cluster",
+        "igraph",
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "e16719dc9084d3658a5caf4bebb3c75c"
+    },
     "boot": {
       "Package": "boot",
       "Version": "1.3-31",
@@ -1506,6 +1526,22 @@
         "vctrs"
       ],
       "Hash": "54ed3ea01b11e81a86544faaecfef8e2"
+    },
+    "edgeR": {
+      "Package": "edgeR",
+      "Version": "4.4.1",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor 3.20",
+      "Requirements": [
+        "R",
+        "graphics",
+        "limma",
+        "locfit",
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "fee28529f0a4225ede46e0297d16ed0d"
     },
     "evaluate": {
       "Package": "evaluate",
@@ -2365,6 +2401,22 @@
       ],
       "Hash": "b8552d117e1b808b09a832f589b79035"
     },
+    "limma": {
+      "Package": "limma",
+      "Version": "3.62.1",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor 3.20",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "methods",
+        "statmod",
+        "stats",
+        "utils"
+      ],
+      "Hash": "a21abf11376d44c9fc51e1a31ecfefcf"
+    },
     "listenv": {
       "Package": "listenv",
       "Version": "0.9.1",
@@ -2399,6 +2451,17 @@
         "stats"
       ],
       "Hash": "2698cbc879db321e87ee97aa5c9abacd"
+    },
+    "locfit": {
+      "Package": "locfit",
+      "Version": "1.5-9.10",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "lattice"
+      ],
+      "Hash": "7d8e0ac914051ca0254332387d9b5816"
     },
     "lubridate": {
       "Package": "lubridate",
@@ -2521,6 +2584,16 @@
         "utils"
       ],
       "Hash": "ecd22cddb62a55ab0789509a54bd4af3"
+    },
+    "metapod": {
+      "Package": "metapod",
+      "Version": "1.14.0",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor 3.20",
+      "Requirements": [
+        "Rcpp"
+      ],
+      "Hash": "d34dd1818ce8e981a8a5b30796e883ef"
     },
     "mgcv": {
       "Package": "mgcv",
@@ -3305,6 +3378,39 @@
       ],
       "Hash": "d316e4abb854dd1677f7bd3ad08bc4e8"
     },
+    "scran": {
+      "Package": "scran",
+      "Version": "1.34.0",
+      "Source": "Bioconductor",
+      "Repository": "Bioconductor 3.20",
+      "Requirements": [
+        "BH",
+        "BiocGenerics",
+        "BiocParallel",
+        "BiocSingular",
+        "DelayedArray",
+        "Matrix",
+        "MatrixGenerics",
+        "Rcpp",
+        "S4Arrays",
+        "S4Vectors",
+        "SingleCellExperiment",
+        "SummarizedExperiment",
+        "beachmat",
+        "bluster",
+        "dqrng",
+        "edgeR",
+        "igraph",
+        "limma",
+        "metapod",
+        "methods",
+        "scuttle",
+        "statmod",
+        "stats",
+        "utils"
+      ],
+      "Hash": "043e2abb6aa396cea763028ec7479e79"
+    },
     "sctransform": {
       "Package": "sctransform",
       "Version": "0.4.1",
@@ -3643,6 +3749,18 @@
         "utils"
       ],
       "Hash": "39a7d631e6d974f2ac6002c14ac4d2c8"
+    },
+    "statmod": {
+      "Package": "statmod",
+      "Version": "1.5.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "graphics",
+        "stats"
+      ],
+      "Hash": "26e158d12052c279bdd4ba858b80fb1f"
     },
     "stringi": {
       "Package": "stringi",
