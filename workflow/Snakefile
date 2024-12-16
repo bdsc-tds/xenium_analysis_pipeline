@@ -209,5 +209,6 @@ rule all:
         lambda wildcards: get_input2all(
             wildcards,
             reports=True,
-            cleanup=False
+            cleanup=False,
+            cell_type_annotation=True
         )
