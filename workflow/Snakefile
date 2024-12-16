@@ -75,8 +75,12 @@ include: 'rules/cell_type_annotation.smk'
 #######################################
 
 def get_input2all(wildcards) -> list[str]:
+    ret: list[str] = []
+
     prefix: str = f'{config["output_path"]}/segmentation'
-    filenames: list[str] = ["output.rds", "labels.csv", "scores.csv"]
+
+    # Cell type annotation results
+    cell_type_annotation_filenames: list[str] = ["output.rds", "labels.csv", "scores.csv"]
 
     samples_by_disease: dict[str, list[str]] = get_dict_value(
         config,
@@ -96,14 +100,18 @@ def get_input2all(wildcards) -> list[str]:
         annotation_by_disease
     )
 
-    return [os.path.join(
-        prefix,
-        i,
-        j[0],
-        "cell_type_annotation",
-        j[1],
-        k
-    ) for i in SEGMENTATION_ID for j in samples_annotation for k in filenames]
+    ret.extend(
+        [os.path.join(
+            prefix,
+            i,
+            j[0],
+            "cell_type_annotation",
+            j[1],
+            k
+        ) for i in SEGMENTATION_ID for j in samples_annotation for k in cell_type_annotation_filenames]
+    )
+
+    return ret
 
 
 #######################################
