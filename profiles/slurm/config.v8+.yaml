@@ -9,13 +9,7 @@ default-resources:
   runtime: 1440
 
 set-resources:
-  changeParquetCompressionType:
-    mem_mb: max(input.size_mb * 10, 20480)
   runBaysor:
     runtime: 4320
-  adjustBaysorResults:
-    mem_mb: max(input.size_mb * 10, 2048)
   runProseg:
     runtime: 4320
-  runProseg2Baysor:
-    mem_mb: max(input.size_mb * 10, 2048)
