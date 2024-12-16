@@ -1,4 +1,29 @@
 #######################################
+#              Functions              #
+#######################################
+
+def get_class_level4runReferenceBasedRCTD(wildcards) -> str:
+    current_level: str = extract_layers_from_experiments(wildcards.annotation_id, [3])[0]
+    available_levels: list[str] = get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+            cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_LEVELS_NAME,
+            extract_layers_from_experiments(wildcards.sample_id, [0])[0],
+            extract_layers_from_experiments(wildcards.annotation_id, [0, 1])[0]
+        )
+    
+    print(available_levels)
+
+    try:
+        current_level_idx: int = available_levels.index(current_level)
+    except ValueError:
+        raise RuntimeError(f"Error! Cannot find {current_level} in [{",".join(available_levels)}].")
+    
+    return available_levels[0] if current_level_idx == 0 else available_levels[current_level_idx - 1]
+
+
+#######################################
 #                Rules                #
 #######################################
 
@@ -12,7 +37,7 @@ rule runReferenceBasedRCTD:
       protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/scores.csv')
     params:
       annotation_id=lambda wildcards: wildcards.annotation_id,
-      #class_level = "Level2", #TODO: think how to provide class_level (Level{min(i-1, 1)}) for Level{i}. Extract levels hierarchi from experiments.yml?              
+      class_level=get_class_level4runReferenceBasedRCTD,
       ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
       xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
       REF_MIN_UMI=cac.REF_MIN_UMI,
