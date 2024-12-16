@@ -74,6 +74,7 @@ cell_type_annotation:
       - cluster
 
     rctd:
+      _threads: 20
       _other_options:
         - "--UMI_min_sigma 100" # low UMI in single-cell mode
         - "--UMI_min_sigma 300" # higher UMI in cluster mode
