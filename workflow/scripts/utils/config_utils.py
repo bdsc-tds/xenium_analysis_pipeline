@@ -529,8 +529,9 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
 
 def _process_cell_type_annotation(
     data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
-) -> tuple[dict[str, dict[str, str]], dict[str, list[str]]]:
+) -> tuple[dict[str, dict[str, str]], dict[str, dict[str, str]], dict[str, list[str]]]:
     paths: dict[str, dict[str, str]] = {}
+    levels: dict[str, dict[str, str]] = {}
     wildcards: dict[str, list[str]] = {}
 
     for k_1, v_1 in data_from_experiments.items():
@@ -549,6 +550,12 @@ def _process_cell_type_annotation(
                 paths[k_1] = {}
             assert k_2 not in paths[k_1]
             paths[k_1][k_2] = v_2["path"]
+
+            # Collect levels for reference.
+            if k_1 not in levels:
+                levels[k_1] = {}
+            assert k_2 not in levels[k_1]
+            levels[k_1][k_2] = v_2["levels"]
 
             # Generate wildcards.
             approach: str = extract_layers_from_experiments(k_2, 0)[0]
@@ -594,7 +601,7 @@ def _process_cell_type_annotation(
 
             set_dict_value(data_from_config, k_1, k_2, value=updated_method)
 
-    return paths, wildcards
+    return paths, levels, wildcards
 
 
 def process_config(
@@ -664,13 +671,22 @@ def process_config(
     set_dict_value(
         data,
         "experiments",
-        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILE_NAME,
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILES_NAME,
         value=_cell_type_annotation[0],
+    )
+
+    set_dict_value(
+        data,
+        "experiments",
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_LEVELS_NAME,
+        value=_cell_type_annotation[1],
     )
 
     set_dict_value(
         data,
         cc.WILDCARDS_NAME,
         cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-        value=_cell_type_annotation[1],
+        value=_cell_type_annotation[2],
     )
