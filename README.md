@@ -24,7 +24,7 @@ We use multiple singularity containers for different methods and / or environmen
 
 #### R
 
-The R version we use for this workflow is 4.4.1, and [renv](https://rstudio.github.io/renv/index.html) is used to track specific versions of packages. Please find files related to renv in `reproducibility/r/metadata`, and use `r.def` in `reproducibility/r` to build the corresponding container:
+The R version we use for this workflow is 4.4.2, and [renv](https://rstudio.github.io/renv/index.html) is used to track specific versions of packages. Please find files related to renv in `reproducibility/r/metadata`, and use `r.def` in `reproducibility/r` to build the corresponding container:
 
 ```bash
 # the current working directory is the root of this repo
