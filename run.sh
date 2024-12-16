@@ -33,12 +33,12 @@ SINGULARITY_BIND_DIRS=(  )
 # Help message.
 help()
 {
-    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULES ] [ -U | --until RULES ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -n,--dry-run: dry run.
-        -R,--forcerun RULES: force the re-execution or creation of the given rules or files.
-        -U,--until RULES: runs the pipeline until it finishes the specified rules or generated the files.
+        -R,--forcerun RULE: force the re-execution or creation of the given rule or file. Repeat this option multile times for multiple rules or files.
+        -U,--until RULE: runs the pipeline until it finishes the specified rule or generated the file. Repeat this option multile times for multiple rules or files.
         --dag OUTPUT: draw dag and save to OUTPUT.pdf.
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
@@ -133,23 +133,23 @@ do
             ;;
 
         -R | --forcerun)
-            FORCE_RUN_OPT=(--forcerun "$2")
-
-            if [ ${#FORCE_RUN_OPT[@]} -eq 1 ]; then
+            if [ -z "$2" ]; then
                 echo "Empty value for -R,--forcerun."
                 help 1
             fi
+
+            FORCE_RUN_OPT=("${FORCE_RUN_OPT[@]}" "$2")
 
             shift 2
             ;;
 
         -U | --until)
-            UNTIL_OPT=(--until "$2")
-
-            if [ ${#UNTIL_OPT[@]} -eq 1 ]; then
+            if [ -z "$2" ]; then
                 echo "Empty value for -U,--until."
                 help 1
             fi
+
+            UNTIL_OPT=("${UNTIL_OPT[@]}" "$2")
 
             shift 2
             ;;
@@ -234,13 +234,13 @@ fi
 # Force run rules.
 # Priority: 3
 if [[ -n "${FORCE_RUN_OPT[*]}" ]]; then
-    COMPLETE_CMD=("${COMPLETE_CMD[@]}" "${FORCE_RUN_OPT[@]}")
+    COMPLETE_CMD=("${COMPLETE_CMD[@]}" --forcerun "${FORCE_RUN_OPT[@]}")
 fi
 
 # Stop after rules.
 # Priority: 3
 if [[ -n "${UNTIL_OPT[*]}" ]]; then
-    COMPLETE_CMD=("${COMPLETE_CMD[@]}" "${UNTIL_OPT[@]}")
+    COMPLETE_CMD=("${COMPLETE_CMD[@]}" --until "${UNTIL_OPT[@]}")
 fi
 
 if [ $VERBOSE -eq 1 ]; then
