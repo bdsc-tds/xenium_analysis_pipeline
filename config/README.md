@@ -59,20 +59,33 @@ Note that if customised gene panels are used, the results from 10X xeniumranger 
 
 ## Segmentation (key: `segmentation`)
 
-This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x`, `baysor`, `proseg`, and `segger`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
+This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x_mm`, `10x`, `baysor`, `proseg`, and `segger`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
 
-1. `10x`
-   10X Xenium Ranger is used for segmentation. Users can specify some options of the method using the following keys (for the meaning for each option please refer to the official documentation):
+1. `10x_mm`
+   10X Xenium Ranger's multimodal cell segmentation algorithm is used, where options `--boundary-stain` and `--interior-stain` are selected automatically based on present stain data. This method should only be activated when the boundary and interior stain signals are available in the data.
 
-   - `expansion-distance`: Either an integer or a list of integers. Each value is treated as an independent segmentation method, which is named as "10x\_{value}um".
+   Users can specify some options of the method using the following keys (for the meaning for each option please refer to the official documentation):
+
+   - `expansion-distance`: Either an integer or a list of integers. Each value is treated as an independent segmentation method, which is named as "10x_mm\_\_{value}um".
 
    - `localcores`: The maximum number of threads to use. Either an integer or a list of integers. In the former case, it will be broadcasted into a list if the value of `expansion-distance` is a list.
 
    - `localmem`: The maximum amount of memory (in GB) to use. Similar to `localcores`.
 
-   - `_other_options`: For options other than those above, in a form similar to: "--option_1 value_1 --option_2 value_2".
+   - `_other_options`: For options other than those above, in a form similar to: "--option_1 value_1 --option_2 value_2". Note that options `--boundary-stain` and `--interior-stain` provided by the user here will be filtered out.
 
-2. `baysor`
+2. `10x`
+   10X Xenium Ranger's cell segmentation algorithm is used, where both `--boundary-stain` and `--interior-stain` are disabled, so only DAPI signal is used.
+
+   - `expansion-distance`: Similar to above. Each value is treated as an independent segmentation method, which is named as "10x\_{value}um".
+
+   - `localcores`: Similar to above.
+
+   - `localmem`: Similar to above.
+
+   - `_other_options`: Similar to above.
+
+3. `baysor`
    [Baysor (v0.7.0+)](https://github.com/kharchenkolab/Baysor) is used for segmentation. Users can specify some options of the method using the following keys:
 
    - `_config`: The path, either absolute or relative, to the configuration file in TOML format for Baysor. If a relative path is given, it must be relative to the current working directory. By default the recommended configuration (stored in `workflow/configs/baysor_xenium.toml`) by developers of Baysor is used, assuming the current working directory is the root of this repo.
@@ -83,7 +96,7 @@ This section specifies with key `methods` a number of methods that could be used
 
    - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
 
-3. `proseg`
+4. `proseg`
    [Proseg (v1.1.8+)](https://github.com/dcjones/proseg) is used for segmentation. Users can specify some options of the method using the following keys:
 
    - `_threads`: The maximum number of threads to use.
