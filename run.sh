@@ -25,6 +25,9 @@ CLUSTER_PROFILE=profiles/slurm
 # Inexistent local directories will be filtered out.
 SINGULARITY_BIND_DIRS=(  )
 
+# Temporary folder for Snakemake.
+XDG_CACHE_HOME=
+
 
 ###############################
 #         DO NOT EDIT         #
