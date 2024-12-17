@@ -195,6 +195,11 @@ do
     esac
 done
 
+# Set Snakemake runtime temporary directory
+if [ -n "$XDG_CACHE_HOME" ]; then
+    export XDG_CACHE_HOME="$XDG_CACHE_HOME"
+fi
+
 # Draw dag and save to disk.
 # Priority: 1 (highest; other options will be ommitted)
 if [[ -v DAG_OPT && -n $DAG_OPT ]]; then
