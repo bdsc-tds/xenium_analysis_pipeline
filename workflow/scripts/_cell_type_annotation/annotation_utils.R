@@ -97,6 +97,8 @@ generate_reference_obj <- function(
     message(sprintf("The following cell types were removed: %s", paste(setdiff(orig_cell_type, unique(chrom[[annotation_level]] %>% pull())), collapse = ", ")))
   }
   
+  all_cell_types <- as.factor(chrom@meta.data %>% pull(annotation_level)) %>% levels()
+  
   # Subset reference data to panel genes
   chrom <- subset(chrom, features = rownames(chrom)[rownames(chrom) %in% query_features])
   
@@ -110,6 +112,11 @@ generate_reference_obj <- function(
   keep_cell_types <- names(which(summary(ref_labels) >= CELL_MIN_INSTANCE))
   ref_labels <- ref_labels[ref_labels %in% keep_cell_types] %>% droplevels()
   chrom <- subset(chrom, cells = names(ref_labels))
+  
+  if(length(all_cell_types) != length(keep_cell_types)){
+    message(sprintf("Cell types %s were filtered out from the reference due to low abundance and/or low profile coverage.", 
+                    paste(setdiff(all_cell_types, keep_cell_types), collapse = ",")))
+  }
   
   return(chrom)
 }
@@ -152,8 +159,14 @@ generate_class_df <- function(
       # Generate class_df with distinct annotation-class mappings
       class_df <- chrom@meta.data %>%
         select(all_of(c(annotation_level, class_level))) %>%
-        distinct() %>%
-        rename(class = all_of(class_level))
+        group_by(across(all_of(c(annotation_level, class_level)))) %>%
+        summarise(n = n(), .groups = "drop") %>%
+        group_by(across(all_of(annotation_level))) %>%
+        slice_max(n, with_ties = FALSE) %>% # Keep the most frequent class for each annotation_level
+        ungroup() %>%
+        rename(class = all_of(class_level)) %>%
+        select(-n) %>% # Remove the count column
+        as.data.frame() # Convert to base R data.frame
       
       # Set annotation_level as row names
       rownames(class_df) <- class_df[[annotation_level]]
