@@ -15,7 +15,7 @@ snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_heade
 UMI_min_sigma     <- snakemake@params[["UMI_min_sigma"]]
 class_level       <- snakemake@params[["class_level"]] # optional, should be NULL if not provided
 cores             <- snakemake@params[["cores"]]
-cell_min_instance <- snakemake@params[["cell_min_instance"]]
+CELL_MIN_INSTANCE <- snakemake@params[["cell_min_instance"]]
 
 ###### end of snakemake params  ###### 
 
@@ -61,7 +61,7 @@ RCTD <- create.RCTD(
   counts_MIN = XE_MIN_counts, #10
   UMI_min_sigma = UMI_min_sigma, # 100, but 300 by default
   max_cores = cores,
-  CELL_MIN_INSTANCE = cell_min_instance,
+  CELL_MIN_INSTANCE = CELL_MIN_INSTANCE,
   class_df = class_df
 )
 
