@@ -10,10 +10,16 @@ diseases_1:
         levels:
           -
 
+        # Minimum number of cells required per cell type. Can be decreased for smaller references.
+        cell_min_instance: 25
+
       external_reference:
         path: /path/to/reference
         levels:
           -
+
+        # Minimum number of cells required per cell type. Can be decreased for smaller references.
+        cell_min_instance: 25
 
     # marker_based: # placeholder
 

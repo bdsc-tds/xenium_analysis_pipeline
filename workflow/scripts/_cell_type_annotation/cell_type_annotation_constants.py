@@ -19,24 +19,3 @@ REF_MIN_UMI: int = (
 REF_MAX_UMI: int = (
     2000  # low, given the small number of counts in scRNA-seq data when restricted to ~300 plex xenium panel.
 )
-
-# RCTD-specific constants
-UMI_min_sigma: int = (
-    100  # min UMI in xenium cells to consider cell for sigma extimation (sigma of  Log-Poisson distribution) #TODO: replace with one from `config -> ... rctd -> mode -> other_options`
-)
-CELL_MIN_INSTANCE: int = (
-    25  # minimum number of cells required per cell type. Can be decreased for smaller references
-)
-
-# SingleR-specific params
-singleR_genes: str = "de"  # use differentially expressed genes
-singleR_de_method: str = "t"  # test to use for DEA
-singleR_aggr_ref: bool = True
-singleR_aggr_args: dict = {"rank": 50, "power": 0.7}
-
-# XGBoost-specific params
-xgb_nrounds: int = 1000
-xgb_eta: float = 0.3
-
-# Seurat_Transfer-specific params
-dims: list = list(range(1, 51))

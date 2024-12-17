@@ -1,7 +1,7 @@
 # header.R
 # Shared parameters for reference-based cell type annotation
 # Loads Snakemake inputs and parameters for downstream scripts
-source(snakemake@source("../../../scripts/_celltype_annotation/annotation_utils.R"))
+snakemake@source("../../../scripts/_cell_type_annotation/annotation_utils.R")
 
 ###### snakemake params  ###### 
 
