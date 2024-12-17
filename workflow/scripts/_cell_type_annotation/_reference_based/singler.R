@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 # Annotate Xenium from Chromium using SingleR
 
 library(Seurat)
@@ -5,7 +9,7 @@ library(dplyr)
 library(SingleR)
 
 # Load common reference-based parameters
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_header.R")) 
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
 
 
 # Annotation method specific, *should not be modified*, so not in snakemake
@@ -13,19 +17,21 @@ ref_layer  <- 'data'
 test_layer <- 'counts' 
 
 # Load reference and query data
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_load_data.R")) # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_data.R") # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
 
 ## Make sure chrom data are log-normalized
 DefaultAssay(chrom) <- ref_assay
 chrom               <- NormalizeData(chrom)
 
+CELL_MIN_INSTANCE <- snakemake@params[["cell_min_instance"]]
+
 # Generate reference object
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_generate_reference_obj.R")) 
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
 
 ref_labels <- chrom@meta.data %>% pull(annotation_level)
 
 # SingleR parameters (ideally, should be provided with `_other_options` from the experiment.yml or config.yml)
-selected_genes <- snakemake@params[["singleR_genes"]] %||% "de"
+selected_genes <- snakemake@params[["genes"]] %||% "de"
 de_method <- snakemake@params[["de_method"]] %||% "t"
 de_n <- snakemake@params[["de_n"]] %||% 25
 aggr_ref <- snakemake@params[["aggr_ref"]] %||% TRUE
