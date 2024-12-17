@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 # Annotate Xenium from Chromium using XGBoost
 
 library(Seurat)
@@ -5,18 +9,20 @@ library(dplyr)
 library(xgboost)
 
 # Load common reference-based parameters
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_header.R")) 
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_xgboost_classifications.R"))
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_xgboost_classifications.R")
 
 # Annotation method specific, *should not be modified*, so not in snakemake
 ref_layer  <- 'counts' 
 test_layer <- 'counts' 
 
 # Load reference and query data
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_load_data.R")) # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_data.R") # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
+
+CELL_MIN_INSTANCE <- snakemake@params[["cell_min_instance"]]
 
 # Generate reference object
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_generate_reference_obj.R")) 
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
 
 ref_labels <- chrom@meta.data %>% pull(annotation_level) %>% as.vector()
 
