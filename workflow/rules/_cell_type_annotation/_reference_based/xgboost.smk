@@ -47,6 +47,8 @@ rule runReferenceBasedXGBoost:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/xgboost/.+"
+    resources:
+        mem_mb=lambda wildcards, input: max(input.size_mb * 10, 10240)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedXGBoost.log'
     container:
