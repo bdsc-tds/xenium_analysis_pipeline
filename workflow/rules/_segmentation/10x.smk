@@ -83,7 +83,7 @@ rule run10x:
             replace_none=""
         )
     wildcard_constraints:
-        segmentation_id=r"10x_\d+um"
+        segmentation_id=r"10x_\w*?_?\d+?um"
     threads:
         lambda wildcards: get_dict_value(
             config,
