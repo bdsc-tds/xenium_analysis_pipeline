@@ -28,7 +28,6 @@ run_regressions_classification_fixed_features <- function(
     num_class = NULL,
     ...
 ) {
- 
   res <- list()
   if(is.null(num_class))
     num_class <- length(unique(Y))

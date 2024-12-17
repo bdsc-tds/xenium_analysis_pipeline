@@ -124,6 +124,9 @@ cell_type_annotation:
       _other_options:
 
     xgboost:
+      nrounds: 1000
+      eta: 0.3
+
       _other_options:
 
   # marker_based: # placeholder
