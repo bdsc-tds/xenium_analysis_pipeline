@@ -115,6 +115,9 @@ cell_type_annotation:
       _other_options:
 
     seurat:
+      min_dim: 1
+      max_dim: 50
+
       _other_options:
 
     tangram:
