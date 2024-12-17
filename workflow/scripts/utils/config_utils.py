@@ -467,13 +467,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         ),
         0,
         drop_layers=(1,),
-        val_func=lambda v: (
-            {
-                os.path.join(v[0], v[1]): {
-                    v[2]: str(v[3]) if isinstance(v[3], int) else v[3]
-                }
-            }
-        ),
+        val_func=lambda v: ({os.path.join(v[0], v[1]): {v[2]: v[3]}}),
         key_val_func=None,
         vals_func=lambda x: _merge_dicts(x, exist_ok=True),
     )
@@ -529,9 +523,15 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
 
 def _process_cell_type_annotation(
     data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
-) -> tuple[dict[str, dict[str, str]], dict[str, dict[str, str]], dict[str, list[str]]]:
+) -> tuple[
+    dict[str, dict[str, str]],
+    dict[str, dict[str, str]],
+    dict[str, dict[str, str]],
+    dict[str, list[str]],
+]:
     paths: dict[str, dict[str, str]] = {}
     levels: dict[str, dict[str, str]] = {}
+    cell_min_instances: dict[str, dict[str, str]] = {}
     wildcards: dict[str, list[str]] = {}
 
     for k_1, v_1 in data_from_experiments.items():
@@ -540,7 +540,11 @@ def _process_cell_type_annotation(
                 del data_from_experiments[k_1][k_2]
                 continue
 
-            if "levels" not in v_2 or v_2["levels"] is None or len(v_2["levels"]) == 0:
+            if (
+                "levels" not in v_2
+                or v_2["levels"] is None
+                or (isinstance(v_2["levels"], list) and len(v_2["levels"]) == 0)
+            ):
                 raise RuntimeError(
                     f"Error! Entry 'levels' of {k_1}'s {k_2} should be specified."
                 )
@@ -557,13 +561,20 @@ def _process_cell_type_annotation(
             assert k_2 not in levels[k_1]
             levels[k_1][k_2] = v_2["levels"]
 
+            # Collect cell min instances for reference.
+            if k_1 not in cell_min_instances:
+                cell_min_instances[k_1] = {}
+            assert k_2 not in cell_min_instances[k_1]
+            cell_min_instances[k_1][k_2] = v_2["cell_min_instance"]
+
             # Generate wildcards.
             approach: str = extract_layers_from_experiments(k_2, 0)[0]
 
             _wildcards = [
                 os.path.join(i[0], j, i[1], m)
                 for i in [
-                    [k_2, _v] for _v in _convert2list(v_2["levels"], match_length=False)
+                    [k_2, str(_v)]
+                    for _v in _convert2list(v_2["levels"], match_length=False)
                 ]
                 for j in data_from_config[approach]["methods"]
                 for m in data_from_config[approach]["modes"]
@@ -601,7 +612,7 @@ def _process_cell_type_annotation(
 
             set_dict_value(data_from_config, k_1, k_2, value=updated_method)
 
-    return paths, levels, wildcards
+    return paths, levels, cell_min_instances, wildcards
 
 
 def process_config(
@@ -686,7 +697,15 @@ def process_config(
 
     set_dict_value(
         data,
+        "experiments",
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_CELL_MIN_INSTANCES_NAME,
+        value=_cell_type_annotation[2],
+    )
+
+    set_dict_value(
+        data,
         cc.WILDCARDS_NAME,
         cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-        value=_cell_type_annotation[2],
+        value=_cell_type_annotation[3],
     )

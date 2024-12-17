@@ -29,7 +29,7 @@ def get_path2reference4reference_based_annotation(wildcards) -> str:
         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILES_NAME,
         extract_layers_from_experiments(wildcards.sample_id, [0])[0],
-        extract_layers_from_experiments(wildcards.annotation_id, [0, 1])[0]
+        extract_layers_from_experiments(wildcards.annotation_id, [0, 1])[0],
     )
 
 
