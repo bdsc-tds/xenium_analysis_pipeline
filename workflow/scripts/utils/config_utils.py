@@ -492,9 +492,9 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
         raise RuntimeError("Error! At least one segmentation method should be used.")
 
     for m in _methods:
-        if m == "10x":
+        if m in ["10x_mm", "10x"]:
             exp_vals: list[int] = _convert2list(
-                get_dict_value(data, "10x", "expansion-distance"), match_length=False
+                get_dict_value(data, m, "expansion-distance"), match_length=False
             )
 
             if len(exp_vals) == 0:
@@ -502,15 +502,56 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
                     "Error! At least one value for 'expansion-distance' in the config file must be specified."
                 )
 
-            methods_10x = ["_".join(["10x", "".join([str(i), "um"])]) for i in exp_vals]
-            methods.extend(methods_10x)
+            methods_ext = ["_".join([m, "".join([str(i), "um"])]) for i in exp_vals]
+            methods.extend(methods_ext)
 
-            tmp = {
-                k: _convert2list(v, len(exp_vals))
-                for k, v in get_dict_value(data, "10x").items()
-            }
+            tmp = {}
+            for k, v in get_dict_value(data, m).items():
+                assert k not in tmp
 
-            for idx, val in enumerate(methods_10x):
+                _v = _convert2list(v, len(exp_vals), match_length=len(exp_vals) != 1)
+
+                if len(exp_vals) != len(_v):
+                    raise ValueError(
+                        f"Error! Extra elements specified for segmentation method {m}: {k}. Expect {len(exp_vals)} elements, while {len(_v)} provided."
+                    )
+
+                if k in ["boundary-stain", "interior-stain"]:
+                    continue
+
+                if k == "_other_options":
+                    _tmp: list[str] = []
+                    for __v in _v:
+                        __tmp: list[str] = []
+                        prev_kept: bool = False
+
+                        for elem in __v.split():
+                            if elem.startswith("--"):
+                                if elem in ["--boundary-stain", "--interior-stain"]:
+                                    prev_kept = False
+                                else:
+                                    prev_kept = True
+                                    __tmp.append(elem)
+                            elif prev_kept:
+                                __tmp.append(elem)
+
+                        if m == "10x":
+                            __tmp.extend(
+                                [
+                                    "--boundary-stain",
+                                    "disable",
+                                    "--interior-stain",
+                                    "disable",
+                                ]
+                            )
+
+                        _tmp.append(" ".join(__tmp))
+
+                    tmp[k] = _tmp
+                else:
+                    tmp[k] = _v
+
+            for idx, val in enumerate(methods_ext):
                 ret[val] = {}
 
                 for k, v in tmp.items():

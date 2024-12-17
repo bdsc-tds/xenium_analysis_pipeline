@@ -15,9 +15,18 @@ reprocess:
 
 segmentation:
   methods:
+    - 10x_mm
     - 10x
     - baysor
     - proseg
+
+  10x_mm:
+    expansion-distance:
+      - 5
+
+    localcores: 16
+    localmem: 128
+    _other_options:
 
   10x:
     expansion-distance:
