@@ -91,12 +91,27 @@ cell_type_annotation:
       - cluster
 
     rctd:
+      # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
+      UMI_min_sigma:
+        - 100 # low UMI in single-cell mode
+        - 300 # higher UMI in cluster mode
+
       _threads: 20
       _other_options:
-        - "--UMI_min_sigma 100" # low UMI in single-cell mode
-        - "--UMI_min_sigma 300" # higher UMI in cluster mode
 
     singler:
+      # Use differentially expressed genes.
+      genes: "de"
+
+      # Test to use for DEA.
+      de_method: "t"
+
+      aggr_ref: True
+
+      aggr_args:
+        rank: 50
+        power: 0.7
+
       _other_options:
 
     seurat:

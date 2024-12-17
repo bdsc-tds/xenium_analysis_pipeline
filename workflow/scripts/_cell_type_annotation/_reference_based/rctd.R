@@ -1,3 +1,7 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 # Annotate Xenium from Chromium using RCTD
 
 library(Seurat)
@@ -5,11 +9,13 @@ library(dplyr)
 library(spacexr)
 
 # Load common reference-based parameters
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_header.R")) 
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
 
 # parameters specific for RCTD and panel (or disease)
-UMI_min_sigma     <- snakemake@params[["UMI_min_sigma"]] # only used in RCTD (should be passed to snakemake via _other_options?)
+UMI_min_sigma     <- snakemake@params[["UMI_min_sigma"]]
 class_level       <- snakemake@params[["class_level"]] # optional, should be NULL if not provided
+cores             <- snakemake@params[["cores"]]
+cell_min_instance <- snakemake@params[["cell_min_instance"]]
 
 ###### end of snakemake params  ###### 
 
@@ -19,10 +25,10 @@ ref_layer  <- 'counts'
 test_layer <- 'counts' 
 
 # Load reference and query data
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_load_data.R")) # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_data.R") # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
 
 # Generate reference object
-source(snakemake@source("../../../scripts/_celltype_annotation/_reference_based/_generate_reference_obj.R")) 
+snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
 
 # Create RCTD-specific reference object 
 ref_labels <-  chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor()
@@ -49,13 +55,13 @@ class_df <- generate_class_df(
 # Annotate with RCTD
 # run RCTD with many cores #TODO: make it running in chuncks for large samples and gathering results afterwards
 RCTD <- create.RCTD(
-  test.obj, 
-  ref.obj, 
+  test.obj,
+  ref.obj,
   UMI_min = XE_MIN_UMI, #10
   counts_MIN = XE_MIN_counts, #10
-  UMI_min_sigma = UMI_min_sigma, #100, but 300 by default
-  max_cores = parallel::detectCores(),
-  CELL_MIN_INSTANCE = CELL_MIN_INSTANCE,
+  UMI_min_sigma = UMI_min_sigma, # 100, but 300 by default
+  max_cores = cores,
+  CELL_MIN_INSTANCE = cell_min_instance,
   class_df = class_df
 )
 

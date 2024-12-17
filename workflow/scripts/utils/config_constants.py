@@ -40,3 +40,5 @@ EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"
 EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILES_NAME: str = "paths"
 # Child of EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME (third level); for resolution levels for cell type annotation on disease level.
 EXPERIMENTS_CELL_TYPE_ANNOTATION_LEVELS_NAME: str = "levels"
+# Child of EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME (third level); for the minimum number of cells required per cell type for cell type annotation on disease level.
+EXPERIMENTS_CELL_TYPE_ANNOTATION_CELL_MIN_INSTANCES_NAME: str = "cell_min_instances"
