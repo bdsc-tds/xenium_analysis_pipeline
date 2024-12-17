@@ -520,8 +520,13 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
                     continue
 
                 if k == "_other_options":
-                    _tmp: list[str] = []
+                    _tmp: list[str | None] = []
+
                     for __v in _v:
+                        if __v is None:
+                            _tmp.append(None)
+                            continue
+
                         __tmp: list[str] = []
                         prev_kept: bool = False
 

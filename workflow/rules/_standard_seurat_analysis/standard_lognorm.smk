@@ -9,6 +9,8 @@ rule runStandardLogNorm:
         temp(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognormed_seurat.rds')
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY
+    resources:
+        mem_mb=lambda wildcards, input: max(input.size_mb * 50, 10240)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardLogNorm.log'
     container:
