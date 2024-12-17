@@ -12,7 +12,7 @@ rule runStandardSctransformDimRedClust:
             config,
             "standard_seurat_analysis",
             "_future_globals_maxSize",
-            replace_none=1
+            replace_none=1,
         ) * 10**9,
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         n_dims=lambda wildcards: get_dict_value(
@@ -20,15 +20,17 @@ rule runStandardSctransformDimRedClust:
             "standard_seurat_analysis",
             "dim_reduction",
             "n_dims",
-            replace_none=50
+            replace_none=50,
         ),
         resolution=lambda wildcards: get_dict_value(
             config,
             "standard_seurat_analysis",
             "clustering",
             "resolution",
-            replace_none=0.8
+            replace_none=0.8,
         )
+    resources:
+        mem_mb=lambda wildcards, input: max(input.size_mb * 150, 20480)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardSctransformDimRedClust.log'
     container:
