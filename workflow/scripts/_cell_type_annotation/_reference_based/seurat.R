@@ -7,6 +7,8 @@ sink(log, type = "message")
 library(Seurat)
 library(dplyr)
 
+options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
+
 # Load common reference-based parameters
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
 
