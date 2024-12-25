@@ -13,3 +13,5 @@ set-resources:
     runtime: 4320
   runProseg:
     runtime: 4320
+  runReferenceBasedRCTD:
+    runtime: 4320
