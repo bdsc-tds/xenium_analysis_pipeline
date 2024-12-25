@@ -11,6 +11,12 @@ rule runReferenceBasedSeurat:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/labels.csv'),
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/scores.csv')
     params:
+        future_globals_maxSize=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "_future_globals_maxSize",
+            replace_none=1,
+        ) * 10**9,
         annotation_id=lambda wildcards: wildcards.annotation_id,
         ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
         xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
