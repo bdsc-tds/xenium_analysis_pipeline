@@ -117,9 +117,8 @@ cell_type_annotation:
 
       aggr_ref: True
 
-      aggr_args:
-        rank: 50
-        power: 0.7
+      aggr_args_rank: 50
+      aggr_args_power: 0.7
 
       _other_options:
 
