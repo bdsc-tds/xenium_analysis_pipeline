@@ -54,22 +54,30 @@ rule runReferenceBasedSingleR:
             "aggr_ref",
             replace_none=True,
         ),
-        aggr_args=lambda wildcards: get_dict_value(
-            config,
-            "cell_type_annotation",
-            extract_layers_from_experiments(wildcards.annotation_id, [0])[0],
-            "singler",
-            extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
-            "aggr_args",
-            replace_none={
-                "rank": 50,
-                "power": 0.7
-            },
-        )
+        aggr_args=lambda wildcards: {
+            "rank": get_dict_value(
+                config,
+                "cell_type_annotation",
+                extract_layers_from_experiments(wildcards.annotation_id, [0])[0],
+                "singler",
+                extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
+                "aggr_args_rank",
+                replace_none=50,
+            ),
+            "power": get_dict_value(
+                config,
+                "cell_type_annotation",
+                extract_layers_from_experiments(wildcards.annotation_id, [0])[0],
+                "singler",
+                extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
+                "aggr_args_power",
+                replace_none=0.7,
+            ),
+        }
     wildcard_constraints:
         annotation_id=r"reference_based/.+/singler/.+"
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 20, 10240)
+        mem_mb=lambda wildcards, input: max(input.size_mb * 30, 10240)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedSingleR.log'
     container:
