@@ -3,26 +3,7 @@
 #######################################
 
 def get_input2_or_params4runProseg(wildcards, for_input: bool = True) -> str:
-    gene_panel_file: str | None = get_gene_panel_file(wildcards.sample_id, config)
-
-    with open(checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0], "r", encoding="utf-8") as fh:
-        versions: dict[str, Any] = json.load(fh)
-    
-    matched: bool = get_dict_value(
-        versions,
-        "match",
-        str(get_dict_value(
-            config,
-            "reprocess",
-            "level"
-        ))
-    )
-
-    use_raw_data: bool = True if gene_panel_file is None or matched else False
-    if use_raw_data:
-        ret: str = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{wildcards.sample_id}'
-    else:
-        ret = f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/results'
+    use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
 
     if for_input:
         return ret

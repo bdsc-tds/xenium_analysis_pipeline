@@ -17,12 +17,12 @@ def get_gene_panel4reprocessRawData(wildcards) -> str:
 
     return ret
 
-def get_input2_or_params4changeParquetCompressionType(wildcards, for_input: bool = True) -> str:
-    gene_panel_file: str | None = get_gene_panel_file(wildcards.sample_id, config)
+def get_raw_data_dir(sample_id) -> tuple[bool, str]:
+    gene_panel_file: str | None = get_gene_panel_file(sample_id, config)
 
-    with open(checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0], "r", encoding="utf-8") as fh:
+    with open(checkpoints.check10xVersions.get(sample_id=sample_id).output[0], "r", encoding="utf-8") as fh:
         versions: dict[str, Any] = json.load(fh)
-    
+
     matched: bool = get_dict_value(
         versions,
         "match",
@@ -35,9 +35,14 @@ def get_input2_or_params4changeParquetCompressionType(wildcards, for_input: bool
 
     use_raw_data: bool = True if gene_panel_file is None or matched else False
     if use_raw_data:
-        ret: str = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{wildcards.sample_id}'
+        ret: str = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{sample_id}'
     else:
-        ret = f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/results'
+        ret = f'{config["output_path"]}/reprocessed/{sample_id}/results'
+
+    return use_raw_data, ret
+
+def get_input2_or_params4changeParquetCompressionType(wildcards, for_input: bool = True) -> str:
+    use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
 
     if for_input:
         return ret
@@ -57,6 +62,25 @@ def get_input2_or_params4changeParquetCompressionType(wildcards, for_input: bool
         return_dir=False,
         check_exist=False
     )
+
+def get_auxiliary_10x_files(wildcards, input) -> list[str]:
+    ret: list[str] = []
+
+    dir_pats: str = r"XENIUM_RANGER_CS"
+    file_pats: str = r"^_.+|.+\.mri\.tgz"
+
+    for _, dirnames, filenames in os.walk(input):
+        for dir_name in dirnames:
+            if re.match(dir_pats, dir_name, re.IGNORECASE):
+                ret.append(dir_name)
+
+        for file_name in filenames:
+            if re.match(file_pats, file_name, re.IGNORECASE):
+                ret.append(file_name)
+
+        break
+
+    return ret
 
 
 #######################################
@@ -145,3 +169,19 @@ rule changeParquetCompressionType:
         "-t snappy "
         "-l {log} "
         "-o {output}"
+
+rule zipReprocessed10xAuxiliaryFiles:
+    input:
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/results'
+    output:
+        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar')
+    log:
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/zipReprocessed10xAuxiliaryFiles.log'
+    params:
+        abs_output=lambda wildcards: os.path.abspath(
+            f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar'
+        ),
+        filenames=get_auxiliary_10x_files
+    shell:
+        "cd {input} && "
+        "tar --remove-files -cf {params.abs_output} {params.filenames} &> {log}"
