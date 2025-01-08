@@ -69,7 +69,7 @@ def get_auxiliary_10x_files(wildcards, input) -> list[str]:
     dir_pats: str = r"XENIUM_RANGER_CS"
     file_pats: str = r"^_.+|.+\.mri\.tgz"
 
-    for _, dirnames, filenames in os.walk(input):
+    for _, dirnames, filenames in os.walk(input[0]):
         for dir_name in dirnames:
             if re.match(dir_pats, dir_name, re.IGNORECASE):
                 ret.append(dir_name)
@@ -170,16 +170,16 @@ rule changeParquetCompressionType:
         "-l {log} "
         "-o {output}"
 
-rule zipReprocessed10xAuxiliaryFiles:
+rule zipReprocessedAuxiliary10xFiles:
     input:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/results'
     output:
         protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar')
     log:
-        f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/zipReprocessed10xAuxiliaryFiles.log'
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/zipReprocessedAuxiliary10xFiles.log'
     params:
         abs_output=lambda wildcards: os.path.abspath(
-            f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar'
+            f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/results/_auxiliary_files.tar'
         ),
         filenames=get_auxiliary_10x_files
     shell:

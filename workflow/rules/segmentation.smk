@@ -11,13 +11,13 @@ include: '_segmentation/proseg.smk'
 #                Rules                #
 #######################################
 
-rule zipNormalised10xAuxiliaryFiles:
+rule zipNormalisedAuxiliary10xFiles:
     input:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/normalised_results'
     output:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/normalised_results/_auxiliary_files.tar')
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/zipNormalised10xAuxiliaryFiles.log'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/zipNormalisedAuxiliary10xFiles.log'
     params:
         abs_output=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/segmentation/{wildcards.segmentation_id}/{wildcards.sample_id}/normalised_results/_auxiliary_files.tar'
