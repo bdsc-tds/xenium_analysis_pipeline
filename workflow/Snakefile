@@ -62,9 +62,84 @@ include: 'rules/standard_seurat_analysis.smk'
 
 
 #######################################
+#              Functions              #
+#######################################
+
+def get_output4reports() -> list[str]:
+    prefix: str = f'{config["output_path"]}/segmentation'
+    ret: list[str] = []
+
+    ret.extend(
+        [
+            os.path.join(
+                prefix,
+                i,
+                j,
+                "reports",
+                "standard_seurat_analysis.html"
+            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+
+        ]
+    )
+
+    return ret
+
+def get_output4cleanup() -> list[str]:
+    ret: list[str] = []
+
+    # Get the path to the raw data, and save it if it is reprocessed.
+    for i in SAMPLE_ID:
+        use_raw_data, _ret = get_raw_data_dir(i)
+        if not use_raw_data:
+            ret.append(
+                os.path.join(
+                    _ret,
+                    "_auxiliary_files.tar"
+                )
+            )
+
+    # Get the path to the normalised results from all segmentation methods.
+    seg_prefix: str = f'{config["output_path"]}/segmentation'
+    ret.extend(
+        [
+            os.path.join(
+                seg_prefix,
+                i,
+                j,
+                "normalised_results",
+                "_auxiliary_files.tar"
+            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+
+        ]
+    )
+
+    return ret
+
+def get_input2all(
+    wildcards,
+    *,
+    reports: bool = True,
+    cleanup: bool = True
+) -> list[str]:
+    ret: list[str] = []
+
+    if reports:
+        ret.extend(get_output4reports())
+
+    if cleanup:
+        ret.extend(get_output4cleanup())
+    
+    return ret
+
+
+#######################################
 #                Rules                #
 #######################################
 
 rule all:
     input:
-        
+        lambda wildcards: get_input2all(
+            wildcards,
+            reports=True,
+            cleanup=True
+        )

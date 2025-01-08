@@ -34,14 +34,14 @@ def get_input2_or_params4normaliseBaysor(wildcards) -> dict[str, str]:
             "system_software_version",
             "0"
         )
-    
+
     if xr_version < 4:
         ret["segmentation"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation.csv'
         ret["polygons"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation_polygons_2d.json'
     else:
         ret["segmentation"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/raw_results/segmentation.csv'
         ret["polygons"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/raw_results/segmentation_polygons_2d.json'
-    
+
     return ret
 
 
