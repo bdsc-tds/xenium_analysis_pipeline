@@ -1,0 +1,85 @@
+BootStrap: docker
+From: condaforge/mambaforge:24.7.1-2
+Stage: conda
+
+BootStrap: docker
+From: mambaorg/micromamba:noble
+Stage: mamba
+
+%files from conda
+    /opt/conda /pkgs/conda
+
+%post
+    cd /opt
+
+# Put conda binaries to the right directory.
+    rm -rf conda
+    mv /pkgs/conda .
+    rm -rf /pkgs
+
+    cd /
+
+BootStrap: docker
+From: nvidia/cuda:12.1.0-runtime-ubuntu22.04
+Stage: main
+
+%setup
+    mkdir -p ${SINGULARITY_ROOTFS}/opt/_env
+
+%files from mamba
+    /opt/conda /opt
+    /usr/local/bin/_*.sh /usr/local/bin
+    /bin/micromamba /bin
+
+%files
+    segger_cuda.yml /opt/_env
+
+%environment
+    export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+%post
+# Set up build time environment variables, such as versions
+    export SEGGER_REPO=https://github.com/senbaikang/segger_dev.git
+    #https://github.com/EliHei2/segger_dev.git
+    export SEGGER_VERSION=b48485001c07edaf72c4950b7711c5139ecbf1b7
+
+# DNS
+    # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+    sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list
+
+# Force ipv4
+    echo 'Acquire::ForceIPv4 "true";' | tee /etc/apt/apt.conf.d/99force-ipv4
+
+# Set locale 
+    apt-get update
+    apt-get install -y locales gnupg-agent
+    sed -i '/^#.* en_.*.UTF-8 /s/^#//' /etc/locale.gen
+    locale-gen
+
+# Install essential packages
+    apt-get install -y --no-install-recommends software-properties-common dirmngr ca-certificates lsb-release build-essential
+
+# Configure tzdata to prevent asking for input
+    export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export DEBIAN_FRONTEND=noninteractive
+    export TZ="Europe/Zurich"
+
+# Install system packages
+    apt-get install -y git vim cmake wget curl
+
+# Create a new environment for Segger
+    mamba env create -q -y -f /opt/_env/segger_cuda.yml
+
+# Pull Segger from GitHub and install
+    cd /opt
+    git clone ${SEGGER_REPO}
+    cd segger_dev
+    git checkout ${SEGGER_VERSION}
+    
+    mamba run -n segger_cuda pip install -e "."
+
+    cd /
