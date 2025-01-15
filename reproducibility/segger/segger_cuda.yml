@@ -1,0 +1,37 @@
+name: segger_cuda
+channels:
+  - rapidsai
+  - pytorch
+  - nvidia
+  - pyg
+  - conda-forge
+dependencies:
+  - pytorch
+  - python=3.11
+  - dask-cuda=24.12.00
+  - jupyterlab=4.2.1
+  - numpy=1.26.4
+  - pandas=2.2.3
+  - scipy=1.14.1
+  - matplotlib-base=3.10.0
+  - seaborn=0.13.2
+  - tqdm=4.67.1
+  - scikit-learn=1.6.0
+  - anndata=0.10.9
+  - scanpy=1.10.3
+  - pytorch=2.1.2
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - pytorch-lightning=2.2.2
+  - pyg=2.5.2
+  - geopandas=1.0.1
+  - shapely=2.0.6
+  - zarr=2.18.4
+  - git
+  - pip
+  - pip:
+      - cupy-cuda12x==13.3.0
+      - cuvs-cu12==24.12.0
+      - faiss-gpu-cu12==1.9.0.0
+
