@@ -1,5 +1,6 @@
 from typing import Any
 import os
+import shutil
 import json
 include: "scripts/utils/config_utils.py"
 include: "scripts/utils/raw_data_utils.py"
@@ -21,6 +22,13 @@ process_config(
         )
     )
 )
+
+
+#######################################
+#             Local rules             #
+#######################################
+
+localrules: all, zipNormalisedAuxiliary10xFiles
 
 
 #######################################
@@ -99,19 +107,48 @@ def get_output4cleanup() -> list[str]:
             )
 
     # Get the path to the normalised results from all segmentation methods.
-    seg_prefix: str = f'{config["output_path"]}/segmentation'
-    ret.extend(
-        [
-            os.path.join(
-                seg_prefix,
-                i,
-                j,
-                "normalised_results",
-                "_auxiliary_files.tar"
-            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+    # seg_prefix: str = f'{config["output_path"]}/segmentation'
+    # ret.extend(
+    #     [
+    #         os.path.join(
+    #             seg_prefix,
+    #             i,
+    #             j,
+    #             "normalised_results",
+    #             "_auxiliary_files.tar"
+    #         ) for i in SEGMENTATION_ID for j in SAMPLE_ID
 
-        ]
-    )
+    #     ]
+    # )
+
+    # Clean up the Segger results.
+    if "segger" in SEGMENTATION_ID:
+
+        # Get the path to the preprocessed data from Segger.
+        segger_prefix: str = f'{config["output_path"]}/segmentation/segger'
+        ret.extend(
+            [
+                os.path.join(
+                    segger_prefix,
+                    i,
+                    "preprocessed_data",
+                    "tiles.tgz",
+                ) for i in SAMPLE_ID
+            ]
+        )
+
+        # Get path to the predicted results from Segger.
+        segger_predict_files: list[str] = ["segger_adata.h5ad", "segger_transcripts.parquet", "segmentation_log.json", "compressed_transcripts_df.parquet", "compressed_edge_index.parquet"]
+        ret.extend(
+            [
+                os.path.join(
+                    segger_prefix,
+                    i,
+                    "raw_results",
+                    j
+                ) for i in SAMPLE_ID for j in segger_predict_files
+            ]
+        )
 
     return ret
 
