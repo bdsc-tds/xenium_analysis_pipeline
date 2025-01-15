@@ -5,6 +5,7 @@
 **/.jupyter
 **/.condarc
 **/.keras
+**/.cupy
 
 **/__pycache__
 **/.RData
