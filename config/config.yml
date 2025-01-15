@@ -18,6 +18,7 @@ segmentation:
     - 10x
     - baysor
     - proseg
+    - segger
 
   10x:
     expansion-distance:
@@ -39,6 +40,21 @@ segmentation:
     _threads: 16
     _memory: 100
     _other_options:
+
+  segger:
+    preprocess:
+      tile_width: 200
+      tile_height: 200
+      _threads: 8
+      _other_options:
+
+    train:
+      accelerator: "cuda"
+      devices: 1
+      max_epochs: 200
+      batch_size: 4
+      _threads: 4
+      _other_options:
 
   _normalisation:
     _threads: 16
