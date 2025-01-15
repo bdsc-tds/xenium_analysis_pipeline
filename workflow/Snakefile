@@ -107,19 +107,19 @@ def get_output4cleanup() -> list[str]:
             )
 
     # Get the path to the normalised results from all segmentation methods.
-    # seg_prefix: str = f'{config["output_path"]}/segmentation'
-    # ret.extend(
-    #     [
-    #         os.path.join(
-    #             seg_prefix,
-    #             i,
-    #             j,
-    #             "normalised_results",
-    #             "_auxiliary_files.tar"
-    #         ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+    seg_prefix: str = f'{config["output_path"]}/segmentation'
+    ret.extend(
+        [
+            os.path.join(
+                seg_prefix,
+                i,
+                j,
+                "normalised_results",
+                "_auxiliary_files.tar"
+            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
 
-    #     ]
-    # )
+        ]
+    )
 
     # Clean up the Segger results.
     if "segger" in SEGMENTATION_ID:
