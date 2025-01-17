@@ -4,7 +4,7 @@
 
 rule runStandardSctransformDimRedClust:
     input:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognorm_seurat.rds'
+        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognormed_seurat.rds'
     output:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
     params:
