@@ -110,12 +110,29 @@ def get_boundaries(
 
 
 def refine_segmentation_table(
-    ori_table: pd.DataFrame, geo_table: gpd.GeoDataFrame
+    ori_table: pd.DataFrame,
+    geo_table: gpd.GeoDataFrame,
+    cells2exclude: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
+    _geo_table: pd.DataFrame = pd.DataFrame(
+        geo_table.drop(columns=["geometry", "length"])
+    )
+
+    if cells2exclude is not None:
+        _geo_table = pd.merge(
+            _geo_table,
+            cells2exclude,
+            on="dummy_cell_id",
+            how="outer",
+            indicator=True,
+        )
+
+        _geo_table = _geo_table[_geo_table["_merge"] == "left_only"].drop(
+            columns=["_merge"]
+        )
+
     ret: pd.DataFrame = ori_table.join(
-        pd.DataFrame(geo_table.drop(columns=["geometry", "length"])).set_index(
-            "segger_cell_id"
-        ),
+        _geo_table.set_index("segger_cell_id"),
         on="segger_cell_id",
         how="inner",
         validate="many_to_one",
@@ -132,11 +149,13 @@ def refine_segmentation_table(
 
 def convert_feat2geom_collection(
     feat_col: dict[str, Any], prior2baysor07: bool
-) -> dict[str, Any]:
-    ret: dict[str, Any] = {"type": "GeometryCollection", "geometries": []}
+) -> tuple[list[str], dict[str, Any]]:
+    cells2exclude: list[str] = []
+    geom_col: dict[str, Any] = {"type": "GeometryCollection", "geometries": []}
 
     for feat in feat_col["features"]:
         if feat["geometry"]["type"] != "Polygon":
+            cells2exclude.append(feat["properties"]["dummy_cell_id"])
             continue
 
         cell_id: str = feat["properties"]["dummy_cell_id"]
@@ -150,7 +169,7 @@ def convert_feat2geom_collection(
             else:
                 raise RuntimeError(f"Error! Cannot process cell {cell_id}.")
 
-        ret["geometries"].append(
+        geom_col["geometries"].append(
             {
                 "type": "Polygon",
                 "coordinates": feat["geometry"]["coordinates"],
@@ -158,7 +177,7 @@ def convert_feat2geom_collection(
             }
         )
 
-    return ret
+    return cells2exclude, geom_col
 
 
 if __name__ == "__main__":
@@ -178,13 +197,20 @@ if __name__ == "__main__":
     geo: gpd.GeoDataFrame = get_boundaries(seg)
 
     geo.to_file(args.outpolyfeat, driver="GeoJSON")
-    refine_segmentation_table(seg, geo).to_csv(args.outseg, index=False)
 
     assert os.path.isfile(args.outpolyfeat)
     with open(args.outpolyfeat, "r", encoding="utf-8") as fh:
         polygons_feat = json.load(fh)
 
-    polygons_geom = convert_feat2geom_collection(polygons_feat, args.prior2baysor07)
+    cells2exclude, polygons_geom = convert_feat2geom_collection(
+        polygons_feat, args.prior2baysor07
+    )
+
+    refine_segmentation_table(
+        seg,
+        geo,
+        pd.DataFrame({"dummy_cell_id": cells2exclude}),
+    ).to_csv(args.outseg, index=False)
 
     with open(args.outpolygeom, "w", encoding="utf-8") as fh:
         json.dump(polygons_geom, fh)
