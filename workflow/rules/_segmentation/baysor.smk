@@ -2,6 +2,53 @@
 #              Functions              #
 #######################################
 
+def _compare_version(ver: dict[str, int], against: tuple, is_lower_bound: bool) -> bool:
+    assert len(against) > 0
+
+    for idx, val in enumerate(against):
+        tmp: int = get_dict_value(ver, str(idx))
+
+        if tmp == val:
+            continue
+        
+        if is_lower_bound:
+            return tmp > val
+        else:
+            return tmp < val
+
+    return True
+
+def get_xeniumranger_version(
+    version_file_path: str,
+    min_version: tuple | None = None,
+    max_version: tuple | None = None
+) -> tuple | bool:
+    assert min_version is None or isinstance(min_version, tuple)
+    assert max_version is None or isinstance(max_version, tuple)
+
+    with open(version_file_path, "r", encoding="utf-8") as fh:
+        ver: dict[str, int] = get_dict_value(
+            json.load(fh),
+            "system_software_version"
+        )
+
+    meets_min, meets_max = None, None
+
+    if min_version is not None and len(min_version) > 0:
+        meets_min = _compare_version(ver, min_version, True)
+
+    if max_version is not None and len(max_version) > 0:
+        meets_max = _compare_version(ver, max_version, False)
+
+    if meets_min is not None and meets_max is not None:
+        return meets_min and meets_max
+    elif meets_min is not None:
+        return meets_min
+    elif meets_max is not None:
+        return meets_max
+    else:
+        return (v for _, v in ver.items())
+
 def get_other_options4runBaysor(wildcards, input) -> str:
     ret: str = get_dict_value(
         config,
@@ -11,14 +58,12 @@ def get_other_options4runBaysor(wildcards, input) -> str:
         replace_none=""
     )
 
-    with open(input["xr_version"], "r", encoding="utf-8") as fh:
-        xr_version: int = get_dict_value(
-            json.load(fh),
-            "system_software_version",
-            "0"
-        )
+    meets_min: bool = get_xeniumranger_version(
+        input["xr_version"],
+        min_version=(10,)
+    )
 
-    if xr_version < 4:
+    if not meets_min:
         ret = " ".join([ret, "--polygon-format=GeometryCollection"])
 
     return ret
@@ -28,19 +73,17 @@ def get_input2_or_params4normaliseBaysor(wildcards) -> dict[str, str]:
         "data_dir": get_input2_or_params4run10x(wildcards)
     }
 
-    with open(checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0], "r", encoding="utf-8") as fh:
-        xr_version: int = get_dict_value(
-            json.load(fh),
-            "system_software_version",
-            "0"
-        )
+    meets_min: bool = get_xeniumranger_version(
+        checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0],
+        min_version=(3, 1)
+    )
 
-    if xr_version < 4:
-        ret["segmentation"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation.csv'
-        ret["polygons"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation_polygons_2d.json'
-    else:
+    if meets_min:
         ret["segmentation"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/raw_results/segmentation.csv'
         ret["polygons"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/raw_results/segmentation_polygons_2d.json'
+    else:
+        ret["segmentation"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation.csv'
+        ret["polygons"] = f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/processed_results/segmentation_polygons_2d.json'
 
     return ret
 

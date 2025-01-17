@@ -137,19 +137,6 @@ def get_output4cleanup() -> list[str]:
             ]
         )
 
-        # Get path to the predicted results from Segger.
-        segger_predict_files: list[str] = ["segger_adata.h5ad", "segger_transcripts.parquet", "segmentation_log.json", "compressed_transcripts_df.parquet", "compressed_edge_index.parquet"]
-        ret.extend(
-            [
-                os.path.join(
-                    segger_prefix,
-                    i,
-                    "raw_results",
-                    j
-                ) for i in SAMPLE_ID for j in segger_predict_files
-            ]
-        )
-
     return ret
 
 def get_input2all(

@@ -40,6 +40,24 @@ def get_slurm_extra4runSeggerTrain(wildcards) -> str:
 def get_slurm_extra4runSeggerPredict(wildcards) -> str:
     return f"'--gres=gpu:1'" if _use_gpu4segger() else ""
 
+def get_input2_or_params4normaliseSegger(wildcards) -> dict[str, str]:
+    ret: dict[str, str] = {
+        "data_dir": get_input2_or_params4run10x(wildcards),
+        "segmentation": f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/processed_results/segmentation.csv'
+    }
+
+    meets_min: bool = get_xeniumranger_version(
+        checkpoints.check10xVersions.get(sample_id=wildcards.sample_id).output[0],
+        min_version=(10,)
+    )
+
+    if meets_min:
+        ret["polygons"] = f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/processed_results/segmentation_polygons_feat_col.json'
+    else:
+        ret["polygons"] = f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/processed_results/segmentation_polygons_geom_col.json'
+
+    return ret
+
 
 #######################################
 #                Rules                #
@@ -242,6 +260,87 @@ rule cleanSeggerPredictDir:
         "python3 workflow/scripts/clean_segger_predict_results.py "
         "--dir {input} "
         "-l {log}"
+
+rule adjustSeggerResults:
+    input:
+        data_file=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet',
+        xr_version=f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
+    output:
+        segmentation=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation.csv'),
+        polygons_feat=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_feat_col.json'),
+        polygons_geom=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_geom_col.json')
+    log:
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/adjustSeggerResults.log'
+    params:
+        other_options=lambda wildcards, input: "--no-prior2baysor07" if get_xeniumranger_version(
+                input.xr_version,
+                min_version=(3, 1)
+            ) else "--prior2baysor07"
+    resources:
+        mem_mb=lambda wildcards, input: max(input.size_mb * 30, 2048)
+    container:
+        config["containers"]["segger"]
+    shell:
+        "mamba run -n segger_cuda python3 workflow/scripts/convert_segger2baysor.py "
+        "--inseg {input.data_file} "
+        "--outseg {output.segmentation} "
+        "--outpolyfeat {output.polygons_feat} "
+        "--outpolygeom {output.polygons_geom} "
+        "-l {log} "
+        "{params.other_options}"
+
+rule normaliseSegger:
+    input:
+        unpack(get_input2_or_params4normaliseSegger)
+    output:
+        directory(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/normalised_results')
+    log:
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/normaliseSegger.log'
+    params:
+        work_dir=f'{config["output_path"]}/segmentation/segger/{{sample_id}}',
+        abs_input_data_dir=lambda wildcards: os.path.abspath(
+            get_input2_or_params4run10x(wildcards, for_input=False)
+        ),
+        abs_input_segmentation=lambda wildcards, input: os.path.abspath(
+            input.segmentation
+        ),
+        abs_input_polygons=lambda wildcards, input: os.path.abspath(
+            input.polygons
+        ),
+        abs_log=lambda wildcards: os.path.abspath(
+            f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/logs/normaliseSegger.log'
+        ),
+        localmem=get_dict_value(
+            config,
+            "segmentation",
+            "_normalisation",
+            "_memory"
+        )
+    threads:
+        get_dict_value(
+            config,
+            "segmentation",
+            "_normalisation",
+            "_threads"
+        )
+    resources:
+        mem_mb=get_dict_value(
+            config,
+            "segmentation",
+            "_normalisation",
+            "_memory"
+        ) * 1024
+    container:
+        config["containers"]["10x"]
+    shell:
+        "cd {params.work_dir} && "
+        "xeniumranger import-segmentation --id=normalised_results "
+        "--xenium-bundle {params.abs_input_data_dir} "
+        "--transcript-assignment={params.abs_input_segmentation} "
+        "--viz-polygons={params.abs_input_polygons} "
+        "--units=microns "
+        "--localcores={threads} "
+        "--localmem={params.localmem} &> {params.abs_log}"
 
 rule zipSeggerPreprocessed:
     input:
