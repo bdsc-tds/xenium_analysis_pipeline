@@ -1,5 +1,5 @@
 """
-This script is used to adjust the results of Baysor for Xenium Ranger version older than 4.
+This script is used to adjust the results of Baysor for Xenium Ranger prior to v3.1.
 """
 
 import argparse
@@ -116,7 +116,7 @@ if __name__ == "__main__":
         index=False,
     )
 
-    print("The results of Baysor have been processed for Xenium Range older than 4.")
+    print("The results of Baysor have been processed for Xenium Ranger  prior to v3.1.")
 
     if args.l is not None:
         _log.close()
