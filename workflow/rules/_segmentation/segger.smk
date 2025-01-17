@@ -301,11 +301,11 @@ rule normaliseSegger:
         abs_input_data_dir=lambda wildcards: os.path.abspath(
             get_input2_or_params4run10x(wildcards, for_input=False)
         ),
-        abs_input_segmentation=lambda wildcards, input: os.path.abspath(
-            input.segmentation
+        abs_input_segmentation=lambda wildcards: os.path.abspath(
+            get_input2_or_params4normaliseSegger(wildcards)["segmentation"]
         ),
-        abs_input_polygons=lambda wildcards, input: os.path.abspath(
-            input.polygons
+        abs_input_polygons=lambda wildcards: os.path.abspath(
+            get_input2_or_params4normaliseSegger(wildcards)["polygons"]
         ),
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/logs/normaliseSegger.log'

@@ -169,10 +169,10 @@ rule normaliseBaysor:
         abs_input_data_dir=lambda wildcards: os.path.abspath(
             get_input2_or_params4run10x(wildcards, for_input=False)
         ),
-        abs_input_segmentation=lambda wildcards, input: os.path.abspath(
+        abs_input_segmentation=lambda wildcards: os.path.abspath(
             get_input2_or_params4normaliseBaysor(wildcards)["segmentation"]
         ),
-        abs_input_polygons=lambda wildcards, input: os.path.abspath(
+        abs_input_polygons=lambda wildcards: os.path.abspath(
             get_input2_or_params4normaliseBaysor(wildcards)["polygons"]
         ),
         abs_log=lambda wildcards: os.path.abspath(
