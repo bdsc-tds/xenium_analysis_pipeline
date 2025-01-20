@@ -16,7 +16,7 @@ def get_model_version4runSeggerPredict(wildcards) -> int:
             ]
         )
     
-    raise RuntimeError(f"Error! No model version found in {model_dir} or its subfolders.")
+    return -1
 
 def _use_gpu4segger() -> bool:
     return get_dict_value(

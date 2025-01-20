@@ -5,6 +5,7 @@ containers:
   10x:
   baysor:
   proseg:
+  segger:
 
 experiments: experiments.yml
 
