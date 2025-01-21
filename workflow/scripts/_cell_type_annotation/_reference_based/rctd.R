@@ -7,6 +7,8 @@ sink(log, type = "message")
 library(Seurat)
 library(dplyr)
 library(spacexr)
+library(arrow)
+library(data.table)
 
 # Load common reference-based parameters
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
@@ -70,9 +72,11 @@ message(paste("N = ", nrow(xe) - RCTD@spatialRNA@counts@Dim[[1]], "genes were re
 
 RCTD <- run.RCTD(RCTD, doublet_mode = "doublet")
 
-# Get scores, here weights 
-scores <- as.data.frame(RCTD@results$weights)[colnames(xe), ]
-rownames(scores) <- colnames(xe)
+# Get weights
+weights <- as.data.frame(RCTD@results$weights)[colnames(xe), ]
+weights$cell_id  <- colnames(xe)
+weights          <- weights %>% select(cell_id, everything())
+
 
 # Get labels 
 annotations.df  <- RCTD@results$results_df[colnames(xe),]
@@ -81,12 +85,13 @@ if("scond_type" %in% colnames(annotations.df)){
   annotations.df$scond_type <- NULL
 }
 labels          <- annotations.df %>% select(first_type, second_type) 
-rownames(labels)<- colnames(xe)
+labels$cell_id  <- colnames(xe)
+labels          <- labels %>% select(cell_id, everything())
 
 # Update second type for highly confident cells 
-# Define minimum weight threshold and calculate boolean scores and candidate counts
-scores_bool <- scores > 0.01
-n_candidates <- rowSums(scores_bool)
+# Define minimum weight threshold and calculate boolean weights and candidate counts
+weights_bool <- weights > 0.01
+n_candidates <- rowSums(weights_bool)
 high_confidence_cells <- n_candidates < 2
 
 # Update labels based on the threshold
@@ -94,8 +99,26 @@ labels <- labels %>%
   mutate(second_type_updated = if_else(high_confidence_cells, NA_character_, second_type))
 
 # Save annotation
-saveRDS(RCTD, snakemake@output[[1]])
-write.csv(labels, snakemake@output[[2]])
-write.csv(scores, snakemake@output[[3]])
+saveRDS(RCTD, snakemake@output[["rds_output"]]) 
+write_parquet(labels, snakemake@output[["labels"]])
+write_parquet(weights, snakemake@output[["scores"]])
+
+# Convert and Save rctd output in Py-compatible format 
+
+# save cell_id at least in one .parquet object
+results_df <- RCTD@results$results_df
+results_df$cell_id <- rownames(results_df)
+results_df <- results_df %>% select(cell_id, everything())
+# transform score_mat into a long data.frame
+score_mat <- convert_score_mat_to_long_df(RCTD@results$score_mat)
+# transform singlet_scores into a long data.frame
+singlet_scores <- convert_singlet_scores_to_long_df(RCTD@results$singlet_scores)
+
+write_parquet(results_df, snakemake@output[["out_res_df"]])
+write_parquet(RCTD@results$weights %>% as.data.frame(), snakemake@output[["out_w"]])
+write_parquet(RCTD@results$weights_doublet %>% as.data.frame(), snakemake@output[["out_wd"]])
+write_parquet(singlet_scores, snakemake@output[["out_sc"]])
+write_parquet(score_mat, snakemake@output[["out_sm"]])
+
 
 
