@@ -180,3 +180,72 @@ generate_class_df <- function(
   
   return(class_df)
 }
+
+
+#'Convert a List of Matrices to a Long-Format Data Frame
+#'
+#' This function takes a list of matrices (mat_score) from rctd output and converts each matrix into a long-format data frame.
+#' The resulting data frames are combined into a single data frame with an additional column
+#' identifying the index of the source matrix in the input list.
+#'
+#' @param score_mat rctd@results$score_mat
+#'
+#' @return A data frame with the following columns:
+#' \describe{
+#'   \item{row}{Row indices of the matrix entries.}
+#'   \item{column}{Column indices of the matrix entries.}
+#'   \item{value}{Values from the matrices.}
+#'   \item{cell_index}{The index of the matrix in the original list.}
+#' }
+#'
+#' @examples
+#' # Example usage:
+#' score_mat <- convert_score_mat_to_long_df(rctd@results$score_mat)
+#' print(score_mat)
+convert_score_mat_to_long_df <- function(
+    score_mat
+){
+  # Convert each matrix into a long-format data frame
+  res <- lapply(seq_along(score_mat), function(idx) {
+    mat <- score_mat[[idx]]
+    df <- as.data.frame(as.table(as.matrix(mat)))
+    df$cell_index <- idx  # Add the index as a new column
+    return(df)
+  })
+  res <- data.table::rbindlist(res)
+  colnames(res) <- c("row", "column", "value", "cell_index")
+
+  return(res)
+}
+
+
+#' Convert Singlet Scores to a Long Data Frame
+#'
+#' This function converts a list of singlet scores from rctdf results (`rctd@results$singlet_scores`) into a long-format data frame, with each
+#' score linked to its corresponding cell index and cell type.
+#'
+#' @param singlet_list a `rctd@results$singlet_scores`
+#'
+#' @return A tibble with the following columns:
+#' \describe{
+#'   \item{cell_index}{The index of the cell in the input list.}
+#'   \item{cell_type}{The name of the cell type corresponding to each score.}
+#'   \item{score}{The score value.}
+#' }
+#'
+#' @examples
+#' # Example usage
+#' singlet_scores <- convert_singlet_scores_to_long_df(rctd@results$singlet_scores)
+#' print(singlet_scores)
+#'
+convert_singlet_scores_to_long_df <- function(
+    singlet_scores
+){
+  singlet_unlist <- unlist(singlet_scores, use.names = TRUE)
+  singlet_tibble <- tibble(
+    cell_index = lapply(seq_along(singlet_scores), function(idx) rep(idx, length(singlet_scores[[idx]]))) %>% unlist(),
+    cell_type = names(singlet_unlist),          # Extract names
+    score = singlet_unlist  # Extract values
+  )
+  return(singlet_tibble)
+}
