@@ -224,7 +224,7 @@ rule runSeggerPredict:
                     wildcards,
                     for_input=False
                     )
-            ) * 10**-6 * (80 if _use_gpu4segger() else 500),
+            ) * 10**-6 * (100 if _use_gpu4segger() else 800),
             2048
         ),
         slurm_extra=get_slurm_extra4runSeggerPredict
