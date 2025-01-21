@@ -149,7 +149,7 @@ generate_class_df <- function(
   # Initialize class_df as NULL
   class_df <- NULL
   
-  if (class_level == annotation_level) {
+  if (!is.null(class_level) && class_level == annotation_level) {
     class_level <- NULL
   }
   

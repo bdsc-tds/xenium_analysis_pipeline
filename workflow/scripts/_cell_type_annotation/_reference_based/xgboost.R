@@ -63,7 +63,7 @@ labels <- Y.ref_map[as.character(labels)] # convert numbers to cell types
 
 # Convert results into data.frames for parquet output
 labels_df <- data.frame(cell_id = colnames(xe), label = labels %>% as.vector())
-xe_pred_prob <- as.data.frame()
+xe_pred_prob <- as.data.frame(xe_pred_prob)
 xe_pred_prob$cell_id <- colnames(xe)
 xe_pred_prob <- xe_pred_prob %>% select(cell_id, everything())
 

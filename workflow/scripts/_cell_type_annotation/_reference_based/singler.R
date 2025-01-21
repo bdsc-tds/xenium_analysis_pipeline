@@ -60,6 +60,6 @@ singler_labels                <- data.frame(cell_id = colnames(xe), label = sing
 # Save annotation
 saveRDS(singler_result, snakemake@output[[1]])
 write_parquet(singler_labels, snakemake@output[[2]])
-write_parquet(singler_labels, snakemake@output[[3]])
+write_parquet(singler_scores, snakemake@output[[3]])
 
 
