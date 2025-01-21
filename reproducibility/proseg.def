@@ -16,7 +16,7 @@ Stage: main
 
 %post
 # Set up build time environment variables, such as versions
-    export PROSEG_VERSION=1.1.8
+    export PROSEG_COMMIT=ef2d1ca8c535fd911b7cd37da47c84de98e784a4
 
     export RUSTUP_HOME=/opt/rustup
     export CARGO_HOME=/opt/cargo
@@ -50,7 +50,7 @@ Stage: main
     apt-get install -y --no-install-recommends software-properties-common lsb-release dirmngr apt-transport-https ca-certificates build-essential 
 
 # Install system packages
-    apt-get install -y vim curl
+    apt-get install -y vim curl git
 
     apt-get clean
 
@@ -66,7 +66,7 @@ Stage: main
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # Install proseg
-    cargo install --version "${PROSEG_VERSION}" proseg
+    cargo install --git https://github.com/dcjones/proseg.git --rev ${PROSEG_COMMIT}
 
 # Back to root directory
     cd /
