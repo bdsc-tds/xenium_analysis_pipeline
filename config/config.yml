@@ -89,7 +89,8 @@ standard_seurat_analysis:
 cell_type_annotation:
   reference_based:
     methods:
-      - rctd
+      - rctd_class_aware
+      - rctd_class_unaware
       - singler
       - seurat
       - tangram
