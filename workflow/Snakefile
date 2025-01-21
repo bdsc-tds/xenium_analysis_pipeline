@@ -150,7 +150,7 @@ def get_output4cleanup() -> list[str]:
 
 def get_output4cell_type_annotation() -> list[str]:
     prefix: str = f'{config["output_path"]}/segmentation'
-    filenames: list[str] = ["output.rds", "labels.csv", "scores.csv"]
+    filenames: list[str] = ["output.rds", "labels.parquet", "scores.parquet"]
 
     samples_by_disease: dict[str, list[str]] = get_dict_value(
         config,
