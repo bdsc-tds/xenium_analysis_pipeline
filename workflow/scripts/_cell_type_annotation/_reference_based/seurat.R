@@ -61,6 +61,6 @@ labels_df             <- data.frame(cell_id = colnames(xe), label = labels)
 
 # Save annotation
 saveRDS(predictions, snakemake@output[[1]])
-write_parquet(labels, snakemake@output[[2]])
+write_parquet(labels_df, snakemake@output[[2]])
 write_parquet(scores, snakemake@output[[3]]) 
 
