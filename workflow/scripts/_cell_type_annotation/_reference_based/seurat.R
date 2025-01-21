@@ -6,6 +6,7 @@ sink(log, type = "message")
 
 library(Seurat)
 library(dplyr)
+library(arrow)
 
 options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
 
@@ -51,11 +52,15 @@ xe            <- AddMetaData(xe, metadata = predictions)
 scores                <- predictions %>% select(!c("predicted.id", "prediction.score.max"))
 colnames(scores)      <- gsub("prediction.score.", "", colnames(scores))
 labels                <- predictions$predicted.id
-rownames(scores)      <- colnames(xe)
-names(labels)         <- colnames(xe)
+
+# Convert result to data.frames for parquet output
+scores$cell_id        <- colnames(xe)
+scores                <- scores %>% select(cell_id, everything())
+
+labels_df             <- data.frame(cell_id = colnames(xe), label = labels)
 
 # Save annotation
 saveRDS(predictions, snakemake@output[[1]])
-write.csv(labels, snakemake@output[[2]])
-write.csv(scores, snakemake@output[[3]]) 
+write_parquet(labels, snakemake@output[[2]])
+write_parquet(scores, snakemake@output[[3]]) 
 

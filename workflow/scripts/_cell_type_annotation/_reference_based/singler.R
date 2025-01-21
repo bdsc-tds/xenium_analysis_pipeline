@@ -7,6 +7,7 @@ sink(log, type = "message")
 library(Seurat)
 library(dplyr)
 library(SingleR)
+library(arrow)
 
 # Load common reference-based parameters
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
@@ -50,14 +51,15 @@ singler_result <- SingleR(
   aggr.args = aggr_args
 )
 
-singler_scores                <- singler_result$scores
-singler_labels                <- singler_result$labels
-rownames(singler_scores)      <- colnames(xe)
-names(singler_labels)         <- colnames(xe)
+singler_scores                <- singler_result$scores %>% as.data.frame()
+singler_scores$cell_id        <- colnames(xe)
+singler_scores                <- singler_scores %>% select(cell_id, everything())
+
+singler_labels                <- data.frame(cell_id = colnames(xe), label = singler_result$labels)
 
 # Save annotation
 saveRDS(singler_result, snakemake@output[[1]])
-write.csv(singler_labels, snakemake@output[[2]])
-write.csv(singler_scores, snakemake@output[[3]])
+write_parquet(singler_labels, snakemake@output[[2]])
+write_parquet(singler_labels, snakemake@output[[3]])
 
 
