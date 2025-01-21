@@ -79,6 +79,7 @@ def get_dict_value(
     *keys: str | int | float | tuple,
     replace_none: Any = None,
     inexist_key_ok: bool = False,
+    regex: bool = False,
 ) -> Any:
     """Get a value from a given dictionary using given keys.
 
@@ -94,13 +95,29 @@ def get_dict_value(
     """
     if x is not None:
         for k in keys:
-            if k not in x:
-                if inexist_key_ok:
-                    x = None
-                    break
-                raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
+            matched_key: str = ""
 
-            x = x[k]
+            if regex:
+                matched_keys: list[str] = [
+                    i for i in x.keys() if re.match(k, i) is not None
+                ]
+
+                if len(matched_keys) > 1:
+                    raise KeyError(f"Error! Multiple keys {k} found: {matched_keys}")
+
+                if len(matched_keys) == 1:
+                    matched_key = matched_keys[0]
+            else:
+                if k in x:
+                    matched_key = k
+
+            if matched_key != "":
+                x = x[matched_key]
+            elif inexist_key_ok:
+                x = None
+                break
+            else:
+                raise KeyError(f"Error! Key {k} is not in {list(x.keys())}")
 
     if x is None:
         return replace_none
