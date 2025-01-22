@@ -150,7 +150,7 @@ rule adjustBaysorResults:
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/adjustBaysorResults.log'
     shell:
-        "python3 workflow/scripts/adjust_baysor_results.py "
+        "python3 workflow/scripts/_segmentation/adjust_baysor_results.py "
         "--inseg {input.segmentation} "
         "--inpoly {input.polygons} "
         "-l {log} "

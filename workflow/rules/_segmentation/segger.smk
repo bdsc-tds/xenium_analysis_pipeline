@@ -257,7 +257,7 @@ rule cleanSeggerPredictDir:
     conda:
         "../../envs/pyarrow.yml"
     shell:
-        "python3 workflow/scripts/clean_segger_predict_results.py "
+        "python3 workflow/scripts/_segmentation/clean_segger_predict_results.py "
         "--dir {input} "
         "-l {log}"
 
@@ -281,7 +281,7 @@ rule adjustSeggerResults:
     container:
         config["containers"]["segger"]
     shell:
-        "mamba run -n segger_cuda python3 workflow/scripts/convert_segger2baysor.py "
+        "mamba run -n segger_cuda python3 workflow/scripts/_segmentation/convert_segger2baysor.py "
         "--inseg {input.data_file} "
         "--outseg {output.segmentation} "
         "--outpolyfeat {output.polygons_feat} "
