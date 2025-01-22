@@ -25,6 +25,10 @@ CLUSTER_PROFILE=profiles/slurm
 # Inexistent local directories will be filtered out.
 SINGULARITY_BIND_DIRS=(  )
 
+# Temporary folder for Snakemake.
+# Leave blank to use the default location.
+SNAKEMAKE_CACHE_DIR=
+
 
 ###############################
 #         DO NOT EDIT         #
@@ -158,6 +162,11 @@ do
 
     esac
 done
+
+# Set Snakemake runtime temporary directory
+if [ -n "$SNAKEMAKE_CACHE_DIR" ]; then
+    export XDG_CACHE_HOME="$SNAKEMAKE_CACHE_DIR"
+fi
 
 # Draw dag and save to disk.
 # Priority: 1 (highest; other options will be ommitted)
