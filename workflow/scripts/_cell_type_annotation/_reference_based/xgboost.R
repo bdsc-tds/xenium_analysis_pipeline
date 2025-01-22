@@ -7,6 +7,7 @@ sink(log, type = "message")
 library(Seurat)
 library(dplyr)
 library(xgboost)
+library(arrow)
 
 # Load common reference-based parameters
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_header.R")
