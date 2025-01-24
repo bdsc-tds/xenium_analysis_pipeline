@@ -149,8 +149,10 @@ rule adjustBaysorResults:
         polygons=f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/processed_results/segmentation_polygons_2d.json'
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/adjustBaysorResults.log'
+    retries:
+        5
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 10, 2048)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 2048)
     shell:
         "python3 workflow/scripts/_segmentation/adjust_baysor_results.py "
         "--inseg {input.segmentation} "
