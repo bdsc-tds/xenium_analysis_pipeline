@@ -53,8 +53,10 @@ rule runReferenceBasedSeurat:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/seurat/.+"
+    retries:
+        RETRIES_NUM
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 30, 10240)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedSeurat.log'
     container:

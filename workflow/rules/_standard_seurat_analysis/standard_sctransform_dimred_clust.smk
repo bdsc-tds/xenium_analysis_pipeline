@@ -29,8 +29,10 @@ rule runStandardSctransformDimRedClust:
             "resolution",
             replace_none=0.8,
         )
+    retries:
+        RETRIES_NUM
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 150, 20480)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardSctransformDimRedClust.log'
     container:

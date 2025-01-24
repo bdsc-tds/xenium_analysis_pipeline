@@ -82,6 +82,8 @@ rule runReferenceBasedRCTD:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/rctd_.+"
+    retries:
+        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -93,7 +95,7 @@ rule runReferenceBasedRCTD:
             replace_none=20,
         )
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 40, 20480)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 20480)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedRCTD.log'
     container:

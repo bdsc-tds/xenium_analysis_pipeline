@@ -117,6 +117,8 @@ rule runBaysor:
             )
         ),
         other_options=lambda wildcards, input: get_other_options4runBaysor(wildcards, input)
+    retries:
+        RETRIES_NUM
     threads:
         get_dict_value(
             config,
@@ -125,12 +127,12 @@ rule runBaysor:
             "_threads"
         )
     resources:
-        mem_mb=get_dict_value(
+        mem_mb=lambda wildcards, attempt: get_dict_value(
             config,
             "segmentation",
             "baysor",
             "_memory"
-        ) * 1024
+        ) * 1024 * attempt
     container:
         config["containers"]["baysor"]
     shell:
@@ -150,7 +152,7 @@ rule adjustBaysorResults:
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/adjustBaysorResults.log'
     retries:
-        5
+        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 2048)
     shell:
