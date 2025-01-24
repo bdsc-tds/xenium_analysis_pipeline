@@ -33,6 +33,14 @@ localrules: all
 
 
 #######################################
+#              Constants              #
+#######################################
+
+# The number of retries for some rules potentially requiring more resources.
+RETRIES_NUM: int = 5
+
+
+#######################################
 #              Wildcards              #
 #######################################
 

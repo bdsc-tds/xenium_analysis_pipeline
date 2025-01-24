@@ -102,7 +102,7 @@ rule runSeggerPreprocess:
             replace_none=""
         )
     retries:
-        5
+        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -175,7 +175,7 @@ rule runSeggerTrain:
             replace_none=""
         )
     retries:
-        3
+        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -219,7 +219,7 @@ rule runSeggerPredict:
             for_input=False
         )
     retries:
-        5
+        RETRIES_NUM
     threads:
         1
     resources:
@@ -283,7 +283,7 @@ rule runSegger2Baysor:
                 min_version=(3, 1)
             ) else "--prior2baysor07"
     retries:
-        5
+        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * 30 * attempt, 2048)
     container:

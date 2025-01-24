@@ -162,7 +162,7 @@ rule changeParquetCompressionType:
     params:
         input_file=lambda wildcards: get_input2_or_params4changeParquetCompressionType(wildcards, for_input=False)
     retries:
-        5
+        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     conda:

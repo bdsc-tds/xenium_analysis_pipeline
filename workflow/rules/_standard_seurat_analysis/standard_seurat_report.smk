@@ -13,8 +13,10 @@ rule generateStandardSeuratReport:
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
         sample_id=lambda wildcards: wildcards.sample_id,
         rmd_file="workflow/scripts/_standard_seurat_analysis/standard_seurat_report.Rmd"
+    retries:
+        RETRIES_NUM
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 30, 10240)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 30, 10240)
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/generateStandardSeuratReport.log'
     container:
