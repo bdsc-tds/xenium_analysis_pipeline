@@ -71,7 +71,7 @@ segmentation:
     _memory: 64
 
 standard_seurat_analysis:
-  _future_globals_maxSize: 1
+  _future_globals_maxSize: 10
 
   qc:
     min_counts: 10
