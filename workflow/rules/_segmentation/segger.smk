@@ -101,6 +101,8 @@ rule runSeggerPreprocess:
             "_other_options",
             replace_none=""
         )
+    retries:
+        5
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -111,7 +113,7 @@ rule runSeggerPreprocess:
             replace_none=1
         )
     resources:
-        mem_mb=lambda wildcards, input, threads: threads * 2048
+        mem_mb=lambda wildcards, threads, attempt: threads * 2048 * attempt
     container:
         config["containers"]["segger"]
     shell:
@@ -172,6 +174,8 @@ rule runSeggerTrain:
             "_other_options",
             replace_none=""
         )
+    retries:
+        3
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -183,7 +187,7 @@ rule runSeggerTrain:
         )
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
-        mem_mb=lambda wildcards, input, threads: threads * (2048 if _use_gpu4segger() else 20480),
+        mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu4segger() else 20480),
         slurm_extra=get_slurm_extra4runSeggerTrain
     container:
         config["containers"]["segger"]
@@ -214,17 +218,19 @@ rule runSeggerPredict:
             wildcards,
             for_input=False
         )
+    retries:
+        5
     threads:
         1
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
-        mem_mb=lambda wildcards, input: max(
+        mem_mb=lambda wildcards, attempt: max(
             os.path.getsize(
                 get_input2_or_params4runProseg(
                     wildcards,
                     for_input=False
                     )
-            ) * 10**-6 * (100 if _use_gpu4segger() else 800),
+            ) * 10**-6 * attempt * (100 if _use_gpu4segger() else 500),
             2048
         ),
         slurm_extra=get_slurm_extra4runSeggerPredict
@@ -261,7 +267,7 @@ rule cleanSeggerPredictDir:
         "--dir {input} "
         "-l {log}"
 
-rule adjustSeggerResults:
+rule runSegger2Baysor:
     input:
         data_file=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet',
         xr_version=f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
@@ -270,14 +276,16 @@ rule adjustSeggerResults:
         polygons_feat=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_feat_col.json'),
         polygons_geom=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_geom_col.json')
     log:
-        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/adjustSeggerResults.log'
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/runSegger2Baysor.log'
     params:
         other_options=lambda wildcards, input: "--no-prior2baysor07" if get_xeniumranger_version(
                 input.xr_version,
                 min_version=(3, 1)
             ) else "--prior2baysor07"
+    retries:
+        5
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 30, 2048)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * 30 * attempt, 2048)
     container:
         config["containers"]["segger"]
     shell:
