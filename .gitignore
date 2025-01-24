@@ -1,11 +1,13 @@
 **/.snakemake
 **/.conda
 **/.cache
+**/.config
 **/.local
 **/.jupyter
 **/.condarc
 **/.keras
 **/.cupy
+**/.nv
 
 **/__pycache__
 **/.RData
