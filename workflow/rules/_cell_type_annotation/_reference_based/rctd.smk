@@ -82,8 +82,6 @@ rule runReferenceBasedRCTD:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/rctd_.+"
-    retries:
-        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,

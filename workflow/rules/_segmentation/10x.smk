@@ -72,6 +72,8 @@ rule run10x:
             wildcards.segmentation_id,
             "localcores"
         )
+    retries:
+        0
     resources:
         mem_mb=lambda wildcards: get_dict_value(
             config,

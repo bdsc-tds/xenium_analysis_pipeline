@@ -59,8 +59,6 @@ rule runProseg:
             "_other_options",
             replace_none=""
         )
-    retries:
-        RETRIES_NUM
     threads:
         get_dict_value(
             config,
@@ -92,8 +90,6 @@ rule runProseg2Baysor:
         polygons=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson')
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg2Baysor.log'
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 2048)
     container:
@@ -134,6 +130,8 @@ rule normaliseProseg:
             "_normalisation",
             "_memory"
         )
+    retries:
+        0
     threads:
         get_dict_value(
             config,

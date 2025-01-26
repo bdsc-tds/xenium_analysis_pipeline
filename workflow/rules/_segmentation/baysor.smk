@@ -117,8 +117,6 @@ rule runBaysor:
             )
         ),
         other_options=lambda wildcards, input: get_other_options4runBaysor(wildcards, input)
-    retries:
-        RETRIES_NUM
     threads:
         get_dict_value(
             config,
@@ -151,8 +149,6 @@ rule adjustBaysorResults:
         polygons=f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/processed_results/segmentation_polygons_2d.json'
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/adjustBaysorResults.log'
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 2048)
     shell:
@@ -190,6 +186,8 @@ rule normaliseBaysor:
             "_normalisation",
             "_memory"
         )
+    retries:
+        0
     threads:
         get_dict_value(
             config,

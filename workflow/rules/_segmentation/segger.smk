@@ -101,8 +101,6 @@ rule runSeggerPreprocess:
             "_other_options",
             replace_none=""
         )
-    retries:
-        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -174,8 +172,6 @@ rule runSeggerTrain:
             "_other_options",
             replace_none=""
         )
-    retries:
-        RETRIES_NUM
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -218,8 +214,6 @@ rule runSeggerPredict:
             wildcards,
             for_input=False
         )
-    retries:
-        RETRIES_NUM
     threads:
         1
     resources:
@@ -282,8 +276,6 @@ rule runSegger2Baysor:
                 input.xr_version,
                 min_version=(3, 1)
             ) else "--prior2baysor07"
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * 30 * attempt, 2048)
     container:
@@ -324,6 +316,8 @@ rule normaliseSegger:
             "_normalisation",
             "_memory"
         )
+    retries:
+        0
     threads:
         get_dict_value(
             config,
@@ -364,7 +358,7 @@ rule zipSeggerPreprocessed:
             f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/preprocessed_data/tiles.tgz'
         )
     resources:
-        mem_mb=lambda wildcards, input: max(input.size_mb * 2, 2048)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * 2 * attempt, 2048)
     shell:
         "cd {params.work_dir} && "
         "[[ -f tiles.tgz ]] && rm -f tiles.tgz; "
