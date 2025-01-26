@@ -47,8 +47,6 @@ rule runReferenceBasedXGBoost:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/xgboost/.+"
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240)
     log:

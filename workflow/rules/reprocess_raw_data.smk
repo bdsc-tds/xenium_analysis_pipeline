@@ -130,6 +130,8 @@ rule reprocessRawData:
             "reprocess",
             "_memory"
         )
+    retries:
+        0
     threads:
         lambda wildcards: get_dict_value(
             config,
@@ -161,8 +163,6 @@ rule changeParquetCompressionType:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/changeParquetCompressionType.log'
     params:
         input_file=lambda wildcards: get_input2_or_params4changeParquetCompressionType(wildcards, for_input=False)
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     conda:

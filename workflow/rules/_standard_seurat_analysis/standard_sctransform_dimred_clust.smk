@@ -29,8 +29,6 @@ rule runStandardSctransformDimRedClust:
             "resolution",
             replace_none=0.8,
         )
-    retries:
-        RETRIES_NUM
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480)
     log:
