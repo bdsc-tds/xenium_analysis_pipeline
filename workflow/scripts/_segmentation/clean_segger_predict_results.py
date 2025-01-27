@@ -16,7 +16,6 @@ COMPRESSED_PARQUET_PREFIX: str = "compressed_"
 SUBDIR_PAT: str = r"^segger_embedding_.+"
 
 output_file_names: list[str] = [
-    "edge_index.parquet",
     "transcripts_df.parquet",
     "segger_adata.h5ad",
     "segger_transcripts.parquet",

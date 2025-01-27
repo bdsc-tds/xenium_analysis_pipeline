@@ -111,7 +111,7 @@ rule runSeggerPreprocess:
             replace_none=1
         )
     resources:
-        mem_mb=lambda wildcards, threads, attempt: threads * 2048 * attempt
+        mem_mb=lambda wildcards, threads, attempt: threads * 4096 * attempt
     container:
         config["containers"]["segger"]
     shell:
@@ -264,8 +264,7 @@ rule cleanSeggerPredictDir:
         protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_adata.h5ad'),
         protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet'),
         protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segmentation_log.json'),
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/compressed_transcripts_df.parquet'),
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/compressed_edge_index.parquet')
+        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/compressed_transcripts_df.parquet')
     log:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/cleanSeggerPredictDir.log'
     conda:
