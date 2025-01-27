@@ -15,5 +15,7 @@ rmarkdown::render(
   snakemake@params[["rmd_file"]], 
   params = pr,
   output_file = snakemake@output[[1]],
+  intermediates_dir = snakemake@params[["intermediates_dir"]],
+  knit_root_dir = snakemake@params[["knit_root_dir"]],
   clean = TRUE
 )
