@@ -12,7 +12,9 @@ rule generateStandardSeuratReport:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
         sample_id=lambda wildcards: wildcards.sample_id,
-        rmd_file="workflow/scripts/_standard_seurat_analysis/standard_seurat_report.Rmd"
+        rmd_file="workflow/scripts/_standard_seurat_analysis/standard_seurat_report.Rmd",
+        intermediates_dir=f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/reports',
+        knit_root_dir=f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/reports'
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 30, 10240)
     log:
