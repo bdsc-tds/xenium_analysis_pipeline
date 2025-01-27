@@ -66,6 +66,10 @@ segmentation:
       _threads: 4
       _other_options:
 
+    predict:
+      use_cc: False
+      _other_options:
+
   _normalisation:
     _threads: 16
     _memory: 64

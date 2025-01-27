@@ -16,8 +16,6 @@ import numpy as np
 import pandas as pd
 import geopandas as gpd
 
-from scipy.spatial._qhull import QhullError
-
 from segger.prediction.boundary import generate_boundary
 
 
@@ -82,7 +80,7 @@ def _find_boundary_per_cell(
 ) -> pd.DataFrame:
     try:
         geom = generate_boundary(df, x=x, y=y)
-    except QhullError:
+    except Exception:
         geom = None
 
     return pd.DataFrame(
