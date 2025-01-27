@@ -8,12 +8,7 @@ rule runStandardSctransformDimRedClust:
     output:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
     params:
-        future_globals_maxSize=lambda wildcards: get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "_future_globals_maxSize",
-            replace_none=1,
-        ) * 10**9,
+        future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         n_dims=lambda wildcards: get_dict_value(
             config,
@@ -30,7 +25,8 @@ rule runStandardSctransformDimRedClust:
             replace_none=0.8,
         )
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480),
+        retry_idx=lambda wildcards, attempt: attempt
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardSctransformDimRedClust.log'
     container:

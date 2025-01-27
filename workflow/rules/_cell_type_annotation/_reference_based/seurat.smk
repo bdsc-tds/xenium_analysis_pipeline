@@ -11,12 +11,7 @@ rule runReferenceBasedSeurat:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/labels.parquet'),
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/scores.parquet')
     params:
-        future_globals_maxSize=lambda wildcards: get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "_future_globals_maxSize",
-            replace_none=1,
-        ) * 10**9,
+        future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         annotation_id=lambda wildcards: wildcards.annotation_id,
         ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
         xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
@@ -54,7 +49,8 @@ rule runReferenceBasedSeurat:
     wildcard_constraints:
         annotation_id=r"reference_based/.+/seurat/.+"
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240),
+        retry_idx=lambda wildcards, attempt: attempt
     log:
         f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedSeurat.log'
     container:
