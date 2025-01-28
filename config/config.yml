@@ -147,10 +147,12 @@ cell_type_annotation:
       - rctd_class_unaware
       - singler
       - seurat
+      - tangram
       - xgboost
 
     modes:
       - single_cell
+      - cluster
 
     rctd:
       # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
@@ -181,11 +183,16 @@ cell_type_annotation:
 
       _other_options:
 
+    tangram:
+      _other_options:
+
     xgboost:
       nrounds: 1000
       eta: 0.3
 
       _other_options:
+
+  # marker_based: # placeholder
 
 count_correction:
   methods:
@@ -215,3 +222,16 @@ doublet_finding:
 
   scdblfinder:
     _other_options:
+
+domain-identification: # placeholder
+  methods:
+    - BANKSY
+    - spatial-graph
+
+  BANKSY:
+    alpha: 0.5
+    n_dims: 20
+
+  spatial-graph:
+    k_knn: 20
+    radius: 30
