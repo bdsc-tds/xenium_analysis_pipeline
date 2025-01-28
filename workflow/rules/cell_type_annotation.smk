@@ -100,8 +100,10 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 wildcards.normalisation_id,
                 suffix,
             )
+    elif annotation_mode == "cluster": # TODO
+        return TO_BE_DETERMINED
     else:
-        raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell'.")
+        raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell' and 'cluster'.")
 
 
 def get_path2reference4reference_based_annotation(wildcards) -> str:
@@ -134,4 +136,5 @@ def get_assay_name4annotation(wildcards, for_ref: bool) -> str:
 include: "_cell_type_annotation/_reference_based/rctd.smk"
 include: "_cell_type_annotation/_reference_based/singler.smk"
 include: "_cell_type_annotation/_reference_based/seurat.smk"
+# include: "_cell_type_annotation/_reference_based/tangram.smk" # TODO
 include: "_cell_type_annotation/_reference_based/xgboost.smk"
