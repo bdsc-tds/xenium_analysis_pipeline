@@ -13,10 +13,8 @@ def get_path2query4annotation(wildcards) -> str:
 
     if annotation_mode == "single_cell":
         return f'{config["output_path"]}/segmentation/{wildcards.segmentation_id}/{wildcards.sample_id}/std_seurat_objects/preprocessed_seurat.rds'
-    elif annotation_mode == "cluster": # TODO
-        return f'{config["output_path"]}/segmentation/{wildcards.segmentation_id}/{wildcards.sample_id}/{annotation_mode}/seurat.rds'
     else:
-        raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell' and 'cluster'.")
+        raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell'.")
 
 
 def get_path2reference4reference_based_annotation(wildcards) -> str:
@@ -40,5 +38,4 @@ def get_path2reference4reference_based_annotation(wildcards) -> str:
 include: "_cell_type_annotation/_reference_based/rctd.smk"
 include: "_cell_type_annotation/_reference_based/singler.smk"
 include: "_cell_type_annotation/_reference_based/seurat.smk"
-# include: "_cell_type_annotation/_reference_based/tangram.smk" # TODO
 include: "_cell_type_annotation/_reference_based/xgboost.smk"
