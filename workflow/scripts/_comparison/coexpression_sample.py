@@ -1,7 +1,7 @@
 import spatialdata_io
 import sys
 
-sys.path.append("workflow/scripts/")
+sys.path.append("workflow/scripts/_comparison/")
 import coexpression
 
 # params

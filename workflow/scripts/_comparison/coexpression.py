@@ -136,7 +136,7 @@ def coexpression(
     positivity_cutoff (float): Cutoff for determining positivity.
     min_samples (int): Minimum number of samples required.
     target_count (int): Target count for downsampling.
-    method (str): Method for co-expression calculation.
+    method (str): Method for co-expression calculation ("conditional", "jaccard", "pearson", "spearman").
     seed (int): Seed for random number generation.
 
     Returns:
