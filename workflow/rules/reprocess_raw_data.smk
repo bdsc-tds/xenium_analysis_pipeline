@@ -168,7 +168,7 @@ rule changeParquetCompressionType:
     conda:
         "../envs/pyarrow.yml"
     shell:
-        "python3 workflow/scripts/change_parquet_compresson_type.py "
+        "python3 workflow/scripts/change_parquet_compression_type.py "
         "-i {params.input_file} "
         "-t snappy "
         "-l {log} "
