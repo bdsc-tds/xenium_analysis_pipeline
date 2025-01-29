@@ -3,27 +3,35 @@ channels:
   - conda-forge
   - rapidsai
   - nvidia
+  - bioconda
 dependencies:
+  - pip
   - python=3.11
-  - rapids
+  - rapidsai::rapids==24.12
   - cuda-version=12.2
-  - cudf
-  - cudnn
-  - cutensor
-  - cusparselt
-  - cudatoolkit-dev
-  - aws-sdk-cpp
-  - aws-c-event-stream
-  - aws-c-common
+  - rapidsai::cudf
+  # - cudnn
+  # - cutensor
+  # - cusparselt
+  # - cudatoolkit-dev
+  - scanpy
+  - python-igraph
+  - leidenalg
+  - rpy2
+  - conda-forge::r-seurat
+  - bioconda::bioconductor-singlecellexperiment
+  # - aws-sdk-cpp
+  # - aws-c-event-stream
+  # - aws-c-common
   - pip:
-    - umap-learn
-    - torch==2.2.2
-    - lightning<2.2
-    - torchvision
-    - torchaudio
-    - rapids-singlecell
-    - torchdata
-    - spatialdata
-    - spatialdata-io
-    - spatialdata-plot
-
+      - torch #==2.2.2
+      - lightning #<2.2
+      - torchvision
+      - torchaudio
+      - rapids-singlecell
+      - torchdata
+      - spatialdata
+      - spatialdata-io
+      - spatialdata-plot
+      - git+https://github.com/scverse/scvi-tools@2f1611c5d14392fc5b0e7e9706e2b9d80b20e1d5
+      - git+https://github.com/HiDiHlabs/ovrl.py@777bc3fe7bd5575e20ebe83f315e0218cec1dcbc
