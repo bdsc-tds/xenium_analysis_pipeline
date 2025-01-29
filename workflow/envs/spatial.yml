@@ -17,7 +17,6 @@ dependencies:
   - aws-c-common
   - pip:
     - umap-learn
-    - scvi-tools
     - torch==2.2.2
     - lightning<2.2
     - torchvision
