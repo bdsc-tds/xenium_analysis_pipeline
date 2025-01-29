@@ -127,7 +127,9 @@ def xenium_proseg(
 
     cells_metadata = parse_arg(cells_metadata, path / "cell-metadata.csv.gz")
     cells_boundaries = parse_arg(cells_boundaries, path / "cell-polygons.geojson.gz")
-    cells_boundaries_layers = parse_arg(cells_boundaries_layers, path / "cell-polygons-layers.geojson.gz")
+    cells_boundaries_layers = parse_arg(
+        cells_boundaries_layers, path / "cell-polygons-layers.geojson.gz"
+    )
     transcripts = parse_arg(transcripts, path / "transcript-metadata.csv.gz")
     cells_table = parse_arg(cells_table, path / "expected-counts.csv.gz")
     xeniumranger_dir = parse_arg(xeniumranger_dir, None)
@@ -170,7 +172,9 @@ def xenium_proseg(
             print("Reading cells table...")
         df_table = pd.read_csv(cells_table, engine=pandas_engine)
 
-        control_columns = df_table.columns.str.contains("|".join(["BLANK_", "UnassignedCodeword", "NegControl"]))
+        control_columns = df_table.columns.str.contains(
+            "|".join(["BLANK_", "Codeword", "NegControl"])
+        )
 
         table = ad.AnnData(
             df_table.iloc[:, ~control_columns],
@@ -187,8 +191,12 @@ def xenium_proseg(
             if verbose:
                 print("Reading cells metadata...")
 
-            df_cells_metadata = pd.read_csv(cells_metadata, engine=pandas_engine).rename(columns={"cell": "cell_id"})
-            table.obs = pd.concat((df_cells_metadata, df_table.iloc[:, control_columns]), axis=1)
+            df_cells_metadata = pd.read_csv(
+                cells_metadata, engine=pandas_engine
+            ).rename(columns={"cell": "cell_id"})
+            table.obs = pd.concat(
+                (df_cells_metadata, df_table.iloc[:, control_columns]), axis=1
+            )
             table.obsm["spatial"] = table.obs[["centroid_x", "centroid_y"]].values
             table.obs = table.obs
         table.obs[region_key] = region
@@ -231,7 +239,9 @@ def xenium_proseg(
         transformations = {"global": scale}
     else:
         transformations = None
-        if isinstance(cells_boundaries, Path) or isinstance(cells_boundaries_layers, Path):
+        if isinstance(cells_boundaries, Path) or isinstance(
+            cells_boundaries_layers, Path
+        ):
             warnings.warn(
                 """
                 Couldn't load xenium specs file with pixel size. 
@@ -245,17 +255,21 @@ def xenium_proseg(
         if verbose:
             print("Reading cells boundaries...")
 
-        df_cells_boundaries = gpd.read_file("gzip://" + cells_boundaries.as_posix()).rename(columns={"cell": "cell_id"})
-        shapes["cells_boundaries"] = ShapesModel.parse(df_cells_boundaries, transformations=transformations)
+        df_cells_boundaries = gpd.read_file(
+            "gzip://" + cells_boundaries.as_posix()
+        ).rename(columns={"cell": "cell_id"})
+        shapes["cells_boundaries"] = ShapesModel.parse(
+            df_cells_boundaries, transformations=transformations
+        )
 
     # read cells boundaries layers
     if isinstance(cells_boundaries_layers, Path):
         if verbose:
             print("Reading cells boundaries layers...")
 
-        df_cells_boundaries_layers = gpd.read_file("gzip://" + cells_boundaries_layers.as_posix()).rename(
-            columns={"cell": "cell_id"}
-        )
+        df_cells_boundaries_layers = gpd.read_file(
+            "gzip://" + cells_boundaries_layers.as_posix()
+        ).rename(columns={"cell": "cell_id"})
         shapes["cells_boundaries_layers"] = ShapesModel.parse(
             df_cells_boundaries_layers, transformations=transformations
         )
@@ -265,10 +279,14 @@ def xenium_proseg(
         if verbose:
             print("Converting cells boundaries to circle...")
 
-        shapes["cells_boundaries_circles"] = spatialdata.to_circles(shapes["cells_boundaries"])
+        shapes["cells_boundaries_circles"] = spatialdata.to_circles(
+            shapes["cells_boundaries"]
+        )
 
     ### sdata
-    sdata = spatialdata.SpatialData(images=images, labels=labels, points=points, shapes=shapes, tables=tables)
+    sdata = spatialdata.SpatialData(
+        images=images, labels=labels, points=points, shapes=shapes, tables=tables
+    )
 
     return sdata
 
@@ -423,8 +441,12 @@ def read_xenium_samples(
         A dictionary of sample names mapped to AnnData objects or spatialdata objects.
     """
     if isinstance(data_dirs, list):
-        sample_names = [Path(path).stem if sample_name_as_key else path for path in data_dirs]
-        data_dirs = {sample_name: path for sample_name, path in zip(sample_names, data_dirs)}
+        sample_names = [
+            Path(path).stem if sample_name_as_key else path for path in data_dirs
+        ]
+        data_dirs = {
+            sample_name: path for sample_name, path in zip(sample_names, data_dirs)
+        }
 
     # Parallel processing
     sdatas = {}
@@ -487,8 +509,14 @@ def read_coexpression_file(k, method, target_count, results_dir):
     pos_rate : pd.Series
         The positivity rate.
     """
-    out_file_coexpr = results_dir / f"coexpression/{'/'.join(k)}/coexpression_{method}_{target_count}.parquet"
-    out_file_pos_rate = results_dir / f"coexpression/{'/'.join(k)}/positivity_rate_{method}_{target_count}.parquet"
+    out_file_coexpr = (
+        results_dir
+        / f"coexpression/{'/'.join(k)}/coexpression_{method}_{target_count}.parquet"
+    )
+    out_file_pos_rate = (
+        results_dir
+        / f"coexpression/{'/'.join(k)}/positivity_rate_{method}_{target_count}.parquet"
+    )
 
     cc = pd.read_parquet(out_file_coexpr)
     pos_rate = pd.read_parquet(out_file_pos_rate)[0]
@@ -516,7 +544,9 @@ def read_coexpression_files(cc_paths, results_dir):
     """
     with ThreadPoolExecutor() as executor:
         futures = [
-            executor.submit(read_coexpression_file, k, method, target_count, results_dir)
+            executor.submit(
+                read_coexpression_file, k, method, target_count, results_dir
+            )
             for k, method, target_count in cc_paths
         ]
 
@@ -524,7 +554,9 @@ def read_coexpression_files(cc_paths, results_dir):
         pos_rate = {}
         for future in as_completed(futures):
             method, target_count, cc, pr = future.result()
-            k = cc_paths[futures.index(future)][0]  # Retrieve the `k` corresponding to this future
+            k = cc_paths[futures.index(future)][
+                0
+            ]  # Retrieve the `k` corresponding to this future
 
             if k not in CC:
                 CC[k] = {}
@@ -584,13 +616,17 @@ def write_10X_h5(adata, file):
         "barcodes",
         data=np.array(adata.obs_names, dtype=f"|S{str_max(adata.obs_names)}"),
     )
-    grp.create_dataset("data", data=np.array(adata.X.data, dtype=f"<i{int_max(adata.X.data)}"))
+    grp.create_dataset(
+        "data", data=np.array(adata.X.data, dtype=f"<i{int_max(adata.X.data)}")
+    )
     ftrs = grp.create_group("features")
     # this group will lack the following keys:
     # '_all_tag_keys', 'feature_type', 'genome', 'id', 'name', 'pattern', 'read', 'sequence'
     ftrs.create_dataset(
         "feature_type",
-        data=np.array(adata.var.feature_types, dtype=f"|S{str_max(adata.var.feature_types)}"),
+        data=np.array(
+            adata.var.feature_types, dtype=f"|S{str_max(adata.var.feature_types)}"
+        ),
     )
     ftrs.create_dataset(
         "genome",
@@ -600,9 +636,15 @@ def write_10X_h5(adata, file):
         "id",
         data=np.array(adata.var.gene_ids, dtype=f"|S{str_max(adata.var.gene_ids)}"),
     )
-    ftrs.create_dataset("name", data=np.array(adata.var.index, dtype=f"|S{str_max(adata.var.index)}"))
-    grp.create_dataset("indices", data=np.array(adata.X.indices, dtype=f"<i{int_max(adata.X.indices)}"))
-    grp.create_dataset("indptr", data=np.array(adata.X.indptr, dtype=f"<i{int_max(adata.X.indptr)}"))
+    ftrs.create_dataset(
+        "name", data=np.array(adata.var.index, dtype=f"|S{str_max(adata.var.index)}")
+    )
+    grp.create_dataset(
+        "indices", data=np.array(adata.X.indices, dtype=f"<i{int_max(adata.X.indices)}")
+    )
+    grp.create_dataset(
+        "indptr", data=np.array(adata.X.indptr, dtype=f"<i{int_max(adata.X.indptr)}")
+    )
     grp.create_dataset(
         "shape",
         data=np.array(list(adata.X.shape)[::-1], dtype=f"<i{int_max(adata.X.shape)}"),
