@@ -21,3 +21,5 @@
 **/logs/
 **/results/
 **/out
+.Rproj.user
+.DS_Store
