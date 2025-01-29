@@ -3,7 +3,7 @@ import pandas as pd
 import os
 import pathlib
 import json
-from rds2py import read_rds
+# from rds2py import read_rds
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 
 try:

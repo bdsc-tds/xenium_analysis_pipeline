@@ -1,0 +1,44 @@
+name: spatial
+channels:
+  - conda-forge
+  - rapidsai
+  - nvidia
+dependencies:
+  - python=3.11
+  - rapids
+  - cuda-version=12.2
+  - cudf
+  - cudnn
+  - cutensor
+  - cusparselt
+  - graphviz
+  - pygraphviz
+  - cudatoolkit-dev
+  - aws-sdk-cpp
+  - aws-c-event-stream
+  - aws-c-common
+  - modin-ray
+  - pip:
+    - ccf-openapi==1.1
+    - umap-learn
+    - nxontology
+    - pronto
+    - datashader
+    - liana
+    - scib
+    - scanorama
+    - scvi-tools
+    - POT
+    - torch==2.2.2
+    - lightning<2.2
+    - torchvision
+    - torchaudio
+    - scHPL
+    - scarches
+    - rapids-singlecell
+    - torchdata
+    - openpyxl
+    - spatialdata
+    - spatialdata-io
+    - spatialdata-plot
+
