@@ -82,6 +82,7 @@ def spearman_coexpression(X):
     """
     return scipy.stats.spearmanr(X.toarray()).statistic
 
+
 def thin_counts(X, target_count, gen=None):
     """
     Downsample counts to a target count per row.

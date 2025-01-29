@@ -34,6 +34,12 @@ diseases_1:
       max_features: Inf
       min_cells: 5
 
+    _target_counts:
+      # Comment out if they are the same as the global target counts for coexpression.
+      - 30
+      - 50
+      - 200
+
     donor_1: sample_1
     donor_2:
       - sample_2

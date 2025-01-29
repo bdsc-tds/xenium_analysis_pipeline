@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12.7
+  - numpy=2.2.2
+  - pandas=2.2.3
+  - scipy=1.15.1
+  - pip
+  - pip:
+      - spatialdata_io==0.1.7

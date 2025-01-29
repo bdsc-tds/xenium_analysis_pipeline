@@ -37,10 +37,11 @@ def extract_layers_from_experiments(
         j = i.split(sep_in)
         assert max(layers) < len(j)
 
+        vals: list[str] = [j[k] for k in layers]
         if sep_out is not None:
-            ret.append(sep_out.join([j[k] for k in layers]))
+            ret.append(sep_out.join(vals))
         else:
-            ret.append(j)
+            ret.append(vals)
 
     return ret
 
@@ -381,6 +382,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                     cc.EXPERIMENTS_COLLECTIONS_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                    cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                     cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                 ]
             )
@@ -417,6 +419,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
                 )
@@ -446,6 +449,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
                 ),
@@ -460,6 +464,39 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         key_val_func=None,
         vals_func=_merge_dicts,
         simplify=lambda x: {k: v for k, v in x.items() if v is not None and len(v) > 0},
+    )
+
+    gene_panel_target_counts = _collect_experiments(
+        _flatten_struct(
+            data,
+            key_layer2pat_include={
+                (0, 1): r"^(?!_+).+",
+                (2,): cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
+                (3,): lambda v: isinstance(v, (int, float, list)),
+            },
+            key_layer2pat_exclude={
+                (0, 1, 2): "|".join(
+                    [
+                        cc.EXPERIMENTS_CONFIG_PATH_NAME,
+                        cc.EXPERIMENTS_BASE_PATH_NAME,
+                        cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+                    ]
+                ),
+            },
+        ),
+        1,
+        drop_layers=(2,),
+        val_func=None,
+        key_val_func=None,
+        vals_func=lambda v: (
+            None
+            if v is None or (isinstance(v, (list, tuple)) and all(i is None for i in v))
+            else v
+        ),
+        simplify=None,
     )
 
     cell_type_annotation = _collect_experiments(
@@ -478,6 +515,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                     ]
                 ),
             },
@@ -495,6 +533,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         collections,
         gene_panel_files,
         gene_panel_qc_thresholds,
+        gene_panel_target_counts,
         cell_type_annotation,
     )
 
@@ -582,6 +621,31 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
             methods.append(m)
 
     return methods, ret
+
+
+def _process_coexpression(
+    data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
+) -> dict[str, list[str]]:
+    wildcards: dict[str, list[str]] = {}
+
+    for k, v in data_from_experiments.items():
+        assert k not in wildcards
+
+        if v is None:
+            v = _convert2list(
+                get_dict_value(data_from_config, "target_counts"),
+                match_length=False,
+            )
+        assert isinstance(v, list) and len(v) > 0
+
+        methods: list[str] = _convert2list(
+            get_dict_value(data_from_config, "methods"),
+            match_length=False,
+        )
+
+        wildcards[k] = [f"{i}_{j}" for i in methods for j in v]
+
+    return wildcards
 
 
 def _process_cell_type_annotation(
@@ -731,15 +795,32 @@ def process_config(
     _segmentation = _process_segmentation(get_dict_value(data, "segmentation"))
 
     set_dict_value(
-        data, cc.WILDCARDS_NAME, cc.WILDCARDS_SEGMENTATION_NAME, value=_segmentation[0]
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_SEGMENTATION_NAME,
+        value=_segmentation[0],
     )
 
     for k, v in _segmentation[1].items():
         set_dict_value(data, "segmentation", k, value=v)
 
+    # Process `coexpression` section.
+    _coexpression = _process_coexpression(
+        _experiments[5],
+        get_dict_value(data, "coexpression"),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_COEXPRESSION_NAME,
+        value=_coexpression,
+    )
+
     # Process `cell_type_annotation` section.
     _cell_type_annotation = _process_cell_type_annotation(
-        _experiments[5], get_dict_value(data, "cell_type_annotation")
+        _experiments[6],
+        get_dict_value(data, "cell_type_annotation"),
     )
 
     set_dict_value(

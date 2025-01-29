@@ -88,6 +88,18 @@ standard_seurat_analysis:
   clustering:
     resolution: 0.8
 
+coexpression:
+  methods:
+    - conditional
+    - jaccard
+    - pearson
+    - spearman
+
+  target_counts:
+    - 30
+    - 50
+    - 200
+
 cell_type_annotation:
   reference_based:
     methods:
