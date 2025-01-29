@@ -72,7 +72,7 @@ segmentation:
 
   _normalisation:
     _threads: 16
-    _memory: 64
+    _memory: 128
 
 standard_seurat_analysis:
   qc:

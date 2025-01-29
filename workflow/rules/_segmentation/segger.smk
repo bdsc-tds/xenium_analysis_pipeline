@@ -183,7 +183,7 @@ rule runSeggerTrain:
         )
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
-        mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu4segger() else 20480),
+        mem_mb=lambda wildcards, threads, attempt: threads * attempt**2 * (2048 if _use_gpu4segger() else 20480),
         slurm_extra=get_slurm_extra4runSeggerTrain
     container:
         config["containers"]["segger"]
@@ -239,7 +239,7 @@ rule runSeggerPredict:
                 wildcards,
                 for_input=False
                 )
-        ) * 10**-6 * attempt * (100 if _use_gpu4segger() else 500),
+        ) * 10**-6 * attempt**2 * (100 if _use_gpu4segger() else 500),
         slurm_extra=get_slurm_extra4runSeggerPredict
     container:
         config["containers"]["segger"]
