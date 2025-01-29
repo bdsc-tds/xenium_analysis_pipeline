@@ -27,7 +27,10 @@ rule loadSegmentation2Seurat:
     output:
         protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/raw_seurat.rds')
     params:
-        data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input=False),
+        data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(
+            wildcards,
+            for_input=False
+        ),
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         sample_id=lambda wildcards: wildcards.sample_id,
         segmentation_id=lambda wildcards: wildcards.segmentation_id
