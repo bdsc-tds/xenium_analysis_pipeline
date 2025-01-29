@@ -8,6 +8,9 @@
 **/.keras
 **/.cupy
 **/.nv
+**/.fontconfig
+**/.vscode
+**/.mypy_cache
 
 **/__pycache__
 **/.RData
