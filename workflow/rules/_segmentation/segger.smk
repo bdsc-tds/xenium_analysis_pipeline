@@ -132,6 +132,14 @@ rule runSeggerTrain:
     log:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/runSeggerTrain.log'
     params:
+        num_tx_tokens=lambda wildcards: get_dict_value(
+            config,
+            "segmentation",
+            "segger",
+            "train",
+            "num_tx_tokens",
+            replace_none=500
+        ),
         accelerator=lambda wildcards: get_dict_value(
             config,
             "segmentation",
@@ -183,7 +191,7 @@ rule runSeggerTrain:
         )
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
-        mem_mb=lambda wildcards, threads, attempt: threads * attempt**2 * (2048 if _use_gpu4segger() else 20480),
+        mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu4segger() else 20480),
         slurm_extra=get_slurm_extra4runSeggerTrain
     container:
         config["containers"]["segger"]
@@ -192,6 +200,7 @@ rule runSeggerTrain:
         "--dataset_dir {input} "
         "--models_dir {output} "
         "--sample_tag run "
+        "--num_tx_tokens {params.num_tx_tokens} "
         "--accelerator {params.accelerator} "
         "--devices {params.devices} "
         "--max_epochs {params.max_epochs} "
@@ -234,12 +243,15 @@ rule runSeggerPredict:
         1
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
-        mem_mb=lambda wildcards, attempt: os.path.getsize(
-            get_input2_or_params4runProseg(
-                wildcards,
-                for_input=False
-                )
-        ) * 10**-6 * attempt**2 * (100 if _use_gpu4segger() else 500),
+        mem_mb=lambda wildcards, attempt: min(
+            os.path.getsize(
+                get_input2_or_params4runProseg(
+                    wildcards,
+                    for_input=False
+                    )
+            ) * 10**-6 * attempt * (100 if _use_gpu4segger() else 500),
+            1024000
+        ),
         slurm_extra=get_slurm_extra4runSeggerPredict
     container:
         config["containers"]["segger"]
