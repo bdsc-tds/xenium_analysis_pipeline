@@ -2,6 +2,7 @@
 Utility functions during run time.
 """
 
+import os
 from typing import Any
 
 
@@ -43,3 +44,26 @@ def cross_values_by_key(
         ret.extend([(i, j) for i in v for j in vals_2[k]])
 
     return ret
+
+
+def get_size(path) -> int:
+    """Get the size of a file or directory.
+
+    Args:
+        path (str): Path to the file or directory.
+
+    Returns:
+        int: Size of the file or directory.
+    """
+    if os.path.isfile(path):
+        return os.path.getsize(path)
+
+    total_size: int = 0
+    for dirpath, _, filenames in os.walk(path):
+        for f in filenames:
+            fp: str = os.path.join(dirpath, f)
+
+            if not os.path.islink(fp):
+                total_size += os.path.getsize(fp)
+
+    return total_size

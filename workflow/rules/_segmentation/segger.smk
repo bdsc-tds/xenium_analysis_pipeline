@@ -244,7 +244,7 @@ rule runSeggerPredict:
     resources:
         slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
         mem_mb=lambda wildcards, attempt: min(
-            os.path.getsize(
+            get_size(
                 get_input2_or_params4runProseg(
                     wildcards,
                     for_input=False
@@ -281,6 +281,10 @@ rule cleanSeggerPredictDir:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/cleanSeggerPredictDir.log'
     conda:
         "../../envs/pyarrow.yml"
+    resources:
+        mem_mb=lambda wildcards, input: get_size(
+            input[0]
+        ) * 2 * 10**-6
     shell:
         "python3 workflow/scripts/_segmentation/clean_segger_predict_results.py "
         "--dir {input} "
