@@ -8,7 +8,7 @@ library(Seurat)
 
 ###### snakemake params  ######
 
-query_path <- snakemake@input[[1]] # combo meta.data obj (will contain all Seurat metadata, including spot_class)
+# input the right files here: seurat and output/results_df.parquet
 
 ###### end of snakemake params  ###### 
 
@@ -65,6 +65,9 @@ process_segmentation <- function(metadata,
           sample = sample_id, 
           segmentation = segmentation,
           donor = split_sample_id[3],
+          doublet_detection_method = XXX,
+          reference = XXX,
+          annotation_level = XXX,
           number_of_cells = number_of_cells,
           mean_nCount = mean_nCount, 
           median_nCount = median_nCount,
