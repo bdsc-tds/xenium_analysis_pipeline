@@ -3,92 +3,61 @@ sink(log, type = "output")
 sink(log, type = "message")
 
 # Load required libraries
-library(tidyverse)
 library(Seurat)
+library(dplyr)
+library(stringr)
+library(reader)
+library(arrow)
 
-###### snakemake params  ######
+# Parse command-line arguments - not sure if this section is correct, leaving for Senbai
+args <- commandArgs(trailingOnly = TRUE)
+seurat_files <- strsplit(args[1], " ")[[1]]  # Multiple Seurat files
+annotation_file <- args[2]
+output_file <- args[3]
 
-# input the right files here: seurat and output/results_df.parquet
+# Load annotation data
+annotations <- read_parquet(annotation_file)
 
-###### end of snakemake params  ###### 
+# Function to process each Seurat object
+process_seurat_metadata <- function(seurat_path) {
+    path_parts <- unlist(strsplit(seurat_path, "/"))
+    # this should be taken from the annotation file instead!
+    segmentation <- path_parts[1]
+    condition <- path_parts[2]
+    panel <- path_parts[3]  # Extract panel
+    donor <- path_parts[4]
+    sample_id <- path_parts[5]
+    reference <- path_parts[8]
+    annotation_level <- path_parts[10]
 
-# Function to process a segmentation dataset 
-process_segmentation <- function(metadata, 
-                                 count_col = "nCount", 
-                                 feature_col = "nFeature",
-                                 gene_panel = split_sample_id[2], # is this a function I should load first?
-                                 donor_col = split_sample_id[3],
-                                 sample_col = split_sample_id[4],
-                                 sample_id = "sample_id",
-                                 segmentation_col = "segmentation_id") {
-  
-  # Extract unique tissue and segmentation levels
-  tissues <- unique(metadata[[sample_col]])
-  segmentations <- unique(metadata[[segmentation_col]])
-  
-  # Initialize an empty list to store results
-  all_results <- list()
-  
-  # Iterate over each tissue and segmentation method
-  for (tissue in tissues) {
-    for (segmentation in segmentations) {
-      
-      # Subset metadata object for the current tissue and segmentation method
-      md_subset <- subset(metadata, subset = tissue == tissue & segmentation == segmentation)
-      
-      # Ensure the subset is not empty
-      if (nrow(md_subset) > 0) {
-        
-        # Extract the count and feature data
-        count_data <- md_subset[[count_col]]
-        feature_data <- md_subset[[feature_col]]
-        
-        # Convert to numeric vectors (remove row names) before computing the mean
-        count_data_numeric <- as.numeric(count_data)
-        feature_data_numeric <- as.numeric(feature_data)
-        
-        # Calculate QC metrics for the current tissue and segmentation method
-        number_of_cells <- ncol(md_subset)
-        percentage_singlets <- ncol(md_subset %>% filter(spot_class == "singlet")) / number_of_cells * 100
-        percentage_rejects <- ncol(md_subset %>% filter(spot_class == "reject")) / number_of_cells * 100
-        
-        # Assuming count_data_numeric and feature_data_numeric are numeric vectors, calculate the mean
-        mean_nCount <- mean(count_data_numeric, na.rm = TRUE)
-        mean_nFeature <- mean(feature_data_numeric, na.rm = TRUE)
+    seurat_obj <- readRDS(seurat_path)
 
-        # Assuming count_data_numeric and feature_data_numeric are numeric vectors, calculate the median
-        median_nCount <- median(count_data_numeric, na.rm = TRUE)
-        median_nFeature <- median(feature_data_numeric, na.rm = TRUE)
-        
-        # Store the results in a list
-        result <- data.frame(
-          sample = sample_id, 
-          segmentation = segmentation,
-          donor = split_sample_id[3],
-          doublet_detection_method = XXX,
-          reference = XXX,
-          annotation_level = XXX,
-          number_of_cells = number_of_cells,
-          mean_nCount = mean_nCount, 
-          median_nCount = median_nCount,
-          mean_nFeature = mean_nFeature,
-          median_nFeature = median_nFeature,
-          percentage_singlets = percentage_singlets, 
-          percentage_rejects = percentage_rejects 
+    # Add metadata
+    seurat_obj <- AddMetaData(seurat_obj, metadata = annotations)
+
+    # Extract metadata
+    metadata <- seurat_obj@meta.data
+
+    # Summarize count per sample
+    sample_summary <- metadata %>%
+        summarise(
+            sample_id = unique(sample_id),
+            panel = panel,
+            segmentation = segmentation,
+            reference = reference,
+            doublet_detection_method = "scDblFinder",
+            annotation_level = annotation_level,
+            Count = n()
         )
-        
-        # Append the result to the list
-        all_results[[length(all_results) + 1]] <- result
-      }
-    }
-  }
-  
-  # Combine all the results into a single data frame
-  final_data <- do.call(rbind, all_results)
+    
+    return(sample_summary)
 }
 
+# Process all Seurat objects and combine results
+all_summaries <- lapply(seurat_files, process_seurat_metadata)
+final_summary <- bind_rows(all_summaries)
 
-# Running the function
-metadata <- read.csv(query_path)
-all_data <- process_segmentation(metadata)
-write.csv(all_data, snakemake@output[[1]], row.names = FALSE)
+# Group by panel and write separate output files
+final_summary %>%
+    group_by(panel) %>%
+    write.csv(output_file, row.names = FALSE)
