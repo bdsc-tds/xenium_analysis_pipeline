@@ -23,10 +23,9 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
             k = (segmentation.stem,cohort.stem,panel.stem)
             name = '/'.join(k)
 
-            if replicate_transcripts_path.exists():
 
-                out_file = results_dir / f'embed_panel/{name}/umap_{n_comps=}_{n_neighbors=}_{min_dist=}_{metric}.parquet' 
-                out_files_panel.append(out_file)
+            out_file = results_dir / f'embed_panel/{name}/umap_{n_comps=}_{n_neighbors=}_{min_dist=}_{metric}.parquet' 
+            out_files_panel.append(out_file)
 
             rule:
                 name: f'embed_panel/{name}'
@@ -80,10 +79,8 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
             k = (segmentation.stem,cohort.stem)
             name = '/'.join(k)
 
-            if replicate_transcripts_path.exists():
-
-                out_file = results_dir / f'embed_cohort/{name}/umap_{n_comps=}_{n_neighbors=}_{min_dist=}_{metric}.parquet' 
-                out_files_cohort.append(out_file)
+            out_file = results_dir / f'embed_cohort/{name}/umap_{n_comps=}_{n_neighbors=}_{min_dist=}_{metric}.parquet' 
+            out_files_cohort.append(out_file)
 
             rule:
                 name: f'embed_cohort/{name}'
