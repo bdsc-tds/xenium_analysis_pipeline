@@ -13,8 +13,8 @@ rule runReferenceBasedSeurat:
     params:
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         annotation_id=lambda wildcards: wildcards.annotation_id,
-        ref_assay=lambda wildcards: cac.REF_SEURAT_DEFAULT_ASSAY if wildcards.normalisation_id == "lognorm" else cac.REF_SEURAT_ALT_ASSAY,
-        xe_assay=lambda wildcards: cac.XE_SEURAT_DEFAULT_ASSAY if wildcards.normalisation_id == "lognorm" else cac.XE_SEURAT_ALT_ASSAY,
+        ref_assay=lambda wildcards: get_assay_name(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,

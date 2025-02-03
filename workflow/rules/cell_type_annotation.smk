@@ -31,6 +31,15 @@ def get_path2reference4reference_based_annotation(wildcards) -> str:
     )
 
 
+def get_assay_name(wildcards, for_ref: bool) -> str:
+    if wildcards.normalisation_id == "lognorm":
+        return cac.REF_SEURAT_DEFAULT_ASSAY if for_ref else cac.XE_SEURAT_DEFAULT_ASSAY
+    elif wildcards.normalisation_id == "sctransform":
+        return cac.REF_SEURAT_ALT_ASSAY if for_ref else cac.XE_SEURAT_ALT_ASSAY
+
+    raise RuntimeError(f"Error! Unknown normalisation method: {wildcards.normalisation_id}. Valid methods include 'lognorm' and 'sctransform'.")
+
+
 ######################################
 #              Subrules              #
 ######################################

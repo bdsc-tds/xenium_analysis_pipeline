@@ -48,8 +48,8 @@ rule runReferenceBasedRCTD:
     params:
         annotation_id=lambda wildcards: wildcards.annotation_id,
         class_level=get_class_level4runReferenceBasedRCTD,
-        ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
-        xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
+        ref_assay=lambda wildcards: get_assay_name(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,
