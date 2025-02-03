@@ -21,14 +21,6 @@ test_layer <- 'data'
 # Load reference and query data
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_data.R") # this does not look nice, but like this we do not duplicate code and making sure data are loaded and processed the same way for all the methods
 
-## Make sure chrom data are log-normalized
-DefaultAssay(chrom) <- ref_assay
-# chrom               <- NormalizeData(chrom)
-
-
-DefaultAssay(xe)    <- xe_assay
-#xe                  <- NormalizeData(xe)
-
 CELL_MIN_INSTANCE <- snakemake@params[["cell_min_instance"]]
 
 # Generate reference object
@@ -45,6 +37,8 @@ if (normalization.method == "sctransform") {
     normalization.method <- "SCT"
 } else if (normalization.method == "lognorm") {
     normalization.method <- "LogNormalize"
+    ## Make sure data have been log-normalized (required by `FindTransferAnchors()`) 
+    chrom <- NormalizeData(chrom)
 } else {
     stop("Unknown normalization method: ", normalization.method)
 }
