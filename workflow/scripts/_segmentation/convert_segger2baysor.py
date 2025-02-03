@@ -18,6 +18,9 @@ import geopandas as gpd
 
 from segger.prediction.boundary import generate_boundary
 
+CELL_ID_COLUMN_NAME = "segger_cell_id"
+CELL_IDS_TO_EXCLUDE = ["UNASSIGNED"]
+
 
 def parse_args():
     sys_args_parser = argparse.ArgumentParser(description="Adjust Segger results.")
@@ -95,7 +98,7 @@ def get_boundaries(
     df: pd.DataFrame,
     x: str = "x_location",
     y: str = "y_location",
-    cell_id: str = "segger_cell_id",
+    cell_id: str = CELL_ID_COLUMN_NAME,
 ) -> gpd.GeoDataFrame:
     df = df[~df[cell_id].isna()]
     codes, levels = pd.factorize(np.unique(df[cell_id]))
@@ -137,16 +140,16 @@ def refine_segmentation_table(
         )
 
     ret: pd.DataFrame = ori_table.join(
-        _geo_table.set_index("segger_cell_id"),
-        on="segger_cell_id",
+        _geo_table.set_index(CELL_ID_COLUMN_NAME),
+        on=CELL_ID_COLUMN_NAME,
         how="inner",
         validate="many_to_one",
     )
 
-    ret["is_noise"] = ret["segger_cell_id"].isna()
+    ret["is_noise"] = ret[CELL_ID_COLUMN_NAME].isna()
 
     ret = ret[
-        ["transcript_id", "cell_id", "segger_cell_id", "dummy_cell_id", "is_noise"]
+        ["transcript_id", "cell_id", CELL_ID_COLUMN_NAME, "dummy_cell_id", "is_noise"]
     ].rename(columns={"cell_id": "xr_cell_id", "dummy_cell_id": "cell"})
 
     return ret
@@ -198,6 +201,7 @@ if __name__ == "__main__":
         sys.stderr = _log
 
     seg: pd.DataFrame = pd.read_parquet(args.inseg)
+    seg = seg[~seg[CELL_ID_COLUMN_NAME].isin(CELL_IDS_TO_EXCLUDE)]
 
     geo: gpd.GeoDataFrame = get_boundaries(seg)
 
