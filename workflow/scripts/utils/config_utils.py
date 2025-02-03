@@ -623,6 +623,17 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
     return methods, ret
 
 
+def _process_seurat_norm(methods: str | list[str]) -> list[str]:
+    _methods: list[str] = _convert2list(methods, match_length=False)
+
+    if len(_methods) == 0:
+        raise RuntimeError(
+            "Error! At least one Seurat normalisation method should be used."
+        )
+
+    return _methods
+
+
 def _process_coexpression(
     data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
 ) -> dict[str, list[str]]:
@@ -803,6 +814,23 @@ def process_config(
 
     for k, v in _segmentation[1].items():
         set_dict_value(data, "segmentation", k, value=v)
+
+    # Process `standard_seurat_analysis`, `normalisation` section.
+    _seurat_norm = _process_seurat_norm(
+        get_dict_value(
+            data,
+            "standard_seurat_analysis",
+            "normalisation",
+            "methods",
+        )
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_SEURAT_NORM_NAME,
+        value=_seurat_norm,
+    )
 
     # Process `coexpression` section.
     _coexpression = _process_coexpression(

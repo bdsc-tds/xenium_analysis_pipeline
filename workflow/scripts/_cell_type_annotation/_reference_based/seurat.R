@@ -23,7 +23,7 @@ snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_
 
 ## Make sure chrom data are log-normalized
 DefaultAssay(chrom) <- ref_assay
-chrom               <- NormalizeData(chrom)
+# chrom               <- NormalizeData(chrom)
 
 
 DefaultAssay(xe)    <- xe_assay
@@ -40,11 +40,26 @@ ref_labels <- chrom@meta.data %>% pull(annotation_level)
 
 xe_chrom_common_genes <- intersect(rownames(xe), rownames(chrom))
 
+normalization.method <- xe@misc$standard_seurat_analysis_meta$normalisation_id
+if (normalization.method == "sctransform") {
+    normalization.method <- "SCT"
+} else if (normalization.method == "lognorm") {
+    normalization.method <- "LogNormalize"
+} else {
+    stop("Unknown normalization method: ", normalization.method)
+}
+
 # Annotate with Seurat transfer 
 
 dims <- snakemake@params[["min_dim"]]:snakemake@params[["max_dim"]]
 
-anchors       <- FindTransferAnchors(reference = chrom, query = xe, features = xe_chrom_common_genes, dims = dims)
+anchors       <- FindTransferAnchors(
+    reference = chrom,
+    query = xe,
+    normalization.method = normalization.method,
+    features = xe_chrom_common_genes,
+    dims = dims
+)
 predictions   <- TransferData(anchorset = anchors, refdata = ref_labels, dims = dims)
 xe            <- AddMetaData(xe, metadata = predictions)
 

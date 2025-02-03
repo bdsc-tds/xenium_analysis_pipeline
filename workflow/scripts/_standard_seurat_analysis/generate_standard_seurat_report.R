@@ -8,7 +8,21 @@ pr <- list(
   xe_path = snakemake@input[["preprocessed"]],
   default_assay = snakemake@params[["default_assay"]],
   segmentation_id = snakemake@params[["segmentation_id"]],
-  sample_id = snakemake@params[["sample_id"]]
+  sample_id = snakemake@params[["sample_id"]],
+  normalisation_id = snakemake@params[["normalisation_id"]]
+)
+
+dir.create(
+  file.path(snakemake@params[["intermediates_dir"]]),
+  showWarnings = FALSE,
+  recursive = TRUE,
+  mode = "0766"
+)
+dir.create(
+  file.path(snakemake@params[["knit_root_dir"]]),
+  showWarnings = FALSE,
+  recursive = TRUE,
+  mode = "0766"
 )
 
 rmarkdown::render(
@@ -19,3 +33,6 @@ rmarkdown::render(
   knit_root_dir = snakemake@params[["knit_root_dir"]],
   clean = TRUE
 )
+
+unlink(snakemake@params[["intermediates_dir"]], recursive = TRUE)
+unlink(snakemake@params[["knit_root_dir"]], recursive = TRUE)

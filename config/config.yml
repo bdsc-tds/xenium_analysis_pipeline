@@ -82,6 +82,11 @@ standard_seurat_analysis:
     max_features: Inf
     min_cells: 5
 
+  normalisation:
+    methods:
+      - lognorm
+      - sctransform
+
   dim_reduction:
     n_dims: 50
 

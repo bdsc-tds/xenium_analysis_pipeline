@@ -4,9 +4,11 @@
 
 rule runStandardQC:
     input:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/raw_seurat.rds'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds'
     output:
-        temp(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds')
+        obj=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_seurat.rds',
+        cells=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_cells.parquet'),
+        genes=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_genes.parquet')
     params:
         min_counts=lambda wildcards: get_dict_value(
             config,
@@ -86,7 +88,7 @@ rule runStandardQC:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         default_layer=sec.SEURAT_DEFAULT_LAYER
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardQC.log'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/logs/runStandardQC.log'
     container:
         config["containers"]["r"]
     script:

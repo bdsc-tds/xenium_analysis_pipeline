@@ -2,11 +2,12 @@
 params:
   sample_id: "TO_BE_SET"
   segmentation_id: "TO_BE_SET"
+  normalisation_id: "TO_BE_SET"
   xe_raw_path: "TO_BE_SET"
   xe_path: "TO_BE_SET"
   default_assay: "TO_BE_SET"
 
-title: "Report: Standard Seurat analysis for sample `r params$sample_id` segmented by `r params$segmentation_id`"
+title: "Report: Standard Seurat analysis for sample `r params$sample_id` segmented by `r params$segmentation_id` and normalised by `r params$normalisation_id`"
 author: "Mariia Bilous"
 date: "`r Sys.Date()`"
 output: html_document

@@ -2,11 +2,13 @@
 #                Rules                #
 #######################################
 
-rule runStandardSctransformDimRedClust:
+rule runStandardDimRedClust:
     input:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognormed_seurat.rds'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/normalised_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/preprocessed_seurat.rds') 
+        obj=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'),
+        pca=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/preprocessed/pca.parquet'),
+        umap=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/preprocessed/umap.parquet')
     params:
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
@@ -28,8 +30,8 @@ rule runStandardSctransformDimRedClust:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480),
         retry_idx=lambda wildcards, attempt: attempt
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardSctransformDimRedClust.log'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/logs/runStandardDimRedClust.log'
     container:
         config["containers"]["r"]
     script:
-        "../../scripts/_standard_seurat_analysis/standard_sctransform_dimred_clust.R"
+        "../../scripts/_standard_seurat_analysis/standard_dimred_clust.R"

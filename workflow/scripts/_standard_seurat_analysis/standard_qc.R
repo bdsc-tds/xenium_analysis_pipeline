@@ -4,6 +4,7 @@ sink(log, type = "message")
 
 library(Seurat) 
 library(dplyr)
+library(arrow)
 
 convert2numeric <- function(val) {
   if (is.numeric(val)) return(val)
@@ -59,8 +60,22 @@ xe@misc$QC_metadata <- list(
   min_cells = min_cells
 )
 
-# Save post QC seurat
+# Save post QC files
 saveRDS(
-  xe, 
-  file = file.path(snakemake@output[[1]])
+  xe,
+  file = file.path(snakemake@output[["obj"]])
+)
+
+write_parquet(
+  data.frame(
+    cell = colnames(xe)
+  ),
+  sink = file.path(snakemake@output[["cells"]])
+)
+
+write_parquet(
+  data.frame(
+    gene = rownames(xe)
+  ),
+  sink = file.path(snakemake@output[["genes"]])
 )

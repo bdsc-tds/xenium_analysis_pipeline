@@ -43,6 +43,7 @@ import config_constants as cc
 Explanation of wildcards:
 - sample_id: The name of an sample to be processed with a format of "disease/gene_panel/donor/sample".
 - segmentation_id: The name of a segmentation method to be used.
+- normalisation_id: The name of a normalisation method to be used.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
 - annotation_id: The name of cell-type annotation to be used in a format "approach/reference_type/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
 """
@@ -56,6 +57,11 @@ SEGMENTATION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SEGMENTATION_NAME
+)
+NORMALISATION_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_SEURAT_NORM_NAME
 )
 COEXPRESSION_ID = uniquify_elements_in_list(
     *[
@@ -81,6 +87,7 @@ ANNOTATION_ID = uniquify_elements_in_list(
 wildcard_constraints:
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
     segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID]),
+    normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
     coexpression_id='|'.join([re.escape(i) for i in COEXPRESSION_ID]),
     annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID])
 
@@ -101,7 +108,7 @@ include: 'rules/cell_type_annotation.smk'
 #######################################
 
 def get_output4reports() -> list[str]:
-    prefix: str = f'{config["output_path"]}/segmentation'
+    prefix: str = f'{config["output_path"]}/reports'
     ret: list[str] = []
 
     ret.extend(
@@ -110,13 +117,14 @@ def get_output4reports() -> list[str]:
                 prefix,
                 i,
                 j,
-                "reports",
+                k,
                 "standard_seurat_analysis.html"
-            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+            ) for i in SEGMENTATION_ID for j in SAMPLE_ID for k in NORMALISATION_ID
         ]
     )
 
     return ret
+
 
 def get_output4cleanup() -> list[str]:
     ret: list[str] = []
@@ -164,8 +172,9 @@ def get_output4cleanup() -> list[str]:
 
     return ret
 
+
 def get_output4coexpression() -> list[str]:
-    prefix: str = f'{config["output_path"]}/segmentation'
+    prefix: str = f'{config["output_path"]}/coexpression'
     filenames: list[str] = ["coexpression.parquet", "positivity_rate.parquet"]
 
     samples_by_gene_panels: dict[str, list[str]] = get_dict_value(
@@ -191,14 +200,14 @@ def get_output4coexpression() -> list[str]:
             prefix,
             i,
             j[0],
-            "coexpression",
             j[1],
             k
         ) for i in SEGMENTATION_ID for j in samples_coexpression for k in filenames
     ]
 
+
 def get_output4cell_type_annotation() -> list[str]:
-    prefix: str = f'{config["output_path"]}/segmentation'
+    prefix: str = f'{config["output_path"]}/cell_type_annotation'
     filenames: list[str] = ["output.rds", "labels.parquet", "scores.parquet"]
 
     samples_by_disease: dict[str, list[str]] = get_dict_value(
@@ -224,11 +233,12 @@ def get_output4cell_type_annotation() -> list[str]:
             prefix,
             i,
             j[0],
-            "cell_type_annotation",
+            k,
             j[1],
-            k
-        ) for i in SEGMENTATION_ID for j in samples_annotation for k in filenames
+            m
+        ) for i in SEGMENTATION_ID for j in samples_annotation for k in NORMALISATION_ID for m in filenames
     ]
+
 
 def get_input2all(
     wildcards,

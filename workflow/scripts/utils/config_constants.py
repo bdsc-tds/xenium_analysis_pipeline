@@ -14,6 +14,8 @@ WILDCARDS_DONORS_NAME: str = "_donors"
 WILDCARDS_SAMPLES_NAME: str = "_samples"
 # Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods.
 WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
+# Child of `WILDCARDS_NAME` (second level); a list of values for normalization methods with Seurat.
+WILDCARDS_SEURAT_NORM_NAME: str = "_seurat_norm"
 # Child of `WILDCARDS_NAME` (second level); a list of values for coexpression methods.
 WILDCARDS_COEXPRESSION_NAME: str = "_coexpression"
 # Child of `WILDCARDS_NAME` (second level); a list of values for cell type annotation.
