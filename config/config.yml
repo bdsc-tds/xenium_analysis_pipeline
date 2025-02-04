@@ -59,6 +59,7 @@ segmentation:
       _other_options:
 
     train:
+      num_tx_tokens: 500
       accelerator: "cuda"
       devices: 1
       max_epochs: 200
