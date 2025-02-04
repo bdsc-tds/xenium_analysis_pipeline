@@ -4,8 +4,7 @@ sink(log, type = "message")
 
 library(Seurat) 
 library(dplyr)
-
-default_assay  <- snakemake@params[["default_assay"]]
+library(arrow)
 
 xe <- readRDS(snakemake@input[[1]])
 
@@ -17,8 +16,26 @@ xe@misc$standard_seurat_analysis_meta <- list(
   normalisation_id = snakemake@params[["normalisation_id"]]
 )
 
+normalised_data <- GetAssayData(
+  xe,
+  assay = snakemake@params[["normalised_assay"]],
+  layer = snakemake@params[["normalised_layer"]]
+)
+
 # Save post QC seurat
 saveRDS(
-  xe, 
+  xe,
   file = file.path(snakemake@output[[1]])
+)
+
+write_parquet(
+  data.frame(
+    cell = colnames(normalised_data)
+  ),
+  sink = file.path(snakemake@output[["cells"]])
+)
+
+write_parquet(
+  as.data.frame(t(normalised_data)),
+  sink = file.path(snakemake@output[["counts"]])
 )

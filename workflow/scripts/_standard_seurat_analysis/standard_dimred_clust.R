@@ -4,7 +4,6 @@ sink(log, type = "message")
 
 library(Seurat) 
 library(dplyr)
-library(tibble)
 library(arrow)
 
 options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
@@ -43,15 +42,22 @@ saveRDS(
 )
 
 write_parquet(
+  data.frame(
+    cell = colnames(xe)
+  ),
+  sink = file.path(snakemake@output[["cells"]])
+)
+
+write_parquet(
   as.data.frame(
     Embeddings(xe, reduction = "pca")
-  ) %>% rownames_to_column("cell_id"),
+  ),
   sink = file.path(snakemake@output[["pca"]])
 )
 
 write_parquet(
   as.data.frame(
     Embeddings(xe, reduction = "umap")
-  ) %>% rownames_to_column("cell_id"),
+  ),
   sink = file.path(snakemake@output[["umap"]])
 )

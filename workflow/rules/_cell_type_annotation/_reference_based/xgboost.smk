@@ -12,8 +12,8 @@ rule runReferenceBasedXGBoost:
         protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
     params:
         annotation_id=lambda wildcards: wildcards.annotation_id,
-        ref_assay=lambda wildcards: get_assay_name(wildcards, True),
-        xe_assay=lambda wildcards: get_assay_name(wildcards, False),
+        ref_assay=lambda wildcards: get_assay_name4annotation(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name4annotation(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,

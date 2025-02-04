@@ -13,8 +13,8 @@ rule runReferenceBasedSeurat:
     params:
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         annotation_id=lambda wildcards: wildcards.annotation_id,
-        ref_assay=lambda wildcards: get_assay_name(wildcards, True),
-        xe_assay=lambda wildcards: get_assay_name(wildcards, False),
+        ref_assay=lambda wildcards: get_assay_name4annotation(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name4annotation(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,
