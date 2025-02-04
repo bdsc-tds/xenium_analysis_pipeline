@@ -41,11 +41,11 @@ import config_constants as cc
 
 """
 Explanation of wildcards:
-- sample_id: The name of an sample to be processed with a format of "disease/gene_panel/donor/sample".
+- sample_id: The name of an sample to be processed with a format of "condition/gene_panel/donor/sample".
 - segmentation_id: The name of a segmentation method to be used.
 - normalisation_id: The name of a normalisation method to be used.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
-- annotation_id: The name of cell-type annotation to be used in a format "approach/reference_type/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
+- annotation_id: The name of cell-type annotation to be used in a format "approach/reference_name/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
 """
 
 SAMPLE_ID = get_dict_value(
@@ -210,22 +210,22 @@ def get_output4cell_type_annotation() -> list[str]:
     prefix: str = f'{config["output_path"]}/cell_type_annotation'
     filenames: list[str] = ["output.rds", "labels.parquet", "scores.parquet"]
 
-    samples_by_disease: dict[str, list[str]] = get_dict_value(
+    samples_by_conditions: dict[str, list[str]] = get_dict_value(
         config,
         "experiments",
         cc.EXPERIMENTS_COLLECTIONS_NAME,
-        cc.EXPERIMENTS_COLLECTIONS_DISEASES_NAME
+        cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME
     )
 
-    annotation_by_disease: dict[str, list[str]] = get_dict_value(
+    annotations_by_conditions: dict[str, list[str]] = get_dict_value(
         config,
         cc.WILDCARDS_NAME,
         cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME
     )
 
-    samples_annotation: list[tuple[str, str]] = cross_values_by_key(
-        samples_by_disease,
-        annotation_by_disease
+    samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+        samples_by_conditions,
+        annotations_by_conditions
     )
 
     return [
@@ -236,7 +236,7 @@ def get_output4cell_type_annotation() -> list[str]:
             k,
             j[1],
             m
-        ) for i in SEGMENTATION_ID for j in samples_annotation for k in NORMALISATION_ID for m in filenames
+        ) for i in SEGMENTATION_ID for j in samples_annotations for k in NORMALISATION_ID for m in filenames
     ]
 
 

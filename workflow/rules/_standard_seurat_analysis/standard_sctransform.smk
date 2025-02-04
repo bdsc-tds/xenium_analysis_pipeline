@@ -2,6 +2,11 @@
 #                Rules                #
 #######################################
 
+"""
+Comment:
+
+- future_globals_maxSize: By default 10GB is used to deal with the [issue](https://github.com/satijalab/seurat/issues/1845) of "Global size exceeds maximum allowed size" when running Seurat (see the solution [here](https://satijalab.org/seurat/archive/v3.0/future_vignette.html)).
+"""
 rule runStandardScTransform:
     input:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_seurat.rds'
