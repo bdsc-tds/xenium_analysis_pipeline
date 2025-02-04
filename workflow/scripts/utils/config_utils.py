@@ -389,19 +389,19 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         },
     )
 
-    diseases_level: dict[str, Any] = _collect_experiments(flattened, 0)
+    conditions_level: dict[str, Any] = _collect_experiments(flattened, 0)
     gene_panels_level: dict[str, Any] = _collect_experiments(flattened, 1)
     donors_level: dict[str, Any] = _collect_experiments(flattened, 2)
     samples_level: dict[str, Any] = _collect_experiments(flattened, 3)
 
     wildcards: dict[str, Any] = {}
-    wildcards[cc.WILDCARDS_DISEASES_NAME] = list(diseases_level.keys())
+    wildcards[cc.WILDCARDS_CONDITIONS_NAME] = list(conditions_level.keys())
     wildcards[cc.WILDCARDS_GENE_PANELS_NAME] = list(gene_panels_level.keys())
     wildcards[cc.WILDCARDS_DONORS_NAME] = list(donors_level.keys())
     wildcards[cc.WILDCARDS_SAMPLES_NAME] = list(samples_level.keys())
 
     collections: dict[str, Any] = {}
-    collections[cc.EXPERIMENTS_COLLECTIONS_DISEASES_NAME] = diseases_level
+    collections[cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME] = conditions_level
     collections[cc.EXPERIMENTS_COLLECTIONS_GENE_PANELS_NAME] = gene_panels_level
     collections[cc.EXPERIMENTS_COLLECTIONS_DONORS_NAME] = donors_level
 
@@ -623,6 +623,17 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
     return methods, ret
 
 
+def _process_seurat_norm(methods: str | list[str]) -> list[str]:
+    _methods: list[str] = _convert2list(methods, match_length=False)
+
+    if len(_methods) == 0:
+        raise RuntimeError(
+            "Error! At least one Seurat normalisation method should be used."
+        )
+
+    return _methods
+
+
 def _process_coexpression(
     data_from_experiments: dict[str, Any], data_from_config: dict[str, Any]
 ) -> dict[str, list[str]]:
@@ -662,6 +673,8 @@ def _process_cell_type_annotation(
     wildcards: dict[str, list[str]] = {}
 
     for k_1, v_1 in data_from_experiments.items():
+        _per_condition_path: list[str] = []
+
         for k_2, v_2 in list(v_1.items()):
             if "path" not in v_2 or v_2["path"] is None or v_2["path"] == "":
                 del data_from_experiments[k_1][k_2]
@@ -676,6 +689,12 @@ def _process_cell_type_annotation(
                     f"Error! Entry 'levels' of {k_1}'s {k_2} should be specified."
                 )
 
+            if v_2["path"] in _per_condition_path:
+                raise RuntimeError(
+                    f"Warning! Multiple references with the same path are specified for condition {k_1}."
+                )
+            _per_condition_path.append(v_2["path"])
+
             # Collect paths to reference.
             if k_1 not in paths:
                 paths[k_1] = {}
@@ -686,7 +705,7 @@ def _process_cell_type_annotation(
             if k_1 not in levels:
                 levels[k_1] = {}
             assert k_2 not in levels[k_1]
-            levels[k_1][k_2] = v_2["levels"]
+            levels[k_1][k_2] = _convert2list(v_2["levels"], match_length=False)
 
             # Collect cell min instances for reference.
             if k_1 not in cell_min_instances:
@@ -714,7 +733,7 @@ def _process_cell_type_annotation(
 
         if len(v_1) == 0:
             raise RuntimeError(
-                f"Error! At least one reference type among 'matched_reference' and 'external_reference' should be provided for disease {k_1}."
+                f"Error! At least one reference type among 'matched_reference' and 'external_reference' should be provided for condition {k_1}."
             )
 
     for k_1, v_1 in data_from_config.items():
@@ -751,7 +770,7 @@ def process_config(
 
     1. Process `experiments` section.
 
-    The configuration file containing experiment information will be loaded. Those four layers (diseases, gene panels, donors, and samples) will be flattened under different levels, which can be used as wildcards in the workflow.
+    The configuration file containing experiment information will be loaded. Those four layers (conditions, gene panels, donors, and samples) will be flattened under different levels, which can be used as wildcards in the workflow.
 
     Samples corresponding to the wildcards flattened from the first three layers are available under `_collections` of `experiments`.
 
@@ -803,6 +822,23 @@ def process_config(
 
     for k, v in _segmentation[1].items():
         set_dict_value(data, "segmentation", k, value=v)
+
+    # Process `standard_seurat_analysis`, `normalisation` section.
+    _seurat_norm = _process_seurat_norm(
+        get_dict_value(
+            data,
+            "standard_seurat_analysis",
+            "normalisation",
+            "methods",
+        )
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_SEURAT_NORM_NAME,
+        value=_seurat_norm,
+    )
 
     # Process `coexpression` section.
     _coexpression = _process_coexpression(

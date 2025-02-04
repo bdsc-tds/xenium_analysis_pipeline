@@ -4,15 +4,19 @@
 
 rule runStandardLogNorm:
     input:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/qced_seurat.rds'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_seurat.rds'
     output:
-        temp(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/std_seurat_objects/lognormed_seurat.rds')
+        obj=temp(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/normalised_counts/normalised_seurat.rds'),
+        cells=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/normalised_counts/cells.parquet'),
+        counts=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/normalised_counts/counts.parquet')
     params:
-        default_assay=sec.SEURAT_DEFAULT_ASSAY
+        normalised_assay=sec.SEURAT_DEFAULT_ASSAY,
+        normalised_layer=sec.SEURAT_ALT_LAYER,
+        normalisation_id="lognorm"
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240)
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/runStandardLogNorm.log'
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/logs/runStandardLogNorm.log'
     container:
         config["containers"]["r"]
     script:

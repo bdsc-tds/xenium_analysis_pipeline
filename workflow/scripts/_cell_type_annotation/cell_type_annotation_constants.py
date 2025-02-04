@@ -4,6 +4,10 @@ String constants for reference (scRNA-seq) and query (Xenium) Seurat objects.
 
 REF_SEURAT_DEFAULT_ASSAY: str = "RNA"
 XE_SEURAT_DEFAULT_ASSAY: str = "Xenium"
+
+REF_SEURAT_ALT_ASSAY: str = "SCT"
+XE_SEURAT_ALT_ASSAY: str = "SCT"
+
 # XE_SEURAT_SPATIAL_DIM_NAME: str = "spatial" # Not used
 
 # The following parameters may vary depending on the size of the Xenium gene panel

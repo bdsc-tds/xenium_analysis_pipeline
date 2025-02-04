@@ -37,19 +37,19 @@ rule runReferenceBasedRCTD:
         query=get_path2query4annotation,
         reference=get_path2reference4reference_based_annotation
     output:
-        rds_output=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output.rds'),
-        labels=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/labels.parquet'),
-        scores=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/scores.parquet'),
-        out_res_df=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output/results_df.parquet'),
-        out_w=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output/weights.parquet'),
-        out_wd=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output/weights_doublet.parquet'),
-        out_sc=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output/singlet_score.parquet'),
-        out_sm=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output/score_mat.parquet')
+        rds_output=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        labels=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        scores=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet'),
+        out_res_df=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output/results_df.parquet'),
+        out_w=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output/weights.parquet'),
+        out_wd=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output/weights_doublet.parquet'),
+        out_sc=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output/singlet_score.parquet'),
+        out_sm=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output/score_mat.parquet')
     params:
         annotation_id=lambda wildcards: wildcards.annotation_id,
         class_level=get_class_level4runReferenceBasedRCTD,
-        ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
-        xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
+        ref_assay=lambda wildcards: get_assay_name4annotation(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name4annotation(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,
@@ -95,7 +95,7 @@ rule runReferenceBasedRCTD:
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 20480)
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedRCTD.log'
+        f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedRCTD.log'
     container:
         config["containers"]["r"]
     script:

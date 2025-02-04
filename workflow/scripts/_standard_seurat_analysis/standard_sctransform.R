@@ -6,11 +6,11 @@ library(Seurat)
 library(dplyr)
 library(arrow)
 
+options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
+
 xe <- readRDS(snakemake@input[[1]])
 
-xe <- xe %>% NormalizeData() %>%
-    FindVariableFeatures() %>%
-    ScaleData()
+xe <- xe %>% SCTransform(assay = snakemake@params[["default_assay"]])
 
 xe@misc$standard_seurat_analysis_meta <- list(
   normalisation_id = snakemake@params[["normalisation_id"]]
@@ -25,7 +25,7 @@ normalised_data <- GetAssayData(
 # Save post QC seurat
 saveRDS(
   xe,
-  file = file.path(snakemake@output[[1]])
+  file = file.path(snakemake@output[["obj"]])
 )
 
 write_parquet(

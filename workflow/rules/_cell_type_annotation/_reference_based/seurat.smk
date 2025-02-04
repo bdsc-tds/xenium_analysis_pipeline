@@ -7,14 +7,14 @@ rule runReferenceBasedSeurat:
         query=get_path2query4annotation,
         reference=get_path2reference4reference_based_annotation
     output:
-        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/output.rds'),
-        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/labels.parquet'),
-        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/scores.parquet')
+        protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
     params:
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         annotation_id=lambda wildcards: wildcards.annotation_id,
-        ref_default_assay=cac.REF_SEURAT_DEFAULT_ASSAY,
-        xe_default_assay=cac.XE_SEURAT_DEFAULT_ASSAY,
+        ref_assay=lambda wildcards: get_assay_name4annotation(wildcards, True),
+        xe_assay=lambda wildcards: get_assay_name4annotation(wildcards, False),
         REF_MIN_UMI=cac.REF_MIN_UMI,
         REF_MAX_UMI=cac.REF_MAX_UMI,
         XE_MIN_UMI=cac.XE_MIN_UMI,
@@ -52,7 +52,7 @@ rule runReferenceBasedSeurat:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240),
         retry_idx=lambda wildcards, attempt: attempt
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/cell_type_annotation/{{annotation_id}}/logs/runReferenceBasedSeurat.log'
+        f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedSeurat.log'
     container:
         config["containers"]["r"]
     script:

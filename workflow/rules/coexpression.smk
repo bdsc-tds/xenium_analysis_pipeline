@@ -6,10 +6,10 @@ rule computeCoexpression:
     input:
         get_input2_or_params4loadSegmentation2Seurat
     output:
-        co_exp=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/coexpression/{{coexpression_id}}/coexpression.parquet'),
-        pos_rate=protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/coexpression/{{coexpression_id}}/positivity_rate.parquet')
+        co_exp=protected(f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/coexpression.parquet'),
+        pos_rate=protected(f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/positivity_rate.parquet')
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/coexpression/{{coexpression_id}}/logs/computeCoexpression.log'
+        f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/logs/computeCoexpression.log'
     params:
         data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(
             wildcards,

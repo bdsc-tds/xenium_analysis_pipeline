@@ -9,3 +9,17 @@ chrom <- readRDS(reference_path)
 xe <- readRDS(query_path)
 message("Data loaded.")
 
+message("Checking required assays...")
+# Make sure required assays exist
+if(!ref_assay %in% Assays(chrom)){
+  stop("Assay", ref_assay, "is not found in the reference object, please update the object and re-run!")
+} else {
+  DefaultAssay(chrom) <- ref_assay
+}
+
+if(!xe_assay %in% Assays(xe)){
+  stop("Assay", xe_assay, "is not found in the xenium object, please update the object and re-run!")
+} else {
+  DefaultAssay(xe)    <- xe_assay
+}
+message("All required assays exist...")

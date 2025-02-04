@@ -1,27 +1,25 @@
 _base_path: /path/to/raw/data
 
-diseases_1:
+condition_1:
   _cell_type_annotation:
     reference_based:
-      # Empty path (either `None` or "") indicates that the corresponding reference is unavailable.
-      # Please do not comment out sub-dictionaries.
-      matched_reference:
-        path: /path/to/reference
+      # A valid reference should have both a valid path (not `None` or "") and at least one level.
+      # The name of reference is user-defined and should be unique within each condition.
+      ref_1_name:
+        path: /path/to/reference_1
         levels:
           -
 
         # Minimum number of cells required per cell type. Can be decreased for smaller references.
         cell_min_instance: 25
 
-      external_reference:
-        path: /path/to/reference
+      ref_2_name:
+        path: /path/to/reference_2
         levels:
           -
 
         # Minimum number of cells required per cell type. Can be decreased for smaller references.
         cell_min_instance: 25
-
-    # marker_based: # placeholder
 
   gene_panel_1:
     _gene_panel_file: /path/to/or/name/of/gene/panel/file

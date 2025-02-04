@@ -15,8 +15,8 @@ annotation_mode   <- annotation_parameters[["annotation_mode"]] # So far, runs i
 annotation_method <- annotation_parameters[["annotation_method"]]
 
 # Assays used for annotation
-ref_assay         <- snakemake@params[["ref_default_assay"]] 
-xe_assay          <- snakemake@params[["xe_default_assay"]] 
+ref_assay         <- snakemake@params[["ref_assay"]] 
+xe_assay          <- snakemake@params[["xe_assay"]] 
 
 # Reference and query cell filtering params 
 REF_MIN_UMI       <- snakemake@params[["REF_MIN_UMI"]] 

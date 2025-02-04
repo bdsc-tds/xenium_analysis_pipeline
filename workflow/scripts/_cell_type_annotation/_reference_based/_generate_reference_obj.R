@@ -16,3 +16,4 @@ chrom <- generate_reference_obj(
   MAX_UMI_ref = REF_MAX_UMI,
   CELL_MIN_INSTANCE = CELL_MIN_INSTANCE
 )
+message("Reference object generated...")

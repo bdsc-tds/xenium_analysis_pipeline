@@ -4,30 +4,34 @@ This file lists experiments to be analysed.
 
 Experiment data are expected to be organised in the following manner on disk, where each layer is a folder:
 
-- Layer 1: diseases
+- Layer 1: conditions
 - Layer 2: gene panels
 - Layer 3: donors
 - Layer 4: samples
 
 There is no specific naming convention for each layer, except that they should not start with underscores, as character strings with such patterns are reserved for special usage by this workflow.
 
-With the data organised, they should then be specified in `experiments.yml`. The first three layers, namely diseases, gene panels and donors, should be listed as nested keys, and the final layer (samples) is a list of values corresponding to the third layer (donors). Users must ensure that these keys and values are character strings.
+With the data organised, they should then be specified in `experiments.yml`. The first three layers, namely conditions, gene panels and donors, should be listed as nested keys, and the final layer (samples) is a list of values corresponding to the third layer (donors). Users must ensure that these keys and values are character strings.
 
 Some reserved keys are listed as follows:
 
-- `_base_path`: The parent directory to the first layer (diseases) of the organised data. It should be specified as siblings of the first layer (diseases).
+- `_base_path`: The parent directory to the first layer (conditions) of the organised data. It should be specified as siblings of the first layer (conditions).
 
-- `_cell_type_annotation`: Disease specific configuration for cell type annotation using different approaches listed below. It should be specified as a direct child of the first layer (diseases).
+- `_cell_type_annotation`: Condition specific configuration for cell type annotation using different approaches listed below. It should be specified as a direct child of the first layer (conditions).
 
-  - `reference_based`: Single-cell RNA sequencing datasets are used as references for the annotation. Such reference datasets come either from a matched experiment (`matched_reference`), where samples are taken from the same tissue, or from an externel experiment (`external_reference`), where public datasets are used. Both types of references share the following specifications:
+  - `reference_based`: Annotated single-cell RNA sequencing datasets are used as references. Such reference datasets come either from a matched experiment, where samples are taken from the same tissue, or from an externel experiment, where public datasets are used. Users can specify multiple references with unique, user-defined names (not starting with underscores), which share the following specifications:
 
-    - `path`: Absolute path to the reference datasets. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific disease. However, please note that at least one `path` of `matched_reference` and `external_reference` should be specified for annotating cell types.
+    - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition.
 
-    - `levels`: #TODO
+    - `levels`: A list of level names in the reference dataset. A valid reference dataset also requires a valid list of levels.
+
+    - `cell_min_instance`: The minimum number of cells required per cell type (by default `25`). Can be decreased for smaller references.
 
 - `_gene_panel_file`: The path or the name to the gene panel file. It should be specified as a direct child of the second layer (gene panels). Leaving blank implies that the gene panel is user defined and thus invariant to the different versions of 10X xeniumranger.
 
 - `_qc`: Gene panel specific QC thresholds. It should be specified as a direct child of the second layer (gene panels). Only specify QC thresholds if the global ones are not suitable for specific gene panels. Please check the following section for global QC thresholds.
+
+- `_target_counts`: gene panel specific target counts for computing coexpression values. It should be specified as a direct child of the second layer (gene panels). Only specify target values if the global ones are not suitable for specific gene panels. Please check the following section for global target counts.
 
 # config.yml
 
@@ -97,13 +101,37 @@ This section specifies with key `methods` a number of methods that could be used
    - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
 
 4. `proseg`
-   [Proseg (v1.1.8+)](https://github.com/dcjones/proseg) is used for segmentation. Users can specify some options of the method using the following keys:
+   [Proseg (v2.0.0+)](https://github.com/dcjones/proseg) is used for segmentation. Users can specify some options of the method using the following keys:
 
    - `_threads`: The maximum number of threads to use.
 
    - `_memory`: The maximum amount of memory (in GB) to use.
 
    - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
+
+5. `segger`
+   [Segger](https://github.com/EliHei2/segger_dev) is used for segmentation. Users can specify some options at different stages during the computation.
+
+   - `preprocess` stage
+
+     - `tile_width`: Width of the tiles in pixels. Ignored if `tile_size` is provided. `200` by default.
+     - `tile_height`: height of the tiles in pixels. Ignored if `tile_size` is provided. `200` by default.
+     - `_threads`: Number of workers for parallel processing. `1` by default.
+     - `_other_options`: For options not defined in the configuration except for `--sample_type`, in a form similar to that mentioned above.
+
+   - `train` stage
+
+     - `accelerator`: Device type to use for training (e.g.,`cuda`, `cpu`). `cpu` by default.
+     - `devices`: Number of devices (GPUs) to use. `0` by default.
+     - `max_epochs`: Number of epochs for training. `200` by default.
+     - `batch_size`: Batch size for training. `4` by default.
+     - `_threads`: Number of workers for data loading. `2` by default.
+     - `_other_options`: For options not defined in the configuration except for `--sample_tag`, in a form similar to that mentioned above.
+
+   - `predict` stage
+
+     - `use_cc`: Use connected components if specified. `False` by default.
+     - `_other_options`: For options not defined in the configuration except for `--batch_size`, `--knn_method`, and `--cell_id_col`, in a form similar to that mentioned above.
 
 In addition, after acquiring results from Baysor, Proseg, and Segger, an extra step is performed where those results are normalised into the same format for the sake of downstream analysis. The corresponding arguments are specified under `_normalisation`, including:
 
@@ -124,37 +152,74 @@ This section specifies parameters in the standard Seurat analysis workflow.
    - `max_features`: `Inf` by default
    - `min_cells`: `5` by default
 
-2. `dim_reduction`
+2. `normalisation`
+   Normalisation methods to use during standard Seurat analysis, defined under `methods`:
+
+   - `lognorm`: Log-normalisation.
+   - `sctransform`: sctransform.
+
+   At least of one of the two methods should be used when running the workflow.
+
+3. `dim_reduction`
    Parameters used in dimension reduction.
 
    - `n_dims`: Number of dimensions to keep. `50` by default.
 
-3. `clustering`
+4. `clustering`
    Parameters used in clustering.
 
    - `resolution`: Parameter for `Seurat::FindClusters`. `0.8` by default.
 
-In addition, there are some reserved keys, specified as follows:
+## Coexpression (key: `coexpression`)
 
-1. `_future_globals_maxSize`: A number (`1` by default) with unit GB is specified here to deal with the [issue](https://github.com/satijalab/seurat/issues/1845) of "Global size exceeds maximum allowed size" when running Seurat (see the solution [here](https://satijalab.org/seurat/archive/v3.0/future_vignette.html)).
+This section specifies a list of methods (with key `methods`) and a list of target counts (with key `target_counts`) for computing coexpression per segmentation method per sample.
+
+1. `methods`
+   The workflow supports the following methods: `conditional`, `jaccard`, `pearson`, and `spearman`.
+
+2. `target_counts`
+   By default the workflow uses `30`, `50`, and `200` globally for all samples. Users can specify different values for certain panels in `experiments.yml`.
 
 ## Cell type annotation (key: `cell_type_annotation`)
 
-This section specifies with key `approaches` some approaches to use for cell type annotation. For now only reference based approach (specified with key `reference_based`) is available.
-
-More detailed configuration for each approach is configured in a separate dictionary with the approach name being the key. Removing any approaches inside `approaches` will rule them out from the workflow.
+This section for now only supports reference based approach (specified with key `reference_based`) for cell type annotation.
 
 1. `reference_based`
-   Use reference-based methods for cell type annotation, where disease-specific single-cell RNA sequencing datasets are used as references (please refer to the details in section `experiments.yml` above).
+   Use reference-based methods for cell type annotation, where condition-specific single-cell RNA sequencing datasets are used as references (please refer to the details in section `experiments.yml` above).
 
-   With key `methods`, this section specifies a number of methods that could be used for cell type annotation, including `rctd`, `singler`, `seurat`, `tangram`, and `xgboost`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
+   With key `methods`, this section specifies a number of methods that could be used for cell type annotation, including `rctd_class_aware`, `rctd_class_unaware`, `singler`, `seurat`, and `xgboost`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
 
-   1.1 `rctd`
+   For both `rctd_class_aware` and `rctd_class_unaware`, RCTD is used for the annotation. The difference between them is that for the former the parent class of the current one in the reference is passed as an argument, while for the latter it is agnostic about the parent class.
 
-   1.2 `singler`
+   Users can use another key `modes` to specify the the mode under which to run annotation methods. For now only `single_cell` mode is supported.
 
-   1.3 `seurat`
+   - `rctd`
+     RCTD is used for annotation.
 
-   1.4 `tangram`
+     - `UMI_min_sigma`: #TODO
+     - `_threads`: The maximum amount of memory (in GB) to use. `20` bu default.
+     - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.
 
-   1.5 `xgboost`
+   - `singler`
+     SingleR is used for annotation.
+
+     - `genes`: #TODO
+     - `de_method`: #TODO
+     - `aggr_ref`: #TODO
+     - `aggr_args_rank`: #TODO
+     - `aggr_args_power`: #TODO
+     - `_other_options`: Same as above.
+
+   - `seurat`
+     Seurat is used for annotation.
+
+     - `min_dim`: #TODO
+     - `max_dim`: #TODO
+     - `_other_options`: Same as above.
+
+   - `xgboost`
+     XGboost is used for annotation.
+
+     - `nrounds`: #TODO
+     - `eta`: #TODO
+     - `_other_options`: Same as above.
