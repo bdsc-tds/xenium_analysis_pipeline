@@ -50,6 +50,25 @@ The [Baysor](https://github.com/kharchenkolab/Baysor) version we use here is 0.7
 singularity build --fakeroot --force /path/to/the/built/container reproducibility/baysor.def
 ```
 
+#### Proseg
+
+The [Proseg](https://https://github.com/dcjones/proseg) version we use here is 2.0.0.
+
+```bash
+# the current working directory is the root of this repo
+singularity build --fakeroot --force /path/to/the/built/container reproducibility/proseg.def
+```
+
+#### Segger
+
+The [Segger](https://github.com/EliHei2/segger_dev) version we use here is a [fix](https://github.com/senbaikang/segger_dev/tree/96e531dd7313dfe9c19111b029b49e582531044f) by us.
+
+```bash
+# the current working directory is the root of this repo
+cd reproducibility/segger
+singularity build --fakeroot --force /path/to/the/built/container segger.def
+```
+
 ## Configuration
 
 ### Configuration for the workflow
@@ -75,6 +94,8 @@ We have developed a bash script, `run.sh`, to make the execution easy for users.
 
 - `SINGULARITY_BIND_DIRS`: An array of directories to bind to containers. Each element should be in the following form: _LOCAL_DIR:SINGULARITY_DIR_. Inexistent local directories will be filtered out.
 
+- `SNAKEMAKE_CACHE_DIR`: A directory used to store cache of Snakemake. Internally it overwrite the `XDG_CACHE_HOME` environment variable if it is set by users.
+
 ## Execution
 
 The workflow should be executed from the root directory of this repo. To get a self-explanatory help message, type
@@ -87,12 +108,14 @@ The workflow should be executed from the root directory of this repo. To get a s
 which prints
 
 ```
-Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULES ] [ -U | --until RULES ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
+        -j,--jobs JOBS: the number of jobs submitted to the cluster at the same time when -m,--mode is 'cluster'. (default: 500).
+        --retries RETRIES: the number of retries for failed jobs. (default: 0).
         -n,--dry-run: dry run.
-        -R,--forcerun RULES: force the re-execution or creation of the given rules or files.
-        -U,--until RULES: runs the pipeline until it finishes the specified rules or generated the files.
+        -R,--forcerun RULE: force the re-execution or creation of the given rule or file. Repeat this option multile times for multiple rules or files.
+        -U,--until RULE: runs the pipeline until it finishes the specified rule or generated the file. Repeat this option multile times for multiple rules or files.
         --dag OUTPUT: draw dag and save to OUTPUT.pdf.
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
