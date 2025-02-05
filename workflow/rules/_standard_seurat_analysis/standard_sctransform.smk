@@ -21,7 +21,7 @@ rule runStandardScTransform:
         normalised_layer=sec.SEURAT_ALT_LAYER,
         normalisation_id="sctransform"
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 10240),
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 20, 10240),
         retry_idx=lambda wildcards, attempt: attempt
     log:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/logs/runStandardScTransform.log'

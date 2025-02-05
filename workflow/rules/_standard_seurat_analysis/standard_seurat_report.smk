@@ -17,7 +17,7 @@ rule generateStandardSeuratReport:
         intermediates_dir=f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/_intermediates_seurat_report',
         knit_root_dir=f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/_knit_root_seurat_report'
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 30, 10240)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 10240)
     log:
         f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/logs/generateStandardSeuratReport.log'
     container:

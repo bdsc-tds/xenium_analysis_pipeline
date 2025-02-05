@@ -91,5 +91,7 @@ rule runStandardQC:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/logs/runStandardQC.log'
     container:
         config["containers"]["r"]
+    resources:
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     script:
         "../../scripts/_standard_seurat_analysis/standard_qc.R"

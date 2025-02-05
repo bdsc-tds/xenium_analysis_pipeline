@@ -28,7 +28,7 @@ rule runStandardDimRedClust:
             replace_none=0.8,
         )
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 100, 20480),
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480),
         retry_idx=lambda wildcards, attempt: attempt
     log:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/logs/runStandardDimRedClust.log'
