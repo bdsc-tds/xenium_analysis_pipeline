@@ -93,7 +93,7 @@ rule runReferenceBasedRCTD:
             replace_none=20,
         )
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 50, 20480)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     log:
         f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedRCTD.log'
     container:
