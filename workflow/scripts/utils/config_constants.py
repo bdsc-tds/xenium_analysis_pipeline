@@ -12,8 +12,10 @@ WILDCARDS_GENE_PANELS_NAME: str = "_gene_panels"
 WILDCARDS_DONORS_NAME: str = "_donors"
 # Child of `WILDCARDS_NAME` (second level); a list of values for samples.
 WILDCARDS_SAMPLES_NAME: str = "_samples"
-# Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods.
+# Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods. They should be used in the tasks downstream to the segmentation.
 WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
+# Child of `WILDCARDS_NAME` (second level); a list of compact values for segmentation methods. They should only be used in segementation tasks.
+WILDCARDS_COMPACT_SEGMENTATION_NAME: str = "_compact_segmentation"
 # Child of `WILDCARDS_NAME` (second level); a list of values for normalization methods with Seurat.
 WILDCARDS_SEURAT_NORM_NAME: str = "_seurat_norm"
 # Child of `WILDCARDS_NAME` (second level); a list of values for coexpression methods.

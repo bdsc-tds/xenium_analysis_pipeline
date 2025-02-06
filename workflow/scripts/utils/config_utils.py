@@ -538,8 +538,11 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
     )
 
 
-def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
+def _process_segmentation(
+    data: dict[str, Any]
+) -> tuple[list[str], list[str], dict[str, Any]]:
     methods: list[str] = []
+    compact_methods: list[str] = []
     ret: dict[str, Any] = {}
 
     _methods: list[str] = get_dict_value(data, "methods")
@@ -560,6 +563,7 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
 
             methods_ext = ["_".join([m, "".join([str(i), "um"])]) for i in exp_vals]
             methods.extend(methods_ext)
+            compact_methods.extend(methods_ext)
 
             tmp = {}
             for k, v in get_dict_value(data, m).items():
@@ -620,7 +624,13 @@ def _process_segmentation(data: dict[str, Any]) -> tuple[list[str], dict[str, An
         else:
             methods.append(m)
 
-    return methods, ret
+            if m.startswith("proseg"):
+                if "proseg" not in compact_methods:
+                    compact_methods.append("proseg")
+            else:
+                compact_methods.append(m)
+
+    return methods, compact_methods, ret
 
 
 def _process_seurat_norm(methods: str | list[str]) -> list[str]:
@@ -820,7 +830,14 @@ def process_config(
         value=_segmentation[0],
     )
 
-    for k, v in _segmentation[1].items():
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_COMPACT_SEGMENTATION_NAME,
+        value=_segmentation[1],
+    )
+
+    for k, v in _segmentation[2].items():
         set_dict_value(data, "segmentation", k, value=v)
 
     # Process `standard_seurat_analysis`, `normalisation` section.

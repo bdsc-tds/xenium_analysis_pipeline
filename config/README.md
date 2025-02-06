@@ -63,7 +63,9 @@ Note that if customised gene panels are used, the results from 10X xeniumranger 
 
 ## Segmentation (key: `segmentation`)
 
-This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x_mm`, `10x`, `baysor`, `proseg`, and `segger`. Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
+This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x_mm`, `10x`, `baysor`, `proseg_expected`, `proseg_mode`, and `segger`. Specifying either or both of `proseg_expected` and `proseg_mode` will only run `proseg` once. The only difference is that which read counts are used in the downstream analyses: for `proseg_expected`, the expected read counts are used, as recommended by the author of `proseg`; for `proseg_mode`, the read counts are computed by aggregating transcripts assigned to cells based on the mode of their posterior distribution.
+
+Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
 
 1. `10x_mm`
    10X Xenium Ranger's multimodal cell segmentation algorithm is used, where options `--boundary-stain` and `--interior-stain` are selected automatically based on present stain data. This method should only be activated when the boundary and interior stain signals are available in the data.
@@ -121,6 +123,7 @@ This section specifies with key `methods` a number of methods that could be used
 
    - `train` stage
 
+     - `num_tx_tokens`: Number of tokens to encode genes in the panel. `500` by default. The value should not be smaller than the number of genes in the panel. For "5k" gene panel, the value is recommended to be set to `6000`.
      - `accelerator`: Device type to use for training (e.g.,`cuda`, `cpu`). `cpu` by default.
      - `devices`: Number of devices (GPUs) to use. `0` by default.
      - `max_epochs`: Number of epochs for training. `200` by default.

@@ -3,7 +3,9 @@
 #######################################
 
 def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = True) -> str:
-    ret = f'{config["output_path"]}/segmentation/{wildcards.segmentation_id}/{wildcards.sample_id}/normalised_results'
+    seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
+
+    ret = f'{config["output_path"]}/segmentation/{seg_method}/{wildcards.sample_id}/normalised_results'
 
     if for_input:
         return ret
