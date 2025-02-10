@@ -19,7 +19,7 @@ if (!is.character(ref_assay) || length(ref_assay) == 0) {
 }
 
 # Get assays from chrom and ensure it is a character vector
-assays_list <- Assays(chrom)
+assays_list <- Seurat::Assays(chrom)
 
 if (is.null(assays_list) || length(assays_list) == 0) {
   stop("Error: No assays found in the reference object.")
@@ -39,7 +39,7 @@ if (!is.character(xe_assay) || length(xe_assay) == 0) {
 }
 
 # Get assays from xe and ensure it is a character vector
-assays_list <- Assays(xe)
+assays_list <- Seurat::Assays(xe)
 
 if (is.null(assays_list) || length(assays_list) == 0) {
   stop("Error: No assays found in the xenium object.")
