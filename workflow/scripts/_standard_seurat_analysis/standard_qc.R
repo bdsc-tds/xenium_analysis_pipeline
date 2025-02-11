@@ -67,15 +67,6 @@ saveRDS(
 )
 
 write_parquet(
-  data.frame(
-    cell = colnames(xe)
-  ),
-  sink = file.path(snakemake@output[["cells"]])
-)
-
-write_parquet(
-  data.frame(
-    gene = rownames(xe)
-  ),
-  sink = file.path(snakemake@output[["genes"]])
+  xe@meta.data,
+  sink = file.path(snakemake@output[["meta_data"]])
 )
