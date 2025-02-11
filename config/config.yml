@@ -48,9 +48,16 @@ segmentation:
     _other_options:
 
   proseg:
-    _threads: 16
-    _memory: 100
-    _other_options:
+    run:
+      _threads: 16
+      _memory: 100
+      _other_options:
+
+    expected:
+      use_mapping: false
+
+    mode:
+      use_mapping: false
 
   segger:
     preprocess:

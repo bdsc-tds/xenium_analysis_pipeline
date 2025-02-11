@@ -26,6 +26,27 @@ def get_input2_or_params4runProseg(wildcards, for_input: bool = True) -> str:
         check_exist=False
     )
 
+def get_input2_or_params4mapProsegRawAndNormalisedCells(wildcards, for_input: bool = True) -> list[str]:
+    ret: list[str] = [
+        f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz'
+    ]
+
+    if for_input:
+        ret.append(f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/normalised_results')
+    else:
+        ret.append(
+            normalise_path(
+                f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/normalised_results',
+                candidate_paths=("outs",),
+                pat_anchor_file="cells.parquet",
+                pat_flags=re.IGNORECASE,
+                return_dir=False,
+                check_exist=False
+            )
+        )
+
+    return ret
+
 
 #######################################
 #                Rules                #
@@ -56,22 +77,27 @@ rule runProseg:
             config,
             "segmentation",
             "proseg",
+            "run",
             "_other_options",
-            replace_none=""
+            replace_none="",
         )
     threads:
         get_dict_value(
             config,
             "segmentation",
             "proseg",
-            "_threads"
+            "run",
+            "_threads",
+            replace_none=1,
         )
     resources:
         mem_mb=lambda wildcards, attempt: get_dict_value(
             config,
             "segmentation",
             "proseg",
-            "_memory"
+            "run",
+            "_memory",
+            replace_none=20,
         ) * 1024 * attempt
     container:
         config["containers"]["proseg"]
@@ -157,3 +183,37 @@ rule normaliseProseg:
         "--units=microns "
         "--localcores={threads} "
         "--localmem={params.localmem} &> {params.abs_log}"
+
+rule mapProsegRawAndNormalisedCells:
+    input:
+        lambda wildcards: get_input2_or_params4mapProsegRawAndNormalisedCells(
+            wildcards,
+            for_input=True,
+        )
+    output:
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet')
+    params:
+        lambda wildcards: get_input2_or_params4mapProsegRawAndNormalisedCells(
+            wildcards,
+            for_input=False,
+        )
+    log:
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/mapProsegRawAndNormalisedCells.log'
+    resources:
+        mem_mb=lambda wildcards, attempt: max(
+            sum(
+                get_size(i) for i in get_input2_or_params4mapProsegRawAndNormalisedCells(
+                    wildcards,
+                    for_input=True,
+                )
+            ) * 10**-6 * attempt * 10,
+            2048
+        )
+    conda:
+        "../../envs/pyarrow.yml"
+    shell:
+        "python3 workflow/scripts/_segmentation/map_proseg_raw_and_normalised_cells.py "
+        "--raw {params[0][0]} "
+        "--normalised {params[0][1]} "
+        "-l {log} "
+        "--out {output}"
