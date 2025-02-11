@@ -3,91 +3,10 @@ import pandas as pd
 import os
 import pathlib
 import json
-# from rds2py import read_rds
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
-
-try:
-    import msgspec
-except ImportError:
-    pass
-
-
-def soma_to_anndata(
-    soma_uri, measurement_name, X_layer_name, return_experiment=False, **kwargs
-):
-    """
-    Export a SOMA experiment to an anndata object.
-
-    Parameters
-    ----------
-    soma_uri (str): The URI (path) of the SOMA experiment.
-    measurement_name (str): The measurement name (e.g., 'RNA') to extract.
-    X_layer_name (str): The layer name in the X matrix to extract (e.g., 'counts').
-    return_experiment (bool): Whether to return the SOMA experiment.
-
-    Returns
-    -------
-    anndata.AnnData: The anndata object.
-    """
-    import tiledbsoma as soma
-    import tiledbsoma.io
-
-    # Open the SOMA experiment
-    experiment = soma.open(soma_uri)
-    # Export the SOMA experiment to anndata format
-    ad = soma.io.to_anndata(
-        experiment=experiment,
-        measurement_name=measurement_name,
-        X_layer_name=X_layer_name,
-        **kwargs,
-    )
-
-    if return_experiment:
-        return ad, experiment
-    else:
-        return ad
-
-
-def xenium_specs(path):
-    path = pathlib.Path(path)
-    with open(path / "experiment.xenium") as f:
-        specs = json.load(f)
-    return specs
 
 
 ######### Xenium readers
-def xenium_samples_files(dir_segmentation_cohort, segmentation=None, samples=None):
-    """
-    Get a dictionary of files for each sample in a Xenium segmentation run.
-
-    Parameters
-    ----------
-    dir_segmentation_cohort (str): The directory path of the segmentation run.
-    segmentation (str): The segmentation name, e.g., 'default', '10x_5um', 'baysor'.
-    samples (list): The sample names to include. If None, include all samples.
-
-    Returns
-    -------
-    dict: A dictionary of files for each sample.
-    """
-    files = {}
-    for sample_path in pathlib.Path(dir_segmentation_cohort).iterdir():
-        for replicate_path in sample_path.iterdir():
-            sample_name = replicate_path.stem
-
-            if samples is not None and sample_name not in samples:
-                continue
-            elif "corrupted" in sample_name:
-                continue
-            else:
-                if segmentation != "default":
-                    files[sample_name] = replicate_path / "normalised_results/outs"
-                else:
-                    files[sample_name] = replicate_path
-
-    return files
-
-
 def read_xenium_sample(
     sample_name,
     path,
@@ -245,121 +164,6 @@ def read_xenium_samples(
     return xdatas
 
 
-######### RCTD readers
-
-
-def read_json(file_path):
-    with open(file_path, "r") as file:
-        return json.load(file)
-
-
-def read_json_msgspec(file_path):
-    with open(file_path, "rb") as file:
-        return msgspec.json.decode(file.read())
-
-
-def _rds2py_dict_to_df(r_obj_df, mode="results_df"):
-    if mode == "results_df":
-        r_obj_df_columns = r_obj_df["attributes"]["names"]["data"]
-        r_obj_df_index = r_obj_df["attributes"]["row.names"]["data"]
-        pandas_df = pd.DataFrame(
-            [r_obj_df["data"][i]["data"] for i in range(len(r_obj_df["data"]))],
-            index=r_obj_df_columns,
-            columns=r_obj_df_index,
-        ).T
-    elif mode == "weights":
-        r_obj_df_columns = r_obj_df["attributes"]["dimnames"]["data"][1]["data"]
-        r_obj_df_index = r_obj_df["attributes"]["dimnames"]["data"][0]["data"]
-        r_obj_df["data"] = r_obj_df["data"].reshape(
-            r_obj_df["attributes"]["dim"]["data"], order="F"
-        )
-        pandas_df = pd.DataFrame(
-            r_obj_df["data"], index=r_obj_df_index, columns=r_obj_df_columns
-        )
-
-    return pandas_df
-
-
-def read_rctd_sample(sample_name, rctd_results_path):
-    """
-    Reads RCTD results from a single sample and returns a dictionary containing:
-
-    - results_df: a pandas DataFrame with columns to be added to the anndata object's obs
-    - weights: a pandas Series with the weights for each cell for the given reference
-    - weights_doublet: (not implemented) a pandas Series with the weights for each cell for doublets for the given reference
-    - singlet_scores: (not implemented) a pandas Series with the singlet scores for each cell for the given reference
-
-    Parameters
-    ----------
-    sample_name: str
-        The name of the sample
-    rctd_results_path : str
-        The path to the sample RCTD results
-    rsuffix : str, optional
-        The suffix to append to the reference name when storing to the anndata objects
-
-    Returns
-    -------
-    A tuple containing the sample name and the results dictionary
-    """
-
-    r_obj = read_rds(rctd_results_path)
-
-    results = r_obj["attributes"]["results"]
-    results_keys = results["attributes"]["names"]["data"]
-    results_keys_idx = {k: results_keys.index(k) for k in results_keys}
-
-    pandas_results = {}
-    for k in ["results_df", "weights"]:
-        pandas_results[k] = _rds2py_dict_to_df(
-            results["data"][results_keys_idx[k]], mode=k
-        )
-
-    return sample_name, pandas_results
-
-
-def read_rctd_samples(ads, rctd_results_paths, prefix=""):
-    """
-    Read RCTD results into anndata objects in parallel using ProcessPoolExecutor.
-
-    Parameters
-    ----------
-    ads : dict of anndata.AnnData
-        The anndata objects to be updated.
-    rctd_results_paths : str
-        The directory containing the RCTD results.
-    prefix : str, optional
-        The prefix to append to the reference name when storing to the anndata objects.
-
-    Returns
-    -------
-    None
-    """
-
-    # Use ProcessPoolExecutor for CPU-bound tasks
-    with ProcessPoolExecutor() as executor:
-        futures = {
-            executor.submit(
-                read_rctd_sample,
-                sample_name,
-                rctd_results_paths[sample_name],
-            ): sample_name
-            for sample_name in ads.keys()
-        }
-
-        # Update anndata objects in the parent process
-        for future in as_completed(futures):
-            try:
-                sample_name, results = future.result()
-                if results:
-                    ad = ads[sample_name]
-                    ad.obs = ad.obs.join(results["results_df"].add_prefix(prefix))
-                    ad.uns[f"{prefix}_weights"] = results["weights"]
-
-            except Exception as e:
-                print(f"Error processing sample {futures[future]}: {e}")
-
-
 ###### coexpression files readers
 def read_coexpression_file(k, method, target_count, results_dir):
     """
@@ -444,3 +248,86 @@ def read_coexpression_files(cc_paths, results_dir):
             CC[k][method, target_count] = cc
             pos_rate[k][method, target_count] = pr
     return CC, pos_rate
+
+
+######### 10x writers
+
+
+def write_10X_h5(adata, file):
+    """Writes adata to a 10X-formatted h5 file.
+    taken from https://github.com/scverse/anndata/issues/595
+
+    Note that this function is not fully tested and may not work for all cases.
+    It will not write the following keys to the h5 file compared to 10X:
+    '_all_tag_keys', 'pattern', 'read', 'sequence'
+
+    Args:
+        adata (AnnData object): AnnData object to be written.
+        file (str): File name to be written to. If no extension is given, '.h5' is appended.
+
+    Raises:
+        FileExistsError: If file already exists.
+
+    Returns:
+        None
+    """
+
+    if ".h5" not in file:
+        file = f"{file}.h5"
+    if Path(file).exists():
+        raise FileExistsError(f"There already is a file `{file}`.")
+
+    def int_max(x):
+        return int(max(np.floor(len(str(int(max(x)))) / 4), 1) * 4)
+
+    def str_max(x):
+        return max([len(i) for i in x])
+
+    if not scipy.sparse.issparse(adata.X):
+        adata.X = scipy.sparse.csr_matrix(adata.X)
+    if "genome" not in adata.var:
+        adata.var["genome"] = "undefined"
+    if "feature_types" not in adata.var:
+        adata.var["feature_types"] = "Gene Expression"
+    if "gene_ids" not in adata.var:
+        adata.var["gene_ids"] = adata.var_names
+
+    w = h5py.File(file, "w")
+    grp = w.create_group("matrix")
+    grp.create_dataset(
+        "barcodes",
+        data=np.array(adata.obs_names, dtype=f"|S{str_max(adata.obs_names)}"),
+    )
+    grp.create_dataset(
+        "data", data=np.array(adata.X.data, dtype=f"<i{int_max(adata.X.data)}")
+    )
+    ftrs = grp.create_group("features")
+    # this group will lack the following keys:
+    # '_all_tag_keys', 'feature_type', 'genome', 'id', 'name', 'pattern', 'read', 'sequence'
+    ftrs.create_dataset(
+        "feature_type",
+        data=np.array(
+            adata.var.feature_types, dtype=f"|S{str_max(adata.var.feature_types)}"
+        ),
+    )
+    ftrs.create_dataset(
+        "genome",
+        data=np.array(adata.var.genome, dtype=f"|S{str_max(adata.var.genome)}"),
+    )
+    ftrs.create_dataset(
+        "id",
+        data=np.array(adata.var.gene_ids, dtype=f"|S{str_max(adata.var.gene_ids)}"),
+    )
+    ftrs.create_dataset(
+        "name", data=np.array(adata.var.index, dtype=f"|S{str_max(adata.var.index)}")
+    )
+    grp.create_dataset(
+        "indices", data=np.array(adata.X.indices, dtype=f"<i{int_max(adata.X.indices)}")
+    )
+    grp.create_dataset(
+        "indptr", data=np.array(adata.X.indptr, dtype=f"<i{int_max(adata.X.indptr)}")
+    )
+    grp.create_dataset(
+        "shape",
+        data=np.array(list(adata.X.shape)[::-1], dtype=f"<i{int_max(adata.X.shape)}"),
+    )
