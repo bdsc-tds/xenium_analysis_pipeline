@@ -42,7 +42,8 @@ import config_constants as cc
 """
 Explanation of wildcards:
 - sample_id: The name of an sample to be processed with a format of "condition/gene_panel/donor/sample".
-- segmentation_id: The name of a segmentation method to be used.
+- compact_segmentation_id: The name of a segmentation method to only be used in segementation tasks.
+- segmentation_id: The name of a segmentation method to be used in the tasks downstream to the segmentation.
 - normalisation_id: The name of a normalisation method to be used.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
 - annotation_id: The name of cell-type annotation to be used in a format "approach/reference_name/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
@@ -52,6 +53,11 @@ SAMPLE_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SAMPLES_NAME
+)
+COMPACT_SEGMENTATION_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_COMPACT_SEGMENTATION_NAME
 )
 SEGMENTATION_ID = get_dict_value(
     config,
@@ -86,6 +92,7 @@ ANNOTATION_ID = uniquify_elements_in_list(
 
 wildcard_constraints:
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
+    compact_segmentation_id='|'.join([re.escape(i) for i in COMPACT_SEGMENTATION_ID]),
     segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID]),
     normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
     coexpression_id='|'.join([re.escape(i) for i in COEXPRESSION_ID]),
@@ -150,12 +157,12 @@ def get_output4cleanup() -> list[str]:
                 j,
                 "normalised_results",
                 "_auxiliary_files.tar"
-            ) for i in SEGMENTATION_ID for j in SAMPLE_ID
+            ) for i in COMPACT_SEGMENTATION_ID for j in SAMPLE_ID
         ]
     )
 
     # Clean up the Segger results.
-    if "segger" in SEGMENTATION_ID:
+    if "segger" in COMPACT_SEGMENTATION_ID:
 
         # Get the path to the preprocessed data from Segger.
         segger_prefix: str = f'{config["output_path"]}/segmentation/segger'

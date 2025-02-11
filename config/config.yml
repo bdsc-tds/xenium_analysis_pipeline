@@ -19,7 +19,8 @@ segmentation:
     - 10x_mm
     - 10x
     - baysor
-    - proseg
+    - proseg_expected
+    - proseg_mode
     - segger
 
   10x_mm:
@@ -47,9 +48,16 @@ segmentation:
     _other_options:
 
   proseg:
-    _threads: 16
-    _memory: 100
-    _other_options:
+    run:
+      _threads: 16
+      _memory: 100
+      _other_options:
+
+    expected:
+      use_mapping: false
+
+    mode:
+      use_mapping: false
 
   segger:
     preprocess:
@@ -121,7 +129,7 @@ cell_type_annotation:
     rctd:
       # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
       UMI_min_sigma:
-        - 100 # low UMI in single-cell mode
+        - 1 # low UMI in single-cell mode
         - 300 # higher UMI in cluster mode
 
       _threads: 20

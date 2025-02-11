@@ -14,14 +14,14 @@ include: '_segmentation/segger.smk'
 
 rule zipNormalisedAuxiliary10xFiles:
     input:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/normalised_results'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results'
     output:
-        protected(f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/normalised_results/_auxiliary_files.tar')
+        protected(f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results/_auxiliary_files.tar')
     log:
-        f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/logs/zipNormalisedAuxiliary10xFiles.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/zipNormalisedAuxiliary10xFiles.log'
     params:
         abs_output=lambda wildcards: os.path.abspath(
-            f'{config["output_path"]}/segmentation/{wildcards.segmentation_id}/{wildcards.sample_id}/normalised_results/_auxiliary_files.tar'
+            f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/normalised_results/_auxiliary_files.tar'
         ),
         filenames=get_auxiliary_10x_files
     shell:
