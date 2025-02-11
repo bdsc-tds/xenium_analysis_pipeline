@@ -27,6 +27,8 @@ CELL_MIN_INSTANCE <- snakemake@params[["cell_min_instance"]]
 
 # Generate reference object
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
+xe_chrom_common_genes <- intersect(rownames(xe), rownames(chrom))
+
 
 ref_labels <- chrom@meta.data %>% pull(annotation_level)
 
@@ -40,8 +42,8 @@ aggr_args <- snakemake@params[["aggr_args"]] %||% list(rank = 50, power = 0.7)
 # Annotate with SingleR
 message("Running SingleR...")
 singler_result <- SingleR(
-  test = GetAssayData(xe, assay = xe_assay, layer = test_layer),
-  ref = GetAssayData(chrom, assay = ref_assay, layer = ref_layer),
+  test = GetAssayData(xe, assay = xe_assay, layer = test_layer)[xe_chrom_common_genes, ],
+  ref = GetAssayData(chrom, assay = ref_assay, layer = ref_layer)[xe_chrom_common_genes,],
   labels = ref_labels,
   genes = selected_genes,
   de.method = de_method,

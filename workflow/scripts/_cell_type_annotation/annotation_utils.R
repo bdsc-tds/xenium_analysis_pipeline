@@ -99,11 +99,13 @@ generate_reference_obj <- function(
   
   all_cell_types <- as.factor(chrom@meta.data %>% pull(annotation_level)) %>% levels()
   
-  # Subset reference data to panel genes
-  chrom <- subset(chrom, features = rownames(chrom)[rownames(chrom) %in% query_features])
+  # Subset reference data to used reference and panel genes
+  chrom <- DietSeurat(chrom, assays = ref_assay, dimreducs = NULL, graphs = NULL)
+  #chrom <- subset(chrom, features = rownames(chrom)[rownames(chrom) %in% query_features])
   
+  features <- rownames(chrom)[rownames(chrom) %in% query_features]
   # Filter cells based on UMI counts to exclude low and high count cells
-  chrom$nCount <- chrom@meta.data[[paste0("nCount_", ref_assay)]]
+  chrom$nCount <- colSums(GetAssayData(chrom, assay = ref_assay, layer = "counts")[features,]) #chrom@meta.data[[paste0("nCount_", ref_assay)]]
   chrom <- subset(chrom, subset = (nCount > MIN_UMI_ref & nCount < MAX_UMI_ref))
   
   # Remove cell types with fewer than CELL_MIN_INSTANCE cells

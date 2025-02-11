@@ -31,13 +31,15 @@ snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_load_
 
 # Generate reference object
 snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
+xe_chrom_common_genes <- intersect(rownames(xe), rownames(chrom))
+
 
 # Create RCTD-specific reference object 
 ref_labels <-  chrom@meta.data %>% pull(annotation_level) %>% as.vector() %>% as.factor()
 names(ref_labels) <- colnames(chrom)
 
 ref.obj <- Reference(
-  GetAssayData(chrom, assay = ref_assay, layer = ref_layer), 
+  GetAssayData(chrom, assay = ref_assay, layer = ref_layer)[xe_chrom_common_genes, ], 
   cell_types = ref_labels, 
   min_UMI = REF_MIN_UMI, 
   require_int = !(xe@misc$sample_metadata[["segmentation_method"]] %in% c("proseg", "segger")))
