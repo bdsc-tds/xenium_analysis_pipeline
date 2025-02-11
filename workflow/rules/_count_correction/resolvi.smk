@@ -61,8 +61,8 @@ rule runResolvi:
     input:
         get_input2_or_params4runResolvi
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/resolvi/corrected_counts.h5'),
-        proportions=protected(f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/resolvi/proportions.parquet')
+        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/corrected_counts.h5'),
+        proportions=protected(f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/proportions.parquet')
     params:
         input_data=lambda wildcards: get_input2_or_params4runResolvi(
             wildcards,
@@ -158,7 +158,7 @@ rule runResolvi:
             inexist_key_ok=True
         )
     log:
-        f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/resolvi/logs/runResolvi.log'
+        f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/logs/runResolvi.log'
     wildcard_constraints:
         compact_segmentation_id=r"(10x_\w*?_?0um)|(proseg)"
     container:
