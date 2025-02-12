@@ -16,10 +16,16 @@ xe@misc$standard_seurat_analysis_meta <- list(
   normalisation_id = snakemake@params[["normalisation_id"]]
 )
 
-normalised_data <- GetAssayData(
+data <- GetAssayData(
   xe,
-  assay = snakemake@params[["normalised_assay"]],
-  layer = snakemake@params[["normalised_layer"]]
+  assay = snakemake@params[["assay"]],
+  layer = snakemake@params[["data_layer"]]
+)
+
+scale.data <- GetAssayData(
+  xe,
+  assay = snakemake@params[["assay"]],
+  layer = snakemake@params[["scale_data_layer"]]
 )
 
 # Save post QC seurat
@@ -30,12 +36,17 @@ saveRDS(
 
 write_parquet(
   data.frame(
-    cell = colnames(normalised_data)
+    cell = colnames(data)
   ),
   sink = file.path(snakemake@output[["cells"]])
 )
 
 write_parquet(
-  as.data.frame(t(normalised_data)),
-  sink = file.path(snakemake@output[["counts"]])
+  as.data.frame(t(data)),
+  sink = file.path(snakemake@output[["data"]])
+)
+
+write_parquet(
+  as.data.frame(t(scale.data)),
+  sink = file.path(snakemake@output[["scale_data"]])
 )

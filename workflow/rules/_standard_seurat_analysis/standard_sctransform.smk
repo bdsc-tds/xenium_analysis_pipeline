@@ -11,14 +11,16 @@ rule runStandardScTransform:
     input:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/standard_qc/qced_seurat.rds'
     output:
-        obj=temp(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/normalised_seurat.rds'),
+        obj=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/normalised_seurat.rds',
         cells=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/cells.parquet'),
-        counts=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/counts.parquet')
+        data=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/data.parquet'),
+        scale_data=protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/normalised_counts/scale_data.parquet')
     params:
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
-        normalised_assay=sec.SEURAT_ALT_ASSAY,
-        normalised_layer=sec.SEURAT_ALT_LAYER,
+        assay=sec.SEURAT_ALT_ASSAY,
+        data_layer=sec.SEURAT_DATA_LAYER,
+        scale_data_layer=sec.SEURAT_SCALE_DATA_LAYER,
         normalisation_id="sctransform"
     resources:
         mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt**2 * 20, 1024000),

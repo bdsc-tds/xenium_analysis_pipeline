@@ -8,4 +8,6 @@ SEURAT_DEFAULT_ASSAY: str = "Xenium"
 SEURAT_ALT_ASSAY: str = "SCT"
 
 SEURAT_DEFAULT_LAYER: str = "counts"
-SEURAT_ALT_LAYER: str = "data"
+
+SEURAT_DATA_LAYER: str = "data"
+SEURAT_SCALE_DATA_LAYER: str = "scale.data"

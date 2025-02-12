@@ -57,7 +57,28 @@ rule loadSegmentation2Seurat:
         ),
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         sample_id=lambda wildcards: wildcards.sample_id,
-        segmentation_id=lambda wildcards: wildcards.segmentation_id
+        segmentation_id=lambda wildcards: wildcards.segmentation_id,
+        condition=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            0,
+        )[0],
+        gene_panel=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            1,
+        )[0],
+        donor=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            2,
+        )[0],
+        sample=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            3,
+        )[0],
+        segmentation_method=lambda wildcards: extract_layers_from_experiments(
+            wildcards.segmentation_id,
+            0,
+            sep_in="_",
+        )[0]
     log:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/logs/loadSegmentation2Seurat.log'
     container:
@@ -83,6 +104,27 @@ rule loadProseg2Seurat:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         sample_id=lambda wildcards: wildcards.sample_id,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
+        condition=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            0,
+        )[0],
+        gene_panel=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            1,
+        )[0],
+        donor=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            2,
+        )[0],
+        sample=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            3,
+        )[0],
+        segmentation_method=lambda wildcards: extract_layers_from_experiments(
+            wildcards.segmentation_id,
+            0,
+            sep_in="_",
+        )[0],
         xr_cell_id_col_name="xr_cell_id",
         proseg_cell_id_col_name="proseg_cell_id",
         use_mode_counts=use_mode_counts4loadProseg2Seurat,
@@ -93,12 +135,5 @@ rule loadProseg2Seurat:
         config["containers"]["r"]
     wildcard_constraints:
         segmentation_id=r"proseg_\w+"
-    resources:
-        mem_mb=lambda wildcards, input, attempt: max(
-            sum(
-                get_size(i) for i in input if os.path.isfile(i)
-            ) * 10**-6 * attempt * 4,
-            2048
-        )
     script:
         "../../scripts/_standard_seurat_analysis/load_proseg2seurat.R"
