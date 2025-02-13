@@ -5,15 +5,12 @@ sink(log, type = "message")
 snakemake@source("../../scripts/utils/run_time_utils.R")
 
 library(arrow)
-library(SeuratObject)
-library(Seurat)
-library(Matrix)
-library(dplyr)
 
 spatial_dimname <- snakemake@params[["spatial_dimname"]]
 
 xe <- LoadXenium(
-  data.dir = snakemake@params[["data_dir"]]
+  data.dir = snakemake@params[["data_dir"]],
+  molecule.coordinates = FALSE
 )
 
 mapping <- read_parquet(snakemake@input[["mapping"]])
@@ -42,66 +39,11 @@ if (snakemake@params[["use_mode_counts"]]) {
     stop("Error! Number of cells in cell metadata and expected counts in the results of Proseg do not match.")
   }
 
-  set.seed(42)
-  new_cell_ids <- generate_xr_style_cell_names(nrow(expected_counts))
-  gene_ids <- colnames(expected_counts)
-
-  expected_counts <- t(as.matrix(expected_counts))
-
-  # Create a new Seurat object for expected counts
-  new_xe <- CreateSeuratObject(
-    counts = expected_counts,
-    assay = "Xenium"
+  xe <- replace_counts_in_seurat(
+    xe,
+    expected_counts,
+    cell_metadata[, c("centroid_x", "centroid_y")]
   )
-  colnames(new_xe) <- new_cell_ids
-  rownames(new_xe) <- gene_ids
-
-  coords <- CreateCentroids(
-    coords = cell_metadata[, c("centroid_x", "centroid_y")],
-    nsides = xe@images$fov@boundaries$centroids@nsides,
-    radius = xe@images$fov@boundaries$centroids@radius,
-    theta = xe@images$fov@boundaries$centroids@theta
-  )
-  coords <- RenameCells(coords, new_cell_ids)
-
-  new_xe@images <- list(
-    fov = CreateFOV(
-      coords,
-      molecules = xe@images$fov@molecules[[1]],
-      assay = xe@images$fov@assay,
-      key = xe@images$fov@key
-    )
-  )
-
-  missing_assays <- Assays(xe)[!Assays(xe) %in% Assays(new_xe)]
-  names(missing_assays) <- missing_assays
-
-  new_assays <- sapply(
-    missing_assays,
-    function(x) {
-      assay <- GetAssayData(xe, assay = x)
-
-      CreateAssayObject(
-        counts = Matrix(
-            0,
-            ncol = ncol(new_xe),
-            nrow = nrow(assay),
-            dimnames = list(
-                rownames(assay),
-                new_cell_ids
-            )
-        )
-      )
-    },
-    simplify = FALSE,
-    USE.NAMES = TRUE
-  )
-
-  for (i in names(new_assays)) {
-    new_xe[[i]] <- new_assays[[i]]
-  }
-
-  xe <- new_xe
 }
 
 snakemake@source("../../scripts/_standard_seurat_analysis/_post_seurat_load_xenium.R")
