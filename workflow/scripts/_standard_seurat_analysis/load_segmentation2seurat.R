@@ -7,7 +7,8 @@ library(Seurat)
 spatial_dimname <- snakemake@params[["spatial_dimname"]]
 
 xe <- LoadXenium(
-  data.dir = snakemake@params[["data_dir"]]
+  data.dir = snakemake@params[["data_dir"]],
+  molecule.coordinates = FALSE
 )
 
 snakemake@source("../../scripts/_standard_seurat_analysis/_post_seurat_load_xenium.R")
