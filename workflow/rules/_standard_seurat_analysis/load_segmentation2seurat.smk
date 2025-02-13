@@ -104,6 +104,7 @@ rule loadProseg2Seurat:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         sample_id=lambda wildcards: wildcards.sample_id,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
+        control_gene_pat=sec.XENIUM_CONTROL_GENE_PAT,
         condition=lambda wildcards: extract_layers_from_experiments(
             wildcards.sample_id,
             0,

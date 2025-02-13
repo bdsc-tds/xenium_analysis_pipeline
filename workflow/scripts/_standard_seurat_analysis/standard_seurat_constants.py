@@ -2,6 +2,8 @@
 String constants for Seurat objects.
 """
 
+XENIUM_CONTROL_GENE_PAT: str = "^BLANK_\\d+|^UnassignedCodeword-\\d+|^NegControl.+"
+
 SEURAT_SPATIAL_DIM_NAME: str = "spatial"
 
 SEURAT_DEFAULT_ASSAY: str = "Xenium"
