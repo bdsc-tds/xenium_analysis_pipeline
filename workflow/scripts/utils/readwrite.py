@@ -170,7 +170,7 @@ def xenium_proseg(
             print("Reading cells table...")
         df_table = pd.read_csv(cells_table, engine=pandas_engine)
 
-        control_columns = df_table.columns.str.contains("|".join(["BLANK_", "NegControl"]))
+        control_columns = df_table.columns.str.contains("|".join(["BLANK_", "UnassignedCodeword", "NegControl"]))
 
         table = ad.AnnData(
             df_table.iloc[:, ~control_columns],
