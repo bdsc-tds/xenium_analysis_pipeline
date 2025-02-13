@@ -231,13 +231,14 @@ def xenium_proseg(
         transformations = {"global": scale}
     else:
         transformations = None
-        warnings.warn(
-            """
-            Couldn't load xenium specs file with pixel size. 
-            Not applying scale transformations to shapes.
-            Please specify xeniumranger_dir or xenium_specs
-            """
-        )
+        if isinstance(cells_boundaries, Path) or isinstance(cells_boundaries_layers, Path):
+            warnings.warn(
+                """
+                Couldn't load xenium specs file with pixel size. 
+                Not applying scale transformations to shapes.
+                Please specify xeniumranger_dir or xenium_specs
+                """
+            )
 
     # read cells boundaries
     if isinstance(cells_boundaries, Path):
@@ -316,7 +317,7 @@ def read_xenium_sample(
 
     If sample_name is None, sample_name is not returned
     """
-
+    path = Path(path)
     kwargs = dict(
         cells_as_circles=cells_as_circles,
         cells_boundaries=cells_boundaries,
@@ -343,7 +344,7 @@ def read_xenium_sample(
     adata = sdata["table"]
     adata.obs_names = adata.obs["cell_id"].values
 
-    metrics_path = Path(path) / "metrics_summary.csv"
+    metrics_path = path / "metrics_summary.csv"
     if metrics_path.exists():
         adata.uns["metrics_summary"] = pd.read_csv(metrics_path)
     else:
