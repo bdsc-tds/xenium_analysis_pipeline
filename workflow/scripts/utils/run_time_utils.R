@@ -26,13 +26,21 @@ generate_xr_style_cell_names <- function(n, len = 8, seed = 42) {
     return(unique_strings)
 }
 
+quick_generate_cell_names <- function(n, prefix = "") {
+    return(paste0(prefix, seq(n)))
+}
+
 # Assume `new_counts` is cell-by-gene.
 # Assume `cell_coords` is, if provided, a data frame with two columns for x and y coordinates.
-replace_counts_in_seurat <- function(xe, new_counts, cell_coords = NULL) {
+replace_counts_in_seurat <- function(xe, new_counts, cell_coords = NULL, cell_id_prefix = "") {
     generate_cell_ids <- sum(!grepl("\\w{8}-1", rownames(new_counts))) > 0
 
     if (generate_cell_ids) {
-        cell_ids <- generate_xr_style_cell_names(nrow(new_counts))
+        if (nrow(new_counts) < 1e5) {
+            cell_ids <- generate_xr_style_cell_names(nrow(new_counts))
+        } else {
+            cell_ids <- quick_generate_cell_names(nrow(new_counts), cell_id_prefix)
+        }
     } else {
         cell_ids <- rownames(new_counts)
     }

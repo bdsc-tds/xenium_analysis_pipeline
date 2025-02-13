@@ -42,7 +42,8 @@ if (snakemake@params[["use_mode_counts"]]) {
   xe <- replace_counts_in_seurat(
     xe,
     expected_counts,
-    cell_metadata[, c("centroid_x", "centroid_y")]
+    cell_metadata[, c("centroid_x", "centroid_y")],
+    "proseg-"
   )
 }
 
