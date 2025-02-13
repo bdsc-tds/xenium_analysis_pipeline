@@ -29,10 +29,10 @@ if (snakemake@params[["use_mode_counts"]]) {
     arrange(cell)
 
   expected_counts <- read.csv(snakemake@input[["expected_counts"]])
-  expected_counts <- expected_counts[, !grepl(
+  expected_counts <- expected_counts[, colnames(expected_counts)[!grepl(
     snakemake@params[["control_gene_pat"]],
-    rownames(expected_counts)
-  )]
+    colnames(expected_counts)
+  )]]
 
   if (snakemake@params[["use_mapping"]]) {
     cell_metadata <- cell_metadata[cell_metadata$cell %in% mapping[[snakemake@params[["proseg_cell_id_col_name"]]]], ]
