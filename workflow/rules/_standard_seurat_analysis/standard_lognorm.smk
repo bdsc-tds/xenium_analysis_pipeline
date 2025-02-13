@@ -16,7 +16,7 @@ rule runStandardLogNorm:
         scale_data_layer=sec.SEURAT_SCALE_DATA_LAYER,
         normalisation_id="lognorm"
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt**2 * 10, 10240)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt**3 * 20, 10240)
     log:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/logs/runStandardLogNorm.log'
     container:

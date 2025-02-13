@@ -23,7 +23,7 @@ rule runStandardScTransform:
         scale_data_layer=sec.SEURAT_SCALE_DATA_LAYER,
         normalisation_id="sctransform"
     resources:
-        mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt**2 * 20, 1024000),
+        mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt**3 * 40, 1024000),
         retry_idx=lambda wildcards, attempt: attempt
     log:
         f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/logs/runStandardScTransform.log'
