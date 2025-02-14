@@ -1,3 +1,27 @@
+#######################################
+#              Functions              #
+#######################################
+
+def _use_gpu() -> bool:
+    return get_dict_value(
+        config,
+        "gpu",
+        "available",
+        replace_none=False,
+    )
+
+def get_slurm_gpu_partition_name(wildcards) -> str:
+    return get_dict_value(
+        config,
+        "gpu",
+        "partition_name",
+        replace_none="gpu",
+    )
+
+def get_slurm_extra(wildcards, num_device: int = 1) -> str:
+    return f"--gres=gpu:{num_device}" if _use_gpu() else ""
+
+
 ######################################
 #              Subrules              #
 ######################################

@@ -1,13 +1,10 @@
 output_path: results
 
 containers:
-  r:
-  10x:
-  baysor:
-  proseg:
-  segger:
 
-experiments: experiments.yml
+gpu:
+  available: true
+  partition_name: "gpu"
 
 reprocess:
   level: 1
@@ -68,7 +65,6 @@ segmentation:
 
     train:
       num_tx_tokens: 500
-      accelerator: "cuda"
       devices: 1
       max_epochs: 200
       batch_size: 4
