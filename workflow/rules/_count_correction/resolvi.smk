@@ -23,9 +23,16 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
             for donor in (donors := panel.iterdir()):
                 for sample in (samples := donor.iterdir()):
 
-                    k = (segmentation.stem,condition.stem,panel.stem,donor.stem,sample.stem)
-                    path = sample / "normalised_results/outs"
+                    if segmentation.stem == 'proseg':
+                        path = sample / 'raw_results'
+                        segmentation_name = 'proseg_expected'
+                    else:
+                        path = sample / "normalised_results/outs"
+                        segmentation_name = segmentation.stem
+                    
+                    k = (segmentation_name,condition.stem,panel.stem,donor.stem,sample.stem)
                     name = '/'.join(k)
+
 
                     if path.exists():
 
@@ -49,7 +56,7 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                 num_samples=num_samples,
                             threads: 1
                             resources:
-                                mem='200GB' if panel.stem == '5k' else '10GB',
+                                mem='400GB',
                                 runtime='8h',
                                 slurm_partition = "gpu",
                                 slurm_extra = '--gres=gpu:1',
