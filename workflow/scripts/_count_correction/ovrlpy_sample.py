@@ -28,7 +28,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "--proseg_format",
-    type="store_true",
+    action="store_true",
     help="is the transcripts file in proseg raw output format.",
 )
 # parser.add_argument(

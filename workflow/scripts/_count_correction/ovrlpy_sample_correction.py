@@ -52,6 +52,11 @@ parser.add_argument(
     type=float,
     help="signal_integrity_threshold parameter (threshold below which a pixel is low quality).",
 )
+parser.add_argument(
+    "--proseg_format",
+    action="store_true",
+    help="is the transcripts file in proseg raw output format.",
+)
 
 args = parser.parse_args()
 
@@ -62,12 +67,44 @@ sample_transcript_info = args.sample_transcript_info
 out_file_corrected_counts = args.out_file_corrected_counts
 out_file_cells_mean_integrity = args.out_file_cells_mean_integrity
 signal_integrity_threshold = args.signal_integrity_threshold
-
+proseg_format = args.proseg_format
 
 # load transcripts
-coordinate_df = pd.read_parquet(sample_transcripts_path).query(
-    "is_gene & (qv >= 20)"
-)  # remove dummy & low qv molecules
+if proseg_format:
+    coordinate_df = (
+        pd.read_csv(sample_transcripts_path, engine="pyarrow")
+        .rename(
+            columns={
+                "assignment": "cell_id",
+            }
+        )
+        .query("qv >= 20")
+    )
+
+    # remove dummy molecules
+    coordinate_df = coordinate_df[
+        ~coordinate_df["gene"].str.contains("|".join(["BLANK_", "UnassignedCodeword", "NegControl"]))
+    ]
+    # recode unassigned transcripts cell_id to UNASSIGNED
+    coordinate_df["cell_id"] = (
+        coordinate_df["cell_id"].astype(str).replace({str(coordinate_df["cell_id"].max()): "UNASSIGNED"})
+    )
+
+else:
+    coordinate_df = (
+        pd.read_parquet(sample_transcripts_path)
+        .rename(
+            columns={
+                "x_location": "x",
+                "y_location": "y",
+                "z_location": "z",
+                "feature_name": "gene",
+            }
+        )
+        .query("is_gene")  # remove dummy molecules
+    )
+
+
 transcript_info = pd.read_parquet(sample_transcript_info)
 coordinate_df = coordinate_df.join(transcript_info)
 
