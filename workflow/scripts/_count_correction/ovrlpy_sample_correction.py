@@ -133,7 +133,7 @@ cell_mean_integrity = (
 
 # create filtered count matrix
 corrected_counts = transcripts_to_count_matrix(
-    coordinate_df_filtered, feature_column="feature_name"
+    coordinate_df_filtered, feature_column="gene"
 )
 
 
