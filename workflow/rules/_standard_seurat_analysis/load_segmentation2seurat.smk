@@ -85,6 +85,8 @@ rule loadSegmentation2Seurat:
         config["containers"]["r"]
     wildcard_constraints:
         segmentation_id=r"(?!proseg).*"
+    resources:
+        mem_mb=lambda wildcards, attempt: min(attempt**2 * 2048, 512000)
     script:
         "../../scripts/_standard_seurat_analysis/load_segmentation2seurat.R"
 
@@ -136,5 +138,7 @@ rule loadProseg2Seurat:
         config["containers"]["r"]
     wildcard_constraints:
         segmentation_id=r"proseg_\w+"
+    resources:
+        mem_mb=lambda wildcards, attempt: min(attempt**2 * 4096, 1024000)
     script:
         "../../scripts/_standard_seurat_analysis/load_proseg2seurat.R"
