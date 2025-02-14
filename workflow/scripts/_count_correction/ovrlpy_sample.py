@@ -62,7 +62,7 @@ if proseg_format:
 
     # remove dummy molecules
     coordinate_df = coordinate_df[
-        ~coordinate_df["gene"].str.contains("|".join(["BLANK_", "UnassignedCodeword", "NegControl"]))
+        ~coordinate_df["gene"].str.contains("|".join(["BLANK_", "Codeword", "NegControl"]))
     ]
     # recode unassigned transcripts cell_id to UNASSIGNED
     coordinate_df["cell_id"] = (
