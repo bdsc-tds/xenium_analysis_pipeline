@@ -111,6 +111,16 @@ standard_seurat_analysis:
   clustering:
     resolution: 0.8
 
+count_correction:
+  methods:
+    - ovrlpy
+    - resolvi
+
+  ovrlpy:
+    signal_integrity_threshold: 0.5
+
+  resolvi:
+
 coexpression:
   methods:
     - conditional
