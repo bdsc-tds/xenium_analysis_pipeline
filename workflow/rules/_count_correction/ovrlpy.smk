@@ -6,60 +6,70 @@ results_dir = Path(config['results_dir'])
 
 # Params
 signal_integrity_threshold = 0.5
-ref_segmentation = xenium_dir / '10x_0um' # ovrlpy output does not depend on segmentation, just run for 10x_0um
+ref_segmentations = [sorted(xenium_dir.iterdir())[0].stem,'proseg'] # ovrlpy output does not depend on segmentation (except for proseg), just run for 10x_0um
 
 out_files_ovrlpy = []
-for condition in (conditions := ref_segmentation.iterdir()): 
-    for panel in (panels := condition.iterdir()):
-        for donor in (donors := panel.iterdir()):
-            for sample in (samples := donor.iterdir()):
+for segmentation in xenium_dir.iterdir():
+    if segmentation.stem not in ref_segmentations[1:]:
+        continue
+    for condition in (conditions := segmentation.iterdir()): 
+        for panel in (panels := condition.iterdir()):
+            for donor in (donors := panel.iterdir()):
+                for sample in (samples := donor.iterdir()):
 
-                k = (ref_segmentation.stem,condition.stem,panel.stem,donor.stem,sample.stem)
-                sample_transcripts_path = sample / "normalised_results/outs/transcripts.parquet"
-                name = '/'.join(k)
+                    if segmentation.stem == 'proseg':
+                        sample_transcripts_path = sample / "raw_results/transcript-metadata.csv.gz"
+                    else:
+                        sample_transcripts_path = sample / "normalised_results/outs/transcripts.parquet"
 
-                if sample_transcripts_path.exists():
+                    k = (segmentation.stem,condition.stem,panel.stem,donor.stem,sample.stem)
+                    name = '/'.join(k)
 
-                    out_file_signal_integrity = results_dir / f'ovrlpy/{name}/signal_integrity.parquet' 
-                    out_file_signal_strength = results_dir / f'ovrlpy/{name}/signal_strength.parquet'
-                    out_file_transcript_info = results_dir / f'ovrlpy/{name}/transcript_info.parquet'
-                    # out_file_doublet_df = results_dir / f'ovrlpy/{name}/doublet_df.parquet'
+                    if sample_transcripts_path.exists():
 
-                    out_files_ovrlpy.extend([
-                                    out_file_signal_integrity,
-                                    out_file_signal_strength,
-                                    out_file_transcript_info,
-                                        #out_file_doublet_df
-                                        ])
+                        out_file_signal_integrity = results_dir / f'ovrlpy/{name}/signal_integrity.parquet' 
+                        out_file_signal_strength = results_dir / f'ovrlpy/{name}/signal_strength.parquet'
+                        out_file_transcript_info = results_dir / f'ovrlpy/{name}/transcript_info.parquet'
+                        # out_file_doublet_df = results_dir / f'ovrlpy/{name}/doublet_df.parquet'
 
-                    rule:
-                        name: f'ovrlpy/{name}'
-                        input:
-                            sample_transcripts_path=sample_transcripts_path,
-                        output:
-                            out_file_signal_integrity=out_file_signal_integrity,
-                            out_file_signal_strength=out_file_signal_strength,
-                            out_file_transcript_info=out_file_transcript_info,
-                            # out_file_doublet_df=out_file_doublet_df,
-                        threads: 1
-                        resources:
-                            mem='400GB',
-                            runtime='15h',
-                        conda:
-                            "spatial"
-                        shell:
-                            """
-                            mkdir -p "$(dirname {output.out_file_signal_integrity})"
+                        out_files_ovrlpy.extend([
+                                        out_file_signal_integrity,
+                                        out_file_signal_strength,
+                                        out_file_transcript_info,
+                                            #out_file_doublet_df
+                                            ])
 
-                            python workflow/scripts/xenium/ovrlpy_sample.py \
-                            --sample_transcripts_path {input.sample_transcripts_path} \
-                            --out_file_signal_integrity {output.out_file_signal_integrity} \
-                            --out_file_signal_strength {output.out_file_signal_strength} \
-                            --out_file_transcript_info {output.out_file_transcript_info} \
+                        rule:
+                            name: f'ovrlpy/{name}'
+                            input:
+                                sample_transcripts_path=sample_transcripts_path,
+                            output:
+                                out_file_signal_integrity=out_file_signal_integrity,
+                                out_file_signal_strength=out_file_signal_strength,
+                                out_file_transcript_info=out_file_transcript_info,
+                                # out_file_doublet_df=out_file_doublet_df,
+                            params:
+                                proseg_format='--proseg_format' if segmentation.stem=='proseg' else '',
+                            threads: 1
+                            resources:
+                                mem='200GB',
+                                runtime='10h',
+                            conda:
+                                "spatial"
+                            shell:
+                                """
+                                mkdir -p "$(dirname {output.out_file_signal_integrity})"
 
-                            echo "DONE"
-                            """
-                            # --out_file_doublet_df {output.out_file_doublet_df} \
+                                python workflow/scripts/xenium/ovrlpy_sample.py \
+                                --sample_transcripts_path {input.sample_transcripts_path} \
+                                --out_file_signal_integrity {output.out_file_signal_integrity} \
+                                --out_file_signal_strength {output.out_file_signal_strength} \
+                                --out_file_transcript_info {output.out_file_transcript_info} \
+                                {params.proseg_format}
+
+                                echo "DONE"
+                                """
+                                # --out_file_doublet_df {output.out_file_doublet_df} \
 
 
 out_files_ovrlpy_correction = []
@@ -73,8 +83,15 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                     if sample.stem == '1FYB':
                         continue
 
+                    if segmentation.stem == 'proseg':
+                        sample_transcripts_path = sample / "raw_results/transcript-metadata.csv.gz"
+                        ref_segmentation = segmentation.stem
+                    else:
+                        sample_transcripts_path = sample / "normalised_results/outs/transcripts.parquet"
+                        ref_segmentation = ref_segmentations[0]
+
                     k = (segmentation.stem,condition.stem,panel.stem,donor.stem,sample.stem)
-                    k_ref = (ref_segmentation.stem,condition.stem,panel.stem,donor.stem,sample.stem)
+                    k_ref = (ref_segmentation,condition.stem,panel.stem,donor.stem,sample.stem)
 
                     name = '/'.join(k)
                     ref_name = '/'.join(k_ref)
@@ -100,6 +117,7 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                 out_file_cells_mean_integrity=out_file_cells_mean_integrity,
                             params:
                                 signal_integrity_threshold=signal_integrity_threshold,
+                                proseg_format='--proseg_format' if segmentation.stem=='proseg' else '',
                             threads: 1
                             resources:
                                 mem='30GB' if panel.stem == '5k' else '20GB',
@@ -117,6 +135,7 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                 --out_file_corrected_counts {output.out_file_corrected_counts} \
                                 --out_file_cells_mean_integrity {output.out_file_cells_mean_integrity} \
                                 --signal_integrity_threshold {params.signal_integrity_threshold} \
+                                {params.proseg_format}
 
                                 echo "DONE"
                                 """

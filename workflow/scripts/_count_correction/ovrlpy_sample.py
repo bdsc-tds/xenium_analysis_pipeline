@@ -26,6 +26,11 @@ parser.add_argument(
     type=str,
     help="out_file_transcript_info file to output.",
 )
+parser.add_argument(
+    "--proseg_format",
+    type="store_true",
+    help="is the transcripts file in proseg raw output format.",
+)
 # parser.add_argument(
 #     "--out_file_doublet_df",
 #     type=str,
@@ -39,22 +44,47 @@ sample_transcripts_path = args.sample_transcripts_path
 out_file_signal_integrity = args.out_file_signal_integrity
 out_file_signal_strength = args.out_file_signal_strength
 out_file_transcript_info = args.out_file_transcript_info
+proseg_format = args.proseg_format
 # out_file_doublet_df = args.out_file_doublet_df
 
 
-# load data
-coordinate_df = (
-    pd.read_parquet(sample_transcripts_path)
-    .rename(
-        columns={
-            "x_location": "x",
-            "y_location": "y",
-            "z_location": "z",
-            "feature_name": "gene",
-        }
+# load transcripts
+if proseg_format:
+    coordinate_df = (
+        pd.read_csv(sample_transcripts_path, engine="pyarrow")
+        .rename(
+            columns={
+                "assignment": "cell_id",
+            }
+        )
+        .query("qv >= 20")
     )
-    .query("is_gene & (qv >= 20)")
-)  # remove dummy & low qv molecules
+
+    # remove dummy molecules
+    coordinate_df = coordinate_df[
+        ~coordinate_df["gene"].str.contains("|".join(["BLANK_", "UnassignedCodeword", "NegControl"]))
+    ]
+    # recode unassigned transcripts cell_id to UNASSIGNED
+    coordinate_df["cell_id"] = (
+        coordinate_df["cell_id"].astype(str).replace({str(coordinate_df["cell_id"].max()): "UNASSIGNED"})
+    )
+
+else:
+    coordinate_df = (
+        pd.read_parquet(sample_transcripts_path)
+        .rename(
+            columns={
+                "x_location": "x",
+                "y_location": "y",
+                "z_location": "z",
+                "feature_name": "gene",
+            }
+        )
+        .query("is_gene")  # remove dummy molecules
+    )
+
+
+coordinate_df = coordinate_df.query("qv >= 20")  # remove low qv molecules
 coordinate_df["gene"] = coordinate_df["gene"].astype("category")
 
 # run ovrlpy
