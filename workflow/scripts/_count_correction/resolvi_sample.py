@@ -56,10 +56,11 @@ min_cells = args.min_cells
 num_samples = args.num_samples
 
 # read counts
-adata = spatialdata_io.xenium(
+adata = readwrite.read_xenium_sample(
     path,
     cells_as_circles=False,
     cells_boundaries=False,
+    cells_boundaries_layers=False,
     nucleus_boundaries=False,
     cells_labels=False,
     nucleus_labels=False,
@@ -67,7 +68,13 @@ adata = spatialdata_io.xenium(
     morphology_mip=False,
     morphology_focus=False,
     aligned_images=False,
-)["table"]
+    anndata=True,
+)
+
+# need to round proseg expected counts for resolVI to run
+# no need for if statement, doesn't change anything to other segmentation methods
+adata.X.data = adata.X.data.astype(np.float32).round()
+adata.obs_names = adata.obs_names.astype(str)
 
 
 # preprocess (QC filters only)
