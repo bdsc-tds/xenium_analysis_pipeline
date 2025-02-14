@@ -1,13 +1,10 @@
 output_path: results
 
 containers:
-  r:
-  10x:
-  baysor:
-  proseg:
-  segger:
 
-experiments: experiments.yml
+gpu:
+  available: true
+  partition_name: "gpu"
 
 gpu:
   available: true
