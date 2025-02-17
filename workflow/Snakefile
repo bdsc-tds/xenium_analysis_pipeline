@@ -45,9 +45,10 @@ Explanation of wildcards:
 - gene_panel_id: The name of a gene panel to be processed with a format of "condition/gene_panel".
 - sample_id: The name of an sample to be processed with a format of "condition/gene_panel/donor/sample".
 - compact_segmentation_id: The name of a segmentation method to only be used in segementation tasks.
-- segmentation_id: The name of a segmentation method to be used in the tasks downstream to the segmentation.
-- normalisation_id: The name of a normalisation method to be used.
+- segmentation_id: The name of a segmentation method to be used in the tasks downstream to the segmentation, except for count correction.
+- count_correction_id: The name of a count correction method to be used after segmentation. Should be used together with `compact_segmentation_id`.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
+- normalisation_id: The name of a normalisation method to be used.
 - annotation_id: The name of cell-type annotation to be used in a format "approach/reference_name/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
 """
 
@@ -76,10 +77,10 @@ SEGMENTATION_ID = get_dict_value(
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SEGMENTATION_NAME
 )
-NORMALISATION_ID = get_dict_value(
+COUNT_CORRECTION_ID=get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_SEURAT_NORM_NAME
+    cc.WILDCARDS_COUNT_CORRECTION_NAME
 )
 COEXPRESSION_ID = uniquify_elements_in_list(
     *[
@@ -90,6 +91,11 @@ COEXPRESSION_ID = uniquify_elements_in_list(
             cc.WILDCARDS_COEXPRESSION_NAME,
         ).values()
     ]
+)
+NORMALISATION_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_SEURAT_NORM_NAME
 )
 ANNOTATION_ID = uniquify_elements_in_list(
     *[
@@ -119,6 +125,7 @@ wildcard_constraints:
 
 include: 'rules/reprocess_raw_data.smk'
 include: 'rules/segmentation.smk'
+include: 'rules/count_correction.smk'
 include: 'rules/standard_seurat_analysis.smk'
 include: 'rules/coexpression.smk'
 include: 'rules/cell_type_annotation.smk'
@@ -178,6 +185,65 @@ def get_output4reports(
         )
 
     return ret
+
+
+def get_output4count_correction() -> list[str]:
+    count_corr_methods: list[str] = get_dict_value(
+        config,
+        "count_correction",
+        "methods",
+    )
+    if len(count_corr_methods) == 0:
+        raise RuntimeError("Error! No methods for count correction specified.")
+    
+    seg_methods: list[str] = get_dict_value(
+        config,
+        "count_correction",
+        cc.COUNT_CORRECTION_SEGMENTATION_METHOD_NAME,
+    )
+    if len(seg_methods) == 0:
+        raise RuntimeError('Error! At least one of "10x_mm_0um", "10x_0um", and "proseg" should be used during segmentation in order to correct counts.')
+
+    prefix: str = f'{config["output_path"]}/count_correction'
+
+    suffix: list[str] = []
+    if "ovrlpy" in count_corr_methods:
+        suffix.extend(
+            [
+                os.path.join(
+                    "ovrlpy",
+                    "".join(
+                        [
+                            "corrected_counts_signal_integrity_threshold=",
+                            str(get_dict_value(
+                                config,
+                                "count_correction",
+                                "ovrlpy",
+                                "signal_integrity_threshold",
+                            )),
+                            ".h5",
+                        ]
+                    )
+                ),
+                "ovrlpy/cells_mean_integrity.parquet"
+            ]
+        )
+    if "resolvi" in count_corr_methods:
+        suffix.extend(
+            [
+                "resolvi/corrected_counts.h5",
+                "resolvi/proportions.parquet"
+            ]
+        )
+    
+    return [
+        os.path.join(
+            prefix,
+            i,
+            j,
+            k,
+        ) for i in seg_methods for j in SAMPLE_ID for k in suffix
+    ]
 
 
 def get_output4cleanup() -> list[str]:
@@ -308,11 +374,15 @@ def get_input2all(
     wildcards,
     *,
     reports: bool = True,
+    count_correction: bool = True,
     coexpression: bool = True,
     cell_type_annotation: bool = True,
     cleanup: bool = False
 ) -> list[str]:
     ret: list[str] = []
+    
+    if count_correction:
+        ret.extend(get_output4count_correction())
 
     if coexpression:
         ret.extend(get_output4coexpression())
@@ -340,6 +410,7 @@ rule all:
         lambda wildcards: get_input2all(
             wildcards,
             reports=True,
+            count_correction=True,
             coexpression=True,
             cell_type_annotation=True,
             cleanup=False,

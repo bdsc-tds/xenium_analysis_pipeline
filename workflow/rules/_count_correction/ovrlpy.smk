@@ -6,7 +6,11 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
     prefix: str = f'{config["output_path"]}/segmentation'
     ret: str = ""
 
-    if wildcards.compact_segmentation_id == "10x_0um":
+    if re.match(
+        r"^10x_\w*?_?0um$",
+        wildcards.compact_segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
         ret = os.path.join(
             prefix,
             f"10x_0um/{wildcards.sample_id}/normalised_results",
@@ -21,7 +25,11 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
                 return_dir=False,
                 check_exist=False
             )
-    elif wildcards.compact_segmentation_id == "proseg":
+    elif re.match(
+        r"^proseg$",
+        wildcards.compact_segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
         ret = os.path.join(
             prefix,
             f'proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz'
@@ -52,7 +60,7 @@ rule runOvrlpy:
     log:
         f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/logs/runOvrlpy.log'
     wildcard_constraints:
-        compact_segmentation_id=r"10x_0um|proseg"
+        compact_segmentation_id=r"(10x_\w*?_?0um)|(proseg)"
     container:
         config["containers"]["r"]
     conda:
@@ -82,7 +90,7 @@ rule getCorrectedCountsFromOvrlpy:
         signal_integrity=f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/signal_integrity.parquet',
         transcript_info=f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/transcript_info.parquet'
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/corrected_counts.h5'),
+        corrected_counts=protected(f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/corrected_counts_signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}.h5'),
         cells_mean_integrity=protected(f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/cells_mean_integrity.parquet')
     params:
         input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
@@ -100,7 +108,7 @@ rule getCorrectedCountsFromOvrlpy:
     log:
         f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/ovrlpy/logs/getCorrectedCountsFromOvrlpy.log'
     wildcard_constraints:
-        compact_segmentation_id=r"10x_0um|proseg"
+        compact_segmentation_id=r"(10x_\w*?_?0um)|(proseg)"
     container:
         config["containers"]["r"]
     conda:

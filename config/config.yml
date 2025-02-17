@@ -118,6 +118,7 @@ count_correction:
     signal_integrity_threshold: 0.5
 
   resolvi:
+    max_epochs: 50
     num_samples: 100
 
 coexpression:

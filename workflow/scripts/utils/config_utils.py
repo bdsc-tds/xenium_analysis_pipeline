@@ -7,6 +7,7 @@ from typing import Any, Callable
 import re
 import os
 import yaml
+import warnings
 
 import config_constants as cc
 
@@ -645,6 +646,38 @@ def _process_segmentation(
     return methods, compact_methods, ret
 
 
+def _process_count_correction(
+    data: dict[str, Any], segmentation_methods: list[str]
+) -> tuple[list[str], list[str] | None]:
+    seg_pats: str = r"(^10x_\w*?_?0um$)|(^proseg$)"
+    _methods: list[str] = _convert2list(
+        get_dict_value(
+            data,
+            "methods",
+        ),
+        match_length=False,
+    )
+
+    valid_seg_methods: list[str] | None = [
+        i
+        for i in segmentation_methods
+        if re.match(
+            seg_pats,
+            i,
+            flags=re.IGNORECASE,
+        )
+        is not None
+    ]
+
+    if len(valid_seg_methods) == 0:
+        valid_seg_methods = None
+        warnings.warn(
+            'Warning! Skip count correction as neither "10x_0um" nor "proseg" is used for segmentation.'
+        )
+
+    return _methods, valid_seg_methods
+
+
 def _process_seurat_norm(methods: str | list[str]) -> list[str]:
     _methods: list[str] = _convert2list(methods, match_length=False)
 
@@ -810,7 +843,10 @@ def process_config(
 
     # Process `experiments` section.
     _experiments = _process_experiments(
-        get_dict_value(data, "experiments"),
+        get_dict_value(
+            data,
+            "experiments",
+        ),
         root_path,
     )
 
@@ -833,7 +869,12 @@ def process_config(
     )
 
     # Process `segmentation` section.
-    _segmentation = _process_segmentation(get_dict_value(data, "segmentation"))
+    _segmentation = _process_segmentation(
+        get_dict_value(
+            data,
+            "segmentation",
+        ),
+    )
 
     set_dict_value(
         data,
@@ -850,7 +891,35 @@ def process_config(
     )
 
     for k, v in _segmentation[2].items():
-        set_dict_value(data, "segmentation", k, value=v)
+        set_dict_value(
+            data,
+            "segmentation",
+            k,
+            value=v,
+        )
+
+    # Process `count_correction` section.
+    _count_correction = _process_count_correction(
+        get_dict_value(
+            data,
+            "count_correction",
+        ),
+        _segmentation[1],
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_COUNT_CORRECTION_NAME,
+        value=_count_correction[0],
+    )
+
+    set_dict_value(
+        data,
+        "count_correction",
+        cc.COUNT_CORRECTION_SEGMENTATION_METHOD_NAME,
+        value=_count_correction[1],
+    )
 
     # Process `standard_seurat_analysis`, `normalisation` section.
     _seurat_norm = _process_seurat_norm(
@@ -859,7 +928,7 @@ def process_config(
             "standard_seurat_analysis",
             "normalisation",
             "methods",
-        )
+        ),
     )
 
     set_dict_value(
@@ -872,7 +941,10 @@ def process_config(
     # Process `coexpression` section.
     _coexpression = _process_coexpression(
         _experiments[5],
-        get_dict_value(data, "coexpression"),
+        get_dict_value(
+            data,
+            "coexpression",
+        ),
     )
 
     set_dict_value(
@@ -885,7 +957,10 @@ def process_config(
     # Process `cell_type_annotation` section.
     _cell_type_annotation = _process_cell_type_annotation(
         _experiments[6],
-        get_dict_value(data, "cell_type_annotation"),
+        get_dict_value(
+            data,
+            "cell_type_annotation",
+        ),
     )
 
     set_dict_value(

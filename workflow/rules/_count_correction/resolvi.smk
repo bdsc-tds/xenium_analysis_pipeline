@@ -6,7 +6,11 @@ def get_input2_or_params4runResolvi(wildcards, for_input: bool = True) -> str | 
     prefix: str = f'{config["output_path"]}/segmentation'
     ret: str = ""
 
-    if wildcards.compact_segmentation_id == "10x_0um":
+    if re.match(
+        r"^10x_\w*?_?0um$",
+        wildcards.compact_segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
         ret = os.path.join(
             prefix,
             f"10x_0um/{wildcards.sample_id}/normalised_results",
@@ -21,7 +25,11 @@ def get_input2_or_params4runResolvi(wildcards, for_input: bool = True) -> str | 
                 return_dir=True,
                 check_exist=False
             )
-    elif wildcards.compact_segmentation_id == "proseg":
+    elif re.match(
+        r"^proseg$",
+        wildcards.compact_segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
         ret = os.path.join(
             prefix,
             f'proseg/{wildcards.sample_id}/raw_results'
@@ -59,6 +67,13 @@ rule runResolvi:
         input_data=lambda wildcards: get_input2_or_params4runResolvi(
             wildcards,
             for_input=False,
+        ),
+        max_epochs=get_dict_value(
+            config,
+            "count_correction",
+            "resolvi",
+            "max_epochs",
+            replace_none=50,
         ),
         num_samples=get_dict_value(
             config,
@@ -145,7 +160,7 @@ rule runResolvi:
     log:
         f'{config["output_path"]}/count_correction/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/resolvi/logs/runResolvi.log'
     wildcard_constraints:
-        compact_segmentation_id=r"10x_0um|proseg"
+        compact_segmentation_id=r"(10x_\w*?_?0um)|(proseg)"
     container:
         config["containers"]["r"]
     conda:
@@ -174,5 +189,6 @@ rule runResolvi:
         "--max_counts {params.max_counts} "
         "--max_features {params.max_features} "
         "--min_cells {params.min_cells} "
+        "--max_epochs {params.max_epochs} "
         "--num_samples {params.num_samples} "
         "-l {log}"
