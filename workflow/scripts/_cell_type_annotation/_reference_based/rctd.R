@@ -46,7 +46,11 @@ ref.obj <- Reference(
 
 # Create query object
 coords   <- xe@meta.data %>% select(ST_1, ST_2)
-test.obj <- SpatialRNA(coords, GetAssayData(xe, assay = xe_assay, layer = test_layer))
+test.obj <- SpatialRNA(
+  coords,
+  GetAssayData(xe, assay = xe_assay, layer = test_layer),
+  require_int = snakemake@params[["is_int_counts"]]
+)
 
 # Create `class_df` if a valid annotation level is provided
 class_df <- generate_class_df(
@@ -63,7 +67,7 @@ RCTD <- create.RCTD(
   ref.obj,
   UMI_min = XE_MIN_UMI, #10
   counts_MIN = XE_MIN_counts, #10
-  UMI_min_sigma = UMI_min_sigma, # 100, but 300 by default
+  UMI_min_sigma = UMI_min_sigma, # 1, but 300 by default
   max_cores = cores,
   CELL_MIN_INSTANCE = CELL_MIN_INSTANCE,
   class_df = class_df
