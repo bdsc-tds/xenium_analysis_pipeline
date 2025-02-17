@@ -111,6 +111,7 @@ count_correction:
     signal_integrity_threshold: 0.5
 
   resolvi:
+    num_samples: 100
 
 coexpression:
   methods:
