@@ -47,6 +47,12 @@ def parse_args():
         "--min_cells", type=int, help="QC parameter from pipeline config"
     )
     parser.add_argument(
+        "--max_epochs",
+        type=int,
+        default=50,
+        help="Maximum number of epochs to train the model.",
+    )
+    parser.add_argument(
         "--num_samples",
         type=int,
         help="Number of samples for RESOLVI generative model.",
@@ -55,6 +61,8 @@ def parse_args():
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
         raise RuntimeError(f"Error! Input directory does not exist: {ret.path}")
+    if ret.max_epochs <= 0:
+        ret.max_epochs = 50
 
     return ret
 
@@ -99,7 +107,7 @@ if __name__ == "__main__":
         prepare_data_kwargs={"spatial_rep": "spatial"},
     )
     resolvi = scvi.external.RESOLVI(adata, semisupervised=False)
-    resolvi.train(max_epochs=50)
+    resolvi.train(max_epochs=args.max_epochs)
 
     # preprocess (QC filters only)
     # resolvi requires at least 5 counts in each cell
