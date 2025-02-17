@@ -15,7 +15,7 @@ def transcripts_to_count_matrix(
     transcripts, cell_column="cell_id", feature_column="feature_name", qv_treshold=20
 ):
     transcripts = transcripts.query(
-        f"is_gene &(qv >= {qv_treshold}) & ({cell_column} != 'UNASSIGNED')"
+        f"(qv >= {qv_treshold}) & ({cell_column} != 'UNASSIGNED')"
     )
     cm = transcripts.pivot_table(
         index=cell_column, columns=feature_column, aggfunc="size", fill_value=0
@@ -110,7 +110,6 @@ if __name__ == "__main__":
                     "assignment": "cell_id",
                 }
             )
-            .query("qv >= 20")
         )
 
         # remove dummy molecules
@@ -138,6 +137,10 @@ if __name__ == "__main__":
             )
             .query("is_gene")  # remove dummy molecules
         )
+
+    coordinate_df = coordinate_df.query("qv >= 20")  # remove low qv molecules
+    coordinate_df["gene"] = coordinate_df["gene"].astype("category")
+
     transcript_info = pd.read_parquet(args.sample_transcript_info)
     coordinate_df = coordinate_df.join(transcript_info)
 
