@@ -76,7 +76,6 @@ rule runOvrlpy:
         "{params.proseg_format} "
         "-l {log}"
 
-
 rule getCorrectedCountsFromOvrlpy:
     input:
         transcripts=get_input2_or_params4runOvrlpy,
