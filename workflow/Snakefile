@@ -151,17 +151,29 @@ def get_output4reports() -> list[str]:
 
     # Reports from segmentation QC.
 
-    ## Reports from RCTD results.
-    ret.extend(
-        [
-            os.path.join(
-                prefix,
-                i,
-                "segmentation_qc_reference_based_rctd.html",
-            )
-            for i in GENE_PANEL_ID
-        ]
-    )
+    ## Reports from RCTD results, if RCTD is used for annotation.
+    if any(
+        False if re.match(
+            r"reference_based/.+/rctd_.+",
+            i,
+            flags=re.IGNORECASE,
+        ) is None else True
+        for i in ANNOTATION_ID
+    ):
+        ret.extend(
+            [
+                os.path.join(
+                    prefix,
+                    i,
+                    "segmentation_qc_reference_based_rctd.html",
+                )
+                for i in GENE_PANEL_ID
+            ]
+        )
+    else:
+        print(
+            "No reports from reference based RCTD will be generated, as RCTD is not used for annotation.",
+        )
 
     return ret
 
