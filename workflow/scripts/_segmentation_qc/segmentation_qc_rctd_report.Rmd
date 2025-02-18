@@ -1,10 +1,9 @@
 ---
 params:
-  gene_panel: "TO_BE_SET"
-  segmentation_qc_path: "TO_BE_SET"
+  gene_panel_id: "TO_BE_SET"
+  file_path: "TO_BE_SET"
 
-
-title: "Report: Segmentation QC for gene_panel `r params$gene_panel`"
+title: "Report: Segmentation QC based on RCTD for gene panel `r params$gene_panel_id`"
 author: "Daria Buszta"
 date: "`r Sys.Date()`"
 output: html_document
@@ -16,22 +15,24 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r, include = FALSE}
 library(Seurat)
+library(arrow)
 library(ggplot2)
 library(dplyr)
 ```
 
 ```{r}
-segmentation_qc <- read.csv(params$segmentation_qc_path)
+data <- read_parquet(params$file_path)
 ```
 
 # Generate QC plots
 
 number of cells
+
 ```{r, fig.height=7}
 
-segmentation_qc$segmentation <- as.factor(all_data$segmentation)
+data$segmentation_id <- as.factor(data$segmentation_id)
 
-ggplot(all_data, aes(x = tissue, y = cells, fill = segmentation)) +
+ggplot(data, aes(x = sample, y = ncell, fill = segmentation_id)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_minimal() +
   theme(
@@ -44,10 +45,12 @@ ggplot(all_data, aes(x = tissue, y = cells, fill = segmentation)) +
   labs(title = NULL, y = "Number of Cells")
 
 ```
+
 singlets
+
 ```{r, fig.height=7}
 
-ggplot(all_data, aes(x = tissue, y = singlets, fill = segmentation)) +
+ggplot(data, aes(x = sample, y = singlet_prop, fill = segmentation_id)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_minimal() +
   theme(
@@ -60,10 +63,12 @@ ggplot(all_data, aes(x = tissue, y = singlets, fill = segmentation)) +
   labs(title = NULL, y = "% of Singlets")
 
 ```
+
 rejects
+
 ```{r, fig.height=7}
 
-ggplot(all_data, aes(x = tissue, y = rejects, fill = segmentation)) +
+ggplot(data, aes(x = sample, y = reject_prop, fill = segmentation_id)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_minimal() +
   theme(
@@ -76,10 +81,12 @@ ggplot(all_data, aes(x = tissue, y = rejects, fill = segmentation)) +
   labs(title = NULL, y = "% of Rejects")
 
 ```
+
 mean_nCount
+
 ```{r, fig.height=7}
 
-ggplot(all_data, aes(x = tissue, y = mean_ncount, fill = segmentation)) +
+ggplot(data, aes(x = sample, y = mean_ncount, fill = segmentation_id)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_minimal() +
   theme(
@@ -92,10 +99,12 @@ ggplot(all_data, aes(x = tissue, y = mean_ncount, fill = segmentation)) +
   labs(title = NULL, y = "mean_nCount")
 
 ```
+
 mean_nFeature
+
 ```{r, fig.height=7}
 
-ggplot(all_data, aes(x = tissue, y = mean_nfeature, fill = segmentation)) +
+ggplot(data, aes(x = sample, y = mean_nfeature, fill = segmentation_id)) +
   geom_bar(stat = "identity", position = position_dodge()) +
   theme_minimal() +
   theme(
