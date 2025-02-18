@@ -583,22 +583,31 @@ def _process_segmentation(
                     _tmp: list[str | None] = []
 
                     for __v in _v:
-                        if __v is None:
-                            _tmp.append(None)
-                            continue
-
                         __tmp: list[str] = []
-                        prev_kept: bool = False
 
-                        for elem in __v.split():
-                            if elem.startswith("--"):
-                                if elem in ["--boundary-stain", "--interior-stain"]:
-                                    prev_kept = False
-                                else:
-                                    prev_kept = True
-                                    __tmp.append(elem)
-                            elif prev_kept:
-                                __tmp.append(elem)
+                        if (
+                            re.match(
+                                r"^10x.*",
+                                m,
+                                flags=re.IGNORECASE,
+                            )
+                            is not None
+                        ):
+                            if __v is not None:
+                                prev_kept: bool = False
+
+                                for elem in __v.split():
+                                    if elem.startswith("--"):
+                                        if elem in [
+                                            "--boundary-stain",
+                                            "--interior-stain",
+                                        ]:
+                                            prev_kept = False
+                                        else:
+                                            prev_kept = True
+                                            __tmp.append(elem)
+                                    elif prev_kept:
+                                        __tmp.append(elem)
 
                         if m == "10x":
                             __tmp.extend(
@@ -610,7 +619,10 @@ def _process_segmentation(
                                 ]
                             )
 
-                        _tmp.append(" ".join(__tmp))
+                        if len(__tmp) > 0:
+                            _tmp.append(" ".join(__tmp))
+                        else:
+                            _tmp.append(None)
 
                     tmp[k] = _tmp
                 else:
