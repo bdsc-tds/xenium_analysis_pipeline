@@ -44,12 +44,6 @@ def parse_args():
         help="file to output.",
     )
     parser.add_argument(
-        "--signal_integrity_threshold",
-        type=float,
-        required=True,
-        help="signal_integrity_threshold parameter (threshold below which a pixel is low quality).",
-    )
-    parser.add_argument(
         "--proseg_format",
         action="store_true",
         help="is the transcripts file in proseg raw output format.",
