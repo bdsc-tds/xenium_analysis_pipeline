@@ -160,10 +160,3 @@ cell_type_annotation:
       eta: 0.3
 
       _other_options:
-
-segmentation_qc:
-  gene_panel:
-    - breast
-    - lung
-    - chuvio
-    - 5k
