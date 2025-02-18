@@ -212,22 +212,18 @@ def get_output4count_correction() -> list[str]:
             [
                 os.path.join(
                     "ovrlpy",
-                    "".join(
-                        [
-                            "corrected_counts_signal_integrity_threshold=",
-                            str(get_dict_value(
-                                config,
-                                "count_correction",
-                                "ovrlpy",
-                                "signal_integrity_threshold",
-                            )),
-                            ".h5",
-                        ]
-                    )
-                ),
-                "ovrlpy/cells_mean_integrity.parquet"
+                    f'signal_integrity_threshold={get_dict_value(
+                        config,
+                        "count_correction",
+                        "ovrlpy",
+                        "signal_integrity_threshold",
+                    )}',
+                    i,
+                )
+                for i in ["corrected_counts.h5", "cells_mean_integrity.parquet"]
             ]
         )
+
     if "resolvi" in count_corr_methods:
         suffix.extend(
             [
