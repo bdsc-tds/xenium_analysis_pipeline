@@ -17,6 +17,7 @@ normalisation_method = 'lognorm'
 num_samples = 30
 batch_size = 1000
 macro_batch_size = 50000
+mixture_k = 50
 references = ['matched_reference_combo']
 methods = ['rctd_class_aware']
 levels = ['Level2']
@@ -68,6 +69,7 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                             num_samples=num_samples,
                                             batch_size=batch_size,
                                             macro_batch_size=macro_batch_size,
+                                            mixture_k=mixture_k,
                                         threads: 1
                                         resources:
                                             mem='80GB',# if panel.stem == '5k' else '10GB',
@@ -93,7 +95,8 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                             --min_cells {params.min_cells} \
                                             --num_samples {params.num_samples} \
                                             --batch_size {params.batch_size} \
-                                            --macro_batch_size {params.macro_batch_size}
+                                            --macro_batch_size {params.macro_batch_size} \
+                                            --mixture_k {params.mixture_k}
 
                                             echo "DONE"
                                             """
