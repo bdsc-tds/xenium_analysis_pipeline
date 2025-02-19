@@ -40,7 +40,6 @@ def parse_args():
         help="Number of samples for RESOLVI generative model.",
     )
     parser.add_argument("--batch_size", type=int, help="batch size parameter")
-    parser.add_argument("--macro_batch_size", type=int, help="macro_batch_size parameter")
     parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
 
     ret = parser.parse_args()
@@ -119,7 +118,6 @@ if __name__ == "__main__":
         summary_fun={"post_donor_q50": np.median},
         num_samples=args.num_samples,
         batch_size=args.batch_size,
-        macro_batch_size=args.macro_batch_size,
         summary_frequency=100,
     )
     samples_corr = pd.DataFrame(samples_corr).T
@@ -130,7 +128,6 @@ if __name__ == "__main__":
         summary_fun={"post_donor_means": np.mean},
         num_samples=args.num_samples,
         batch_size=args.batch_size,
-        macro_batch_size=args.macro_batch_size,
         summary_frequency=100,
     )
     samples_proportions = pd.DataFrame(samples).T
