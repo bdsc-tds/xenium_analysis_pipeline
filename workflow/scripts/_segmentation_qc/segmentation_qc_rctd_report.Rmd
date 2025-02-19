@@ -2,6 +2,8 @@
 params:
   gene_panel_id: "TO_BE_SET"
   file_path: "TO_BE_SET"
+  reference_name: "TO_BE_SET"
+  reference_level: "TO_BE_SET"
 
 title: "Report: Segmentation QC based on RCTD for gene panel `r params$gene_panel_id`"
 author: "Daria Buszta"
@@ -20,15 +22,17 @@ library(ggplot2)
 library(dplyr)
 ```
 
-```{r}
+```{r, df prep, echo=FALSE}
 data <- read_parquet(params$file_path)
-```
 
-```{r, df prep}
-data$segmentation_id <- as.factor(data$segmentation_id)
 data <- data %>%
-  filter(reference_name == "matched_reference_combo") %>%
-  filter(reference_level == "Level2")
+  mutate(
+    segmentation_id = as.factor(segmentation_id)
+  ) %>%
+  filter(
+    reference_name == params$reference_name,
+    reference_level == params$reference_level
+  )
 ```
 
 # Generate QC plots

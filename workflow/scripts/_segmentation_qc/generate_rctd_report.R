@@ -5,7 +5,9 @@ sink(log, type = "message")
 # Get parameters for the report
 pr <- list(
   file_path = snakemake@input[[1]],
-  gene_panel_id = snakemake@params[["gene_panel_id"]]
+  gene_panel_id = snakemake@params[["gene_panel_id"]],
+  reference_name = snakemake@params[["reference_name"]],
+  reference_level = snakemake@params[["reference_level"]]
 )
 
 dir.create(
