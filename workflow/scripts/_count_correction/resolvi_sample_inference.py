@@ -1,26 +1,24 @@
-import os
-import sys
-import argparse
+import dask
 
+dask.config.set({"dataframe.query-planning": False})
+
+import anndata as ad
 import numpy as np
 import pandas as pd
-
 import scvi
-import anndata as ad
-
-import dask
+import argparse
+import os
+import sys
 
 from .._joint_scanpy_analysis import preprocessing
 from ..utils import readwrite
 
 
-dask.config.set({"dataframe.query-planning": False})
-
-
 # Set up argument parser
 def parse_args():
     parser = argparse.ArgumentParser(description="Embed panel of Xenium samples.")
-    parser.add_argument("--path", type=str, help="Path to the xenium donor file.")
+    parser.add_argument("--path", type=str, help="Path to the xenium sample file.")
+    parser.add_argument("--dir_resolvi_model", type=str, help="directory with saved RESOLVI model weights")
     parser.add_argument(
         "--out_file_resolvi_corrected_counts",
         type=str,
@@ -31,18 +29,11 @@ def parse_args():
         type=str,
         help="Path to resolvi proportions parquet file.",
     )
-    parser.add_argument("--out_dir_resolvi_model", type=str, help="output directory with RESOLVI model weights")
     parser.add_argument("--min_counts", type=int, help="QC parameter from pipeline config")
     parser.add_argument("--min_features", type=int, help="QC parameter from pipeline config")
     parser.add_argument("--max_counts", type=float, help="QC parameter from pipeline config")
     parser.add_argument("--max_features", type=float, help="QC parameter from pipeline config")
     parser.add_argument("--min_cells", type=int, help="QC parameter from pipeline config")
-    parser.add_argument(
-        "--max_epochs",
-        type=int,
-        default=50,
-        help="Maximum number of epochs to train the model.",
-    )
     parser.add_argument(
         "--num_samples",
         type=int,
@@ -51,7 +42,6 @@ def parse_args():
     parser.add_argument("--batch_size", type=int, help="batch size parameter")
     parser.add_argument("--macro_batch_size", type=int, help="macro_batch_size parameter")
     parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
-    parser.add_argument("--mixture_k", type=int, help="mixture_k parameter for unsupervised RESOLVI")
 
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
@@ -103,12 +93,6 @@ if __name__ == "__main__":
         labels_key = None
         semisupervised = False
 
-    scvi.external.RESOLVI.setup_anndata(
-        adata, labels_key=labels_key, layer=None, prepare_data_kwargs={"spatial_rep": "spatial"}
-    )
-    resolvi = scvi.external.RESOLVI(adata, mixture_k=args.mixture_k, semisupervised=semisupervised)
-    resolvi.train(max_epochs=args.max_epochs)
-
     # preprocess (QC filters only)
     # resolvi requires at least 5 counts in each cell
     preprocessing.preprocess(
@@ -126,6 +110,8 @@ if __name__ == "__main__":
         min_cells=args.min_cells,
         backend="cpu",
     )
+
+    resolvi = scvi.external.RESOLVI.load(args.dir_resolvi_model, adata=adata)
 
     samples_corr = resolvi.sample_posterior(
         model=resolvi.module.model_corrected,
