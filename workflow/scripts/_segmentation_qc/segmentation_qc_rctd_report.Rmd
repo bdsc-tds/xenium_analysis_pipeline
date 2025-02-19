@@ -24,25 +24,29 @@ library(dplyr)
 data <- read_parquet(params$file_path)
 ```
 
+```{r, df prep}
+data$segmentation_id <- as.factor(data$segmentation_id)
+data <- data %>%
+  filter(reference_name == "matched_reference_combo") %>%
+  filter(reference_level == "Level2")
+```
+
 # Generate QC plots
 
 number of cells
 
 ```{r, fig.height=7}
 
-data$segmentation_id <- as.factor(data$segmentation_id)
-
-ggplot(data, aes(x = sample, y = ncell, fill = segmentation_id)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+ggplot(data, aes(x = sample, y = ncell, color = segmentation_id)) +
+  geom_point(alpha = 0.9, size=4) +
+  scale_y_continuous(limits = c(0, NA)) +  # Ensure y-axis starts at 0
   theme_minimal() +
-  theme(
-    axis.title = element_text(size = 26),       # Increase axis title font size
-    axis.text = element_text(size = 24),        # Increase axis text font size
-    legend.text = element_text(size = 24),      # Increase legend text font size
-    plot.title = element_text(size = 28)        # Increase plot title font size
-  ) +
-  #scale_y_log10() +
-  labs(title = NULL, y = "Number of Cells")
+  labs(y = "Cell Count", title = NULL, x= "Sample") +
+  theme( axis.title = element_text(size = 26),       # Increase axis title font size
+         axis.text = element_text(size = 24),        # Increase axis text font size
+         legend.text = element_text(size = 24),      # Increase legend text font size
+         plot.title = element_text(size = 28),        # Increase plot title font size
+         )
 
 ```
 
@@ -50,17 +54,16 @@ singlets
 
 ```{r, fig.height=7}
 
-ggplot(data, aes(x = sample, y = singlet_prop, fill = segmentation_id)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+ggplot(data, aes(x = sample, y = singlet_prop, color = segmentation_id)) +
+  geom_point(alpha = 0.9, size=4) +
+  scale_y_continuous(limits = c(0, NA)) +  # Ensure y-axis starts at 0
   theme_minimal() +
-  theme(
-    axis.title = element_text(size = 26),       # Increase axis title font size
-    axis.text = element_text(size = 24),        # Increase axis text font size
-    legend.text = element_text(size = 24),      # Increase legend text font size
-    plot.title = element_text(size = 28)        # Increase plot title font size
-  ) +
-  #scale_y_log10() +
-  labs(title = NULL, y = "% of Singlets")
+  labs(y = "Singlet Proportion", title = NULL, x= "Sample") +
+  theme( axis.title = element_text(size = 26),       # Increase axis title font size
+         axis.text = element_text(size = 24),        # Increase axis text font size
+         legend.text = element_text(size = 24),      # Increase legend text font size
+         plot.title = element_text(size = 28),        # Increase plot title font size
+         )
 
 ```
 
@@ -68,17 +71,16 @@ rejects
 
 ```{r, fig.height=7}
 
-ggplot(data, aes(x = sample, y = reject_prop, fill = segmentation_id)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+ggplot(data, aes(x = sample, y = reject_prop, color = segmentation_id)) +
+  geom_point(alpha = 0.9, size=4) +
+  scale_y_continuous(limits = c(0, NA)) +  # Ensure y-axis starts at 0
   theme_minimal() +
-  theme(
-    axis.title = element_text(size = 26),       # Increase axis title font size
-    axis.text = element_text(size = 24),        # Increase axis text font size
-    legend.text = element_text(size = 24),      # Increase legend text font size
-    plot.title = element_text(size = 28)        # Increase plot title font size
-  ) +
-  #scale_y_log10() +
-  labs(title = NULL, y = "% of Rejects")
+  labs(y = "Reject Proportion", title = NULL, x= "Sample") +
+  theme( axis.title = element_text(size = 26),       # Increase axis title font size
+         axis.text = element_text(size = 24),        # Increase axis text font size
+         legend.text = element_text(size = 24),      # Increase legend text font size
+         plot.title = element_text(size = 28),        # Increase plot title font size
+         )
 
 ```
 
@@ -86,17 +88,16 @@ mean_nCount
 
 ```{r, fig.height=7}
 
-ggplot(data, aes(x = sample, y = mean_ncount, fill = segmentation_id)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+ggplot(data, aes(x = sample, y = mean_ncount, color = segmentation_id)) +
+  geom_point(alpha = 0.9, size=4) +
+  scale_y_continuous(limits = c(0, NA)) +  # Ensure y-axis starts at 0
   theme_minimal() +
-  theme(
-    axis.title = element_text(size = 26),       # Increase axis title font size
-    axis.text = element_text(size = 24),        # Increase axis text font size
-    legend.text = element_text(size = 24),      # Increase legend text font size
-    plot.title = element_text(size = 28)        # Increase plot title font size
-  ) +
-  #scale_y_log10() +
-  labs(title = NULL, y = "mean_nCount")
+  labs(y = "mean_nCount",title = NULL, x= "Sample") +
+  theme( axis.title = element_text(size = 26),       # Increase axis title font size
+         axis.text = element_text(size = 24),        # Increase axis text font size
+         legend.text = element_text(size = 24),      # Increase legend text font size
+         plot.title = element_text(size = 28),        # Increase plot title font size
+         )
 
 ```
 
@@ -104,16 +105,15 @@ mean_nFeature
 
 ```{r, fig.height=7}
 
-ggplot(data, aes(x = sample, y = mean_nfeature, fill = segmentation_id)) +
-  geom_bar(stat = "identity", position = position_dodge()) +
+ggplot(data, aes(x = sample, y = mean_nfeature, color = segmentation_id)) +
+  geom_point(alpha = 0.9, size=4) +
+  scale_y_continuous(limits = c(0, NA)) +  # Ensure y-axis starts at 0
   theme_minimal() +
-  theme(
-    axis.title = element_text(size = 26),       # Increase axis title font size
-    axis.text = element_text(size = 24),        # Increase axis text font size
-    legend.text = element_text(size = 24),      # Increase legend text font size
-    plot.title = element_text(size = 28)        # Increase plot title font size
-  ) +
-  #scale_y_log10() +
-  labs(title = NULL, y = "mean_nFeature")
+  labs(y = "mean_nFeature", title = NULL, x= "Sample") +
+  theme( axis.title = element_text(size = 26),       # Increase axis title font size
+         axis.text = element_text(size = 24),        # Increase axis text font size
+         legend.text = element_text(size = 24),      # Increase legend text font size
+         plot.title = element_text(size = 28),        # Increase plot title font size
+         )
 
 ```
