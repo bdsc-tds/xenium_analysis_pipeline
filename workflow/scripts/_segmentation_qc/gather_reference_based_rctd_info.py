@@ -113,6 +113,7 @@ def get_meta_data(
             annotation_id=annotation_id if annotation_id is not None else np.nan,
             reference_name=ref_name if ref_name is not None else np.nan,
             reference_level=ref_level if ref_level is not None else np.nan,
+            ncell=len,
         )
     )
 
@@ -142,9 +143,6 @@ def get_info_from_rctd(file_path: str) -> pd.DataFrame:
         .reset_index(
             None,
         )
-        .assign(
-            doublet_detection_method="scDblFinder",
-        )
     )
 
 
@@ -155,15 +153,21 @@ def combine_meta_data_and_rctd_info(
         pd.merge(
             _meta_data,
             _rctd_info,
-            how="inner",
+            how="left",
             on="cell_id",
         )
+        .fillna(value=False)
         .assign(
+            unannotated=lambda x: ~(
+                x["reject"]
+                | x["singlet"]
+                | x["doublet_certain"]
+                | x["doublet_uncertain"]
+            ),
             mean_ncount=lambda x: x["ncount"].mean(),
             median_ncount=lambda x: x["ncount"].median(),
             mean_nfeature=lambda x: x["nfeature"].mean(),
             median_nfeature=lambda x: x["nfeature"].median(),
-            ncell=len,
         )
         .agg(
             {
@@ -174,10 +178,6 @@ def combine_meta_data_and_rctd_info(
                 "gene_panel": "unique",
                 "donor": "unique",
                 "sample": "unique",
-                "normalisation_id": "unique",
-                "annotation_id": "unique",
-                "reference_name": "unique",
-                "reference_level": "unique",
                 "mean_ncount": "unique",
                 "median_ncount": "unique",
                 "mean_nfeature": "unique",
@@ -187,18 +187,11 @@ def combine_meta_data_and_rctd_info(
                 "singlet": "sum",
                 "doublet_certain": "sum",
                 "doublet_uncertain": "sum",
-                "doublet_detection_method": "unique",
-            },
+                "unannotated": "sum",
+            }
         )
         .map(
-            lambda x: (
-                x[0]
-                if isinstance(
-                    x,
-                    (list, np.ndarray),
-                )
-                else x
-            ),
+            lambda x: x[0] if isinstance(x, (list, np.ndarray)) else x,
         )
         .to_frame()
         .T.assign(
@@ -206,6 +199,13 @@ def combine_meta_data_and_rctd_info(
             singlet_prop=lambda x: x["singlet"] / x["ncell"],
             doublet_certain_prop=lambda x: x["doublet_certain"] / x["ncell"],
             doublet_uncertain_prop=lambda x: x["doublet_uncertain"] / x["ncell"],
+            unannotated_prop=lambda x: (
+                1.0
+                - x["reject_prop"]
+                - x["singlet_prop"]
+                - x["doublet_certain_prop"]
+                - x["doublet_uncertain_prop"]
+            ),
         )
     )
 
