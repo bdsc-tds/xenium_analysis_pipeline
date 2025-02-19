@@ -158,6 +158,7 @@ rule runResolvi:
             ),
             inexist_key_ok=True
         )
+        mixture_k=50 #to define as extra param 
     log:
         f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/logs/runResolvi.log'
     wildcard_constraints:
@@ -193,4 +194,7 @@ rule runResolvi:
         "--min_cells {params.min_cells} "
         "--max_epochs {params.max_epochs} "
         "--num_samples {params.num_samples} "
+        "--batch_size {params.batch_size} "
+        "--macro_batch_size {params.macro_batch_size} "
+        "--mixture_k {params.mixture_k} "
         "-l {log}"
