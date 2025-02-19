@@ -10,6 +10,18 @@ rule generateGenePanelWiseReferencedBasedRCTDReport:
     params:
         gene_panel_id=lambda wildcards: wildcards.gene_panel_id,
         rmd_file="workflow/scripts/_segmentation_qc/segmentation_qc_rctd_report.Rmd",
+        reference_name=lambda wildcards: get_dict_value(
+            config,
+            "segmentation",
+            "_qc",
+            "reference_name",
+        ),
+        reference_level=lambda wildcards: get_dict_value(
+            config,
+            "segmentation",
+            "_qc",
+            "reference_level",
+        ),
         intermediates_dir=f'{config["output_path"]}/reports/{{gene_panel_id}}/_intermediates_rctd_report',
         knit_root_dir=f'{config["output_path"]}/reports/{{gene_panel_id}}/_knit_root_rctd_report'
     log:

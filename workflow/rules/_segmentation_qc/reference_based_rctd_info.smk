@@ -26,7 +26,10 @@ rule gatherReferenceBasedRCTDInfo:
     conda:
         "../../envs/pyarrow.yml"
     resources:
-        mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt * 100, 20480)
+        mem_mb=lambda wildcards, input, attempt: min(
+            input.size_mb * attempt * 100,
+            20480,
+        )
     shell:
         "python3 workflow/scripts/_segmentation_qc/gather_reference_based_rctd_info.py "
         "--in_meta {input.sample_info} "

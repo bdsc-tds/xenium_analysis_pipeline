@@ -83,6 +83,10 @@ segmentation:
     _threads: 16
     _memory: 128
 
+  _qc:
+    reference_name:
+    reference_level:
+
 standard_seurat_analysis:
   qc:
     min_counts: 10
