@@ -115,7 +115,7 @@ if __name__ == "__main__":
     samples_corr = resolvi.sample_posterior(
         model=resolvi.module.model_corrected,
         return_sites=["px_rate"],
-        summary_fun={"post_donor_q50": np.median},
+        summary_fun={"post_sample_q50": np.median},
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         summary_frequency=100,
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     samples = resolvi.sample_posterior(
         model=resolvi.module.model_residuals,
         return_sites=["mixture_proportions"],
-        summary_fun={"post_donor_means": np.mean},
+        summary_fun={"post_sample_means": np.mean},
         num_samples=args.num_samples,
         batch_size=args.batch_size,
         summary_frequency=100,
@@ -134,12 +134,12 @@ if __name__ == "__main__":
 
     ### save
     samples_corr = pd.DataFrame(
-        samples_corr.loc["post_donor_q50", "px_rate"],
+        samples_corr.loc["post_sample_q50", "px_rate"],
         index=adata.obs_names,
         columns=adata.var_names,
     )
     samples_proportions = pd.DataFrame(
-        samples_proportions.loc["post_donor_means", "mixture_proportions"],
+        samples_proportions.loc["post_sample_means", "mixture_proportions"],
         index=adata.obs_names,
         columns=["true_proportion", "diffusion_proportion", "background_proportion"],
     )
