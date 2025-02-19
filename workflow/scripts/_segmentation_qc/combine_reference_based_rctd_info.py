@@ -9,15 +9,21 @@ sys.stdout = _log
 sys.stderr = _log
 
 
-info: pd.DataFrame = pd.concat(
-    [
-        pd.read_parquet(
-            i,
-        )
-        for i in snakemake.input
-    ],
-).reset_index(
-    drop=True,
+info: pd.DataFrame = (
+    pd.concat(
+        [
+            pd.read_parquet(
+                i,
+            )
+            for i in snakemake.input
+        ],
+    )
+    .reset_index(
+        drop=True,
+    )
+    .fillna(
+        value=0,
+    )
 )
 
 info.to_parquet(
