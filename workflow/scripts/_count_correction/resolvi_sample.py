@@ -31,21 +31,12 @@ def parse_args():
         type=str,
         help="Path to resolvi proportions parquet file.",
     )
-    parser.add_argument(
-        "--min_counts", type=int, help="QC parameter from pipeline config"
-    )
-    parser.add_argument(
-        "--min_features", type=int, help="QC parameter from pipeline config"
-    )
-    parser.add_argument(
-        "--max_counts", type=float, help="QC parameter from pipeline config"
-    )
-    parser.add_argument(
-        "--max_features", type=float, help="QC parameter from pipeline config"
-    )
-    parser.add_argument(
-        "--min_cells", type=int, help="QC parameter from pipeline config"
-    )
+    parser.add_argument("--out_dir_resolvi_model", type=str, help="output directory with RESOLVI model weights")
+    parser.add_argument("--min_counts", type=int, help="QC parameter from pipeline config")
+    parser.add_argument("--min_features", type=int, help="QC parameter from pipeline config")
+    parser.add_argument("--max_counts", type=float, help="QC parameter from pipeline config")
+    parser.add_argument("--max_features", type=float, help="QC parameter from pipeline config")
+    parser.add_argument("--min_cells", type=int, help="QC parameter from pipeline config")
     parser.add_argument(
         "--max_epochs",
         type=int,
@@ -57,7 +48,8 @@ def parse_args():
         type=int,
         help="Number of samples for RESOLVI generative model.",
     )
-
+    parser.add_argument("--macro_batch_size", type=int, help="macro_batch_size parameter")
+    parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
         raise RuntimeError(f"Error! Input directory does not exist: {ret.path}")
@@ -100,13 +92,18 @@ if __name__ == "__main__":
     adata.X.data = adata.X.data.astype(np.float32).round()
     adata.obs_names = adata.obs_names.astype(str)
 
+    if args.cell_type_labels is not None:
+        labels_key = "labels_key"
+        semisupervised = True
+        adata.obs[labels_key] = pd.read_parquet(args.cell_type_labels).iloc[:, 0]
+    else:
+        labels_key = None
+        semisupervised = False
+
     scvi.external.RESOLVI.setup_anndata(
-        adata,
-        labels_key=None,
-        layer=None,
-        prepare_data_kwargs={"spatial_rep": "spatial"},
+        adata, labels_key=labels_key, layer=None, prepare_data_kwargs={"spatial_rep": "spatial"}
     )
-    resolvi = scvi.external.RESOLVI(adata, semisupervised=False)
+    resolvi = scvi.external.RESOLVI(adata, semisupervised=semisupervised)
     resolvi.train(max_epochs=args.max_epochs)
 
     # preprocess (QC filters only)
@@ -132,6 +129,8 @@ if __name__ == "__main__":
         return_sites=["px_rate"],
         summary_fun={"post_donor_q50": np.median},
         num_samples=args.num_samples,
+        batch_size=args.batch_size,
+        macro_batch_size=args.macro_batch_size,
         summary_frequency=100,
     )
     samples_corr = pd.DataFrame(samples_corr).T
@@ -141,6 +140,8 @@ if __name__ == "__main__":
         return_sites=["mixture_proportions"],
         summary_fun={"post_donor_means": np.mean},
         num_samples=args.num_samples,
+        batch_size=args.batch_size,
+        macro_batch_size=args.macro_batch_size,
         summary_frequency=100,
     )
     samples_proportions = pd.DataFrame(samples).T
@@ -159,8 +160,8 @@ if __name__ == "__main__":
 
     adata_out = ad.AnnData(samples_corr)
     readwrite.write_10X_h5(adata_out, args.out_file_resolvi_corrected_counts)
-    # samples_corr.to_parquet(out_file_resolvi_corrected)
     samples_proportions.to_parquet(args.out_file_resolvi_proportions)
+    resolvi.save(args.out_dir_resolvi_model)
 
     if args.l is not None:
         _log.close()

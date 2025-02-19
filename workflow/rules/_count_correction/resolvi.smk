@@ -63,6 +63,7 @@ rule runResolvi:
     output:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/corrected_counts.h5'),
         proportions=protected(f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/proportions.parquet')
+        model=protected(f'{config["output_path"]}/count_correction/{{compact_segmentation_id}}/{{sample_id}}/resolvi/model/')
     params:
         input_data=lambda wildcards: get_input2_or_params4runResolvi(
             wildcards,
@@ -184,6 +185,7 @@ rule runResolvi:
         "--path {input.path} "
         "--out_file_resolvi_corrected_counts {output.out_file_resolvi_corrected_counts} "
         "--out_file_resolvi_proportions {output.out_file_resolvi_proportions} "
+        "--out_file_resolvi_model {output.out_dir_resolvi_model}"
         "--min_counts {params.min_counts} "
         "--min_features {params.min_features} "
         "--max_counts {params.max_counts} "
