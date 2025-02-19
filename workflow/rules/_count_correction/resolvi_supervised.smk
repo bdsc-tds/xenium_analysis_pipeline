@@ -15,7 +15,6 @@ min_cells = 5
 # params
 num_samples = 30
 batch_size = 1000
-macro_batch_size = 50000
 mixture_k = 50
 
 # params supervised
@@ -137,7 +136,6 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                             min_cells=min_cells,
                                             num_samples=num_samples,
                                             batch_size=batch_size,
-                                            macro_batch_size=macro_batch_size,
                                             mixture_k=mixture_k,
                                         threads: 1
                                         resources:
@@ -163,7 +161,6 @@ for segmentation in (segmentations := xenium_dir.iterdir()):
                                             --min_cells {params.min_cells} \
                                             --num_samples {params.num_samples} \
                                             --batch_size {params.batch_size} \
-                                            --macro_batch_size {params.macro_batch_size} \
                                             
                                             echo "DONE"
                                             """
