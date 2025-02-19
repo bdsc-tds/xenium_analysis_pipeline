@@ -81,7 +81,7 @@ rule runResolvi:
             "count_correction",
             "resolvi",
             "num_samples",
-            replace_none=100,
+            replace_none=30,
         ),
         min_counts=lambda wildcards: get_dict_value(
             config,
