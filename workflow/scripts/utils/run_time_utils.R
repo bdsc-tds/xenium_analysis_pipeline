@@ -36,11 +36,11 @@ replace_counts_in_seurat <- function(xe, new_counts, cell_coords = NULL, cell_id
     generate_cell_ids <- sum(!grepl("\\w{8}-1", rownames(new_counts))) > 0
 
     if (generate_cell_ids) {
-        if (nrow(new_counts) < 1e5) {
-            cell_ids <- generate_xr_style_cell_names(nrow(new_counts))
-        } else {
+        # if (nrow(new_counts) < 1e5) {
+        #     cell_ids <- generate_xr_style_cell_names(nrow(new_counts))
+        # } else {
             cell_ids <- quick_generate_cell_names(nrow(new_counts), cell_id_prefix)
-        }
+        # }
     } else {
         cell_ids <- rownames(new_counts)
     }
