@@ -48,8 +48,11 @@ def parse_args():
         type=int,
         help="Number of samples for RESOLVI generative model.",
     )
+    parser.add_argument("--batch_size", type=int, help="batch size parameter")
     parser.add_argument("--macro_batch_size", type=int, help="macro_batch_size parameter")
     parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
+    parser.add_argument("--mixture_k", type=int, help="mixture_k parameter for unsupervised RESOLVI")
+
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
         raise RuntimeError(f"Error! Input directory does not exist: {ret.path}")
@@ -103,7 +106,7 @@ if __name__ == "__main__":
     scvi.external.RESOLVI.setup_anndata(
         adata, labels_key=labels_key, layer=None, prepare_data_kwargs={"spatial_rep": "spatial"}
     )
-    resolvi = scvi.external.RESOLVI(adata, semisupervised=semisupervised)
+    resolvi = scvi.external.RESOLVI(adata, mixture_k=args.mixture_k, semisupervised=semisupervised)
     resolvi.train(max_epochs=args.max_epochs)
 
     # preprocess (QC filters only)
