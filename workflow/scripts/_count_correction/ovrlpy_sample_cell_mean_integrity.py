@@ -79,13 +79,12 @@ if __name__ == "__main__":
 
     # load transcripts
     if args.proseg_format:
-        coordinate_df = (
-            pd.read_csv(args.sample_transcripts_path, engine="pyarrow")
-            .rename(
-                columns={
-                    "assignment": "cell_id",
-                }
-            )
+        coordinate_df = pd.read_csv(
+            args.sample_transcripts_path, engine="pyarrow"
+        ).rename(
+            columns={
+                "assignment": "cell_id",
+            }
         )
 
         # remove dummy molecules
@@ -129,7 +128,6 @@ if __name__ == "__main__":
         coordinate_df.y_pixel, coordinate_df.x_pixel
     ]
 
-
     # compute mean cell integrity QC metric from unfiltered transcripts
     cell_mean_integrity_unfiltered = (
         coordinate_df.query("cell_id != 'UNASSIGNED'")
@@ -138,7 +136,9 @@ if __name__ == "__main__":
     )
 
     # store results
-    cell_mean_integrity_unfiltered.to_frame().to_parquet(args.out_file_cells_mean_integrity_unfiltered)
+    cell_mean_integrity_unfiltered.to_frame().to_parquet(
+        args.out_file_cells_mean_integrity_unfiltered
+    )
 
     if args.l is not None:
         _log.close()
