@@ -116,14 +116,20 @@ standard_seurat_analysis:
 count_correction:
   methods:
     - ovrlpy
-    - resolvi
+    - resolvi_supervised
+    - resolvi_unsupervised
 
   ovrlpy:
     signal_integrity_threshold: 0.5
 
   resolvi:
-    max_epochs: 50
-    num_samples: 100
+    train:
+      max_epochs: 50
+      mixture_k: 50
+
+    predict:
+      num_samples: 30
+      batch_size: 1000
 
 coexpression:
   methods:

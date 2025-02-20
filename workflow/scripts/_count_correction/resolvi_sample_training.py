@@ -15,22 +15,68 @@ from ..utils import readwrite
 
 # Set up argument parser
 def parse_args():
-    parser = argparse.ArgumentParser(description="Run RESOLVI on a Xenium sample.")
-    parser.add_argument("--path", type=str, help="Path to the xenium sample file.")
-    parser.add_argument("--out_dir_resolvi_model", type=str, help="output directory with RESOLVI model weights")
-    parser.add_argument("--min_counts", type=int, help="QC parameter from pipeline config")
-    parser.add_argument("--min_features", type=int, help="QC parameter from pipeline config")
-    parser.add_argument("--max_counts", type=float, help="QC parameter from pipeline config")
-    parser.add_argument("--max_features", type=float, help="QC parameter from pipeline config")
-    parser.add_argument("--min_cells", type=int, help="QC parameter from pipeline config")
+    parser = argparse.ArgumentParser(
+        description="Run RESOLVI on a Xenium sample.",
+    )
+    parser.add_argument(
+        "-l",
+        type=str,
+        help="Path to log file.",
+    )
+    parser.add_argument(
+        "--path",
+        type=str,
+        required=True,
+        help="Path to the xenium sample file.",
+    )
+    parser.add_argument(
+        "--out_dir_resolvi_model",
+        type=str,
+        required=True,
+        help="output directory with RESOLVI model weights",
+    )
+    parser.add_argument(
+        "--min_counts",
+        type=int,
+        help="QC parameter from pipeline config",
+    )
+    parser.add_argument(
+        "--min_features",
+        type=int,
+        help="QC parameter from pipeline config",
+    )
+    parser.add_argument(
+        "--max_counts",
+        type=float,
+        help="QC parameter from pipeline config",
+    )
+    parser.add_argument(
+        "--max_features",
+        type=float,
+        help="QC parameter from pipeline config",
+    )
+    parser.add_argument(
+        "--min_cells",
+        type=int,
+        help="QC parameter from pipeline config",
+    )
     parser.add_argument(
         "--max_epochs",
         type=int,
         default=50,
         help="Maximum number of epochs to train the model.",
     )
-    parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
-    parser.add_argument("--mixture_k", type=int, help="mixture_k parameter for unsupervised RESOLVI")
+    parser.add_argument(
+        "--cell_type_labels",
+        type=str,
+        help="optional cell_type_labels for semi-supervised mode",
+    )
+    parser.add_argument(
+        "--mixture_k",
+        type=int,
+        default=50,
+        help="mixture_k parameter for unsupervised RESOLVI",
+    )
 
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
@@ -101,9 +147,14 @@ if __name__ == "__main__":
     )
 
     scvi.external.RESOLVI.setup_anndata(
-        adata, labels_key=labels_key, layer=None, prepare_data_kwargs={"spatial_rep": "spatial"}
+        adata,
+        labels_key=labels_key,
+        layer=None,
+        prepare_data_kwargs={"spatial_rep": "spatial"},
     )
-    resolvi = scvi.external.RESOLVI(adata, mixture_k=args.mixture_k, semisupervised=semisupervised)
+    resolvi = scvi.external.RESOLVI(
+        adata, mixture_k=args.mixture_k, semisupervised=semisupervised
+    )
     resolvi.train(max_epochs=args.max_epochs)
     resolvi.save(args.out_dir_resolvi_model)
 
