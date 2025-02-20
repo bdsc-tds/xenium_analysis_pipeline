@@ -35,5 +35,5 @@ dependencies:
       - spatialdata==0.3.0
       - spatialdata-io==0.1.7
       - spatialdata-plot==0.2.9
-      - git+https://github.com/scverse/scvi-tools@2f1611c5d14392fc5b0e7e9706e2b9d80b20e1d5
+      - git+https://github.com/scverse/scvi-tools@8e4ec9670902f3982d0d2b75164f895caa6c032b
       - git+https://github.com/HiDiHlabs/ovrl.py@777bc3fe7bd5575e20ebe83f315e0218cec1dcbc

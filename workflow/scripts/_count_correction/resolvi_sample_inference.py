@@ -120,7 +120,8 @@ if __name__ == "__main__":
 
     samples_corr = resolvi.sample_posterior(
         model=resolvi.module.model_corrected,
-        return_sites=["px_rate"],
+        return_sites=["obs"],
+        return_observed=True,
         summary_fun={"post_sample_q50": np.median},
         num_samples=args.num_samples,
         batch_size=args.batch_size,
