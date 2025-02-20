@@ -646,38 +646,6 @@ def _process_segmentation(
     return methods, compact_methods, ret
 
 
-def _process_count_correction(
-    data: dict[str, Any], segmentation_methods: list[str]
-) -> tuple[list[str], list[str] | None]:
-    seg_pats: str = r"(^10x_\w*?_?0um$)|(^proseg$)"
-    _methods: list[str] = _convert2list(
-        get_dict_value(
-            data,
-            "methods",
-        ),
-        match_length=False,
-    )
-
-    valid_seg_methods: list[str] | None = [
-        i
-        for i in segmentation_methods
-        if re.match(
-            seg_pats,
-            i,
-            flags=re.IGNORECASE,
-        )
-        is not None
-    ]
-
-    if len(valid_seg_methods) == 0:
-        valid_seg_methods = None
-        warnings.warn(
-            'Warning! Skip count correction as neither "10x_0um" nor "proseg" is used for segmentation.'
-        )
-
-    return _methods, valid_seg_methods
-
-
 def _process_seurat_norm(methods: str | list[str]) -> list[str]:
     _methods: list[str] = _convert2list(methods, match_length=False)
 
@@ -816,6 +784,60 @@ def _process_cell_type_annotation(
     return paths, levels, cell_min_instances, wildcards
 
 
+def _process_count_correction(
+    data: dict[str, Any],
+) -> dict[str, Any] | None:
+    _methods: list[str] = [
+        i
+        for i in _convert2list(
+            get_dict_value(
+                data,
+                "methods",
+            ),
+            match_length=False,
+        )
+        if (
+            re.match(
+                r"^resolvi.*",
+                i,
+                flags=re.IGNORECASE,
+            )
+            is not None
+        )
+    ]
+
+    if len(_methods) == 0:
+        return None
+
+    ret: dict[str, Any] = {}
+
+    assert "resolvi" in data
+    assert "train" in data["resolvi"]
+    assert "predict" in data["resolvi"]
+
+    for m in _methods:
+        assert m not in ret
+        ret[m] = {}
+
+    for k, v in data["resolvi"].items():
+
+        for m in _methods:
+            assert k not in ret[m]
+            ret[m][k] = {}
+
+        for _k, _v in v.items():
+            __v = _convert2list(
+                _v,
+                length=len(_methods),
+                match_length=len(_methods) != 1,
+            )
+
+            for idx, m in enumerate(_methods):
+                ret[m][k][_k] = __v[idx]
+
+    return ret
+
+
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
 ) -> None:
@@ -898,29 +920,6 @@ def process_config(
             value=v,
         )
 
-    # Process `count_correction` section.
-    _count_correction = _process_count_correction(
-        get_dict_value(
-            data,
-            "count_correction",
-        ),
-        _segmentation[1],
-    )
-
-    set_dict_value(
-        data,
-        cc.WILDCARDS_NAME,
-        cc.WILDCARDS_COUNT_CORRECTION_NAME,
-        value=_count_correction[0],
-    )
-
-    set_dict_value(
-        data,
-        "count_correction",
-        cc.COUNT_CORRECTION_SEGMENTATION_METHOD_NAME,
-        value=_count_correction[1],
-    )
-
     # Process `standard_seurat_analysis`, `normalisation` section.
     _seurat_norm = _process_seurat_norm(
         get_dict_value(
@@ -993,3 +992,32 @@ def process_config(
         cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
         value=_cell_type_annotation[3],
     )
+
+    # Process `count_correction` section.
+    _count_correction = _process_count_correction(
+        get_dict_value(
+            data,
+            "count_correction",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_COUNT_CORRECTION_NAME,
+        value=get_dict_value(
+            data,
+            "count_correction",
+            "methods",
+        ),
+    )
+
+    for k, v in _count_correction.items():
+        set_dict_value(
+            data,
+            "count_correction",
+            k,
+            value=v,
+        )
+
+    return None

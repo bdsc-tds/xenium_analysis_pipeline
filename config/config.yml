@@ -113,24 +113,6 @@ standard_seurat_analysis:
   clustering:
     resolution: 0.8
 
-count_correction:
-  methods:
-    - ovrlpy
-    - resolvi_supervised
-    - resolvi_unsupervised
-
-  ovrlpy:
-    signal_integrity_threshold: 0.5
-
-  resolvi:
-    train:
-      max_epochs: 50
-      mixture_k: 50
-
-    predict:
-      num_samples: 30
-      batch_size: 1000
-
 coexpression:
   methods:
     - conditional
@@ -189,3 +171,23 @@ cell_type_annotation:
       eta: 0.3
 
       _other_options:
+
+count_correction:
+  methods:
+    - ovrlpy
+    - resolvi_supervised
+    - resolvi_unsupervised
+
+  ovrlpy:
+    signal_integrity_threshold: 0.5
+
+  resolvi:
+    train:
+      max_epochs:
+        - 50
+        - 100
+      mixture_k: 50
+
+    predict:
+      num_samples: 30
+      batch_size: 1000
