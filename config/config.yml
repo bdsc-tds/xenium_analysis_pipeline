@@ -175,8 +175,8 @@ cell_type_annotation:
 count_correction:
   methods:
     - ovrlpy
-    - resolvi_supervised
     - resolvi_unsupervised
+    - resolvi_supervised
 
   ovrlpy:
     signal_integrity_threshold: 0.5
