@@ -46,41 +46,36 @@ Explanation of wildcards:
 - sample_id: The name of an sample to be processed with a format of "condition/gene_panel/donor/sample".
 - compact_segmentation_id: The name of a segmentation method to only be used in segementation tasks.
 - segmentation_id: The name of a segmentation method to be used in the tasks downstream to the segmentation, except for count correction.
-- count_correction_id: The name of a count correction method to be used after segmentation. Should be used together with `compact_segmentation_id`.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
 - normalisation_id: The name of a normalisation method to be used.
 - annotation_id: The name of cell-type annotation to be used in a format "approach/reference_name/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
+- count_correction_id: The name of a count correction method to be used after segmentation.
 """
 
 CONDITION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_CONDITIONS_NAME
+    cc.WILDCARDS_CONDITIONS_NAME,
 )
 GENE_PANEL_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_GENE_PANELS_NAME
+    cc.WILDCARDS_GENE_PANELS_NAME,
 )
 SAMPLE_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_SAMPLES_NAME
+    cc.WILDCARDS_SAMPLES_NAME,
 )
 COMPACT_SEGMENTATION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_COMPACT_SEGMENTATION_NAME
+    cc.WILDCARDS_COMPACT_SEGMENTATION_NAME,
 )
 SEGMENTATION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_SEGMENTATION_NAME
-)
-COUNT_CORRECTION_ID=get_dict_value(
-    config,
-    cc.WILDCARDS_NAME,
-    cc.WILDCARDS_COUNT_CORRECTION_NAME
+    cc.WILDCARDS_SEGMENTATION_NAME,
 )
 COEXPRESSION_ID = uniquify_elements_in_list(
     *[
@@ -95,7 +90,7 @@ COEXPRESSION_ID = uniquify_elements_in_list(
 NORMALISATION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
-    cc.WILDCARDS_SEURAT_NORM_NAME
+    cc.WILDCARDS_SEURAT_NORM_NAME,
 )
 ANNOTATION_ID = uniquify_elements_in_list(
     *[
@@ -107,6 +102,11 @@ ANNOTATION_ID = uniquify_elements_in_list(
         ).values()
     ]
 )
+COUNT_CORRECTION_ID=get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_COUNT_CORRECTION_NAME,
+)
 
 wildcard_constraints:
     condition_id='|'.join([re.escape(i) for i in CONDITION_ID]),
@@ -114,9 +114,10 @@ wildcard_constraints:
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
     compact_segmentation_id='|'.join([re.escape(i) for i in COMPACT_SEGMENTATION_ID]),
     segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID]),
-    normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
     coexpression_id='|'.join([re.escape(i) for i in COEXPRESSION_ID]),
-    annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID])
+    normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
+    annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID]),
+    count_correction_id="|".join([re.escape(i) for i in COUNT_CORRECTION_ID])
 
 
 ########################################
@@ -185,61 +186,6 @@ def get_output4reports(
         )
 
     return ret
-
-
-def get_output4count_correction() -> list[str]:
-    count_corr_methods: list[str] = get_dict_value(
-        config,
-        "count_correction",
-        "methods",
-    )
-    if len(count_corr_methods) == 0:
-        raise RuntimeError("Error! No methods for count correction specified.")
-    
-    seg_methods: list[str] = get_dict_value(
-        config,
-        "count_correction",
-        cc.COUNT_CORRECTION_SEGMENTATION_METHOD_NAME,
-    )
-    if len(seg_methods) == 0:
-        raise RuntimeError('Error! At least one of "10x_mm_0um", "10x_0um", and "proseg" should be used during segmentation in order to correct counts.')
-
-    prefix: str = f'{config["output_path"]}/count_correction'
-
-    suffix: list[str] = []
-    if "ovrlpy" in count_corr_methods:
-        suffix.extend(
-            [
-                os.path.join(
-                    "ovrlpy",
-                    f'signal_integrity_threshold={get_dict_value(
-                        config,
-                        "count_correction",
-                        "ovrlpy",
-                        "signal_integrity_threshold",
-                    )}',
-                    i,
-                )
-                for i in ["corrected_counts.h5", "cells_mean_integrity.parquet"]
-            ]
-        )
-
-    if "resolvi" in count_corr_methods:
-        suffix.extend(
-            [
-                "resolvi/corrected_counts.h5",
-                "resolvi/proportions.parquet"
-            ]
-        )
-    
-    return [
-        os.path.join(
-            prefix,
-            i,
-            j,
-            k,
-        ) for i in seg_methods for j in SAMPLE_ID for k in suffix
-    ]
 
 
 def get_output4cleanup() -> list[str]:
@@ -366,25 +312,117 @@ def get_output4cell_type_annotation() -> list[str]:
     ]
 
 
+def get_output4count_correction(
+    run_cell_type_annotation: bool,
+) -> list[str]:
+    if len(COUNT_CORRECTION_ID) == 0:
+        raise RuntimeError("Error! No methods for count correction specified.")
+    
+    ret: list[str] = []
+
+    prefix: str = f'{config["output_path"]}/count_correction'
+
+    # Outputs from Ovrlpy, if it is specified.
+    if "ovrlpy" in COUNT_CORRECTION_ID:
+        valid_seg_methods: list[str] = [
+            i
+            for i in SEGMENTATION_ID
+            if re.match(
+                r"(^10x_\w*?_?0um$)|(^proseg_expected$)",
+                i,
+                flags=re.IGNORECASE,
+            ) is not None
+        ]
+
+        if len(valid_seg_methods) > 0:
+            ret.extend(
+                [
+                    os.path.join(
+                        prefix,
+                        i,
+                        j,
+                        "ovrlpy",
+                        f'signal_integrity_threshold={get_dict_value(
+                            config,
+                            "count_correction",
+                            "ovrlpy",
+                            "signal_integrity_threshold",
+                        )}',
+                        k,
+                    )
+                    for i in valid_seg_methods
+                    for j in SAMPLE_ID
+                    for k in ["corrected_counts.h5", "cells_mean_integrity_filtered.parquet"]
+                ]
+            )
+
+    # Results from `resolvi_unsupervised`, if it is specified.
+    if "resolvi_unsupervised" in COUNT_CORRECTION_ID:
+        ret.extend(
+            [
+                os.path.join(
+                    prefix,
+                    i,
+                    j,
+                    "resolvi_unsupervised",
+                    k,
+                )
+                for i in SEGMENTATION_ID
+                for j in SAMPLE_ID
+                for k in ["corrected_counts.h5", "proportions.parquet"]
+            ]
+        )
+
+    # Results from `resolvi_supervised`, if it is specified, and cell tyep annotation is configured to run.
+    if "resolvi_supervised" in COUNT_CORRECTION_ID:
+        if run_cell_type_annotation
+            ret.extend(
+                [
+                    os.path.join(
+                        prefix,
+                        i,
+                        j,
+                        k,
+                        l,
+                        "resolvi_supervised",
+                        m,
+                    )
+                    for i in SEGMENTATION_ID
+                    for j in SAMPLE_ID
+                    for k in NORMALISATION_ID
+                    for l in ANNOTATION_ID
+                    for m in ["corrected_counts.h5", "proportions.parquet"]
+                ]
+            )
+        else:
+            print(
+                'No results from count correction method "resolvi_supervised" will be generated even though it is configured to run, as annotation isn\'t.',
+            )
+    
+    return ret
+
+
 def get_input2all(
     wildcards,
     *,
     reports: bool = True,
-    count_correction: bool = True,
     coexpression: bool = True,
     cell_type_annotation: bool = True,
+    count_correction: bool = True,
     cleanup: bool = False
 ) -> list[str]:
     ret: list[str] = []
-    
-    if count_correction:
-        ret.extend(get_output4count_correction())
 
     if coexpression:
         ret.extend(get_output4coexpression())
 
     if cell_type_annotation:
         ret.extend(get_output4cell_type_annotation())
+    
+    if count_correction:
+        ret.extend(get_output4count_correction(
+            cell_type_annotation,
+        ))
 
     if reports:
         ret.extend(get_output4reports(
@@ -406,8 +444,8 @@ rule all:
         lambda wildcards: get_input2all(
             wildcards,
             reports=True,
-            count_correction=True,
             coexpression=True,
             cell_type_annotation=True,
+            count_correction=True,
             cleanup=False,
         )
