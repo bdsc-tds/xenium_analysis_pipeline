@@ -64,7 +64,6 @@ rule runResolviSupervisedPredict:
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedPredict.log'
     wildcard_constraints:
-        segmentation_id=r"(10x_\w*?_?0um)|(proseg)",
         count_correction_id=r"resolvi_supervised"
     container:
         config["containers"]["r"]
