@@ -131,6 +131,8 @@ include: 'rules/standard_seurat_analysis.smk'
 include: 'rules/coexpression.smk'
 include: 'rules/cell_type_annotation.smk'
 include: 'rules/segmentation_qc.smk'
+include: 'rules/neighborhood_analysis.smk'
+include: 'rules/purification.smk'
 
 
 #######################################
