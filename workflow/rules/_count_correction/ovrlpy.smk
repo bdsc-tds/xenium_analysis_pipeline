@@ -20,7 +20,7 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
             ret = normalise_path(
                 ret,
                 candidate_paths=("outs",),
-                pat_anchor_file=r"transcripts\.parquet",
+                pat_anchor_file=r"transcripts.parquet",
                 pat_flags=re.IGNORECASE,
                 return_dir=False,
                 check_exist=False,
@@ -62,9 +62,7 @@ rule runOvrlpy:
     wildcard_constraints:
         segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
     container:
-        config["containers"]["r"]
-    conda:
-        "../../envs/general.yml"
+        config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
             get_size(
@@ -76,7 +74,7 @@ rule runOvrlpy:
             1024000
         )
     shell:
-        "python workflow/scripts/_count_correction/ovrlpy_sample.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_count_correction/ovrlpy_sample.py "
         "--sample_transcripts_path {params.input_transcripts} "
         "--out_file_signal_integrity {output.signal_integrity} "
         "--out_file_signal_strength {output.signal_strength} "

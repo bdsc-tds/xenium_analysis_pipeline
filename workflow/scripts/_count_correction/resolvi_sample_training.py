@@ -9,7 +9,7 @@ import argparse
 import os
 import sys
 
-from .._joint_scanpy_analysis import preprocessing
+from .._preprocessing import preprocessing
 from ..utils import readwrite
 
 

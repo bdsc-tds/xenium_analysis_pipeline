@@ -38,7 +38,7 @@ def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -
             ret = normalise_path(
                 ret,
                 candidate_paths=("outs",),
-                pat_anchor_file=r"transcripts\.parquet",
+                pat_anchor_file=r"transcripts.parquet",
                 pat_flags=re.IGNORECASE,
                 return_dir=True,
                 check_exist=False

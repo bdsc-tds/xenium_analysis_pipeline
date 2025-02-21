@@ -7,8 +7,6 @@ import sys
 import os
 
 import pandas as pd
-import anndata as ad
-from ..utils import readwrite
 
 
 # Set up argument parser
@@ -50,15 +48,15 @@ def parse_args():
     )
 
     ret = parser.parse_args()
-    if not os.path.isdir(ret.sample_transcripts_path):
+    if not os.path.isfile(ret.sample_transcripts_path):
         raise RuntimeError(
             f"Error! Input file does not exist: {ret.sample_transcripts_path}"
         )
-    if not os.path.isdir(ret.sample_signal_integrity):
+    if not os.path.isfile(ret.sample_signal_integrity):
         raise RuntimeError(
             f"Error! Input file does not exist: {ret.sample_signal_integrity}"
         )
-    if not os.path.isdir(ret.sample_transcript_info):
+    if not os.path.isfile(ret.sample_transcript_info):
         raise RuntimeError(
             f"Error! Input file does not exist: {ret.sample_transcript_info}"
         )

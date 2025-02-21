@@ -55,6 +55,9 @@ def get_size(path) -> int:
     Returns:
         int: Size of the file or directory.
     """
+    if not os.path.exists(path):
+        raise RuntimeError(f"Error! Input path does not exist: {path}")
+
     if os.path.isfile(path):
         return os.path.getsize(path)
 

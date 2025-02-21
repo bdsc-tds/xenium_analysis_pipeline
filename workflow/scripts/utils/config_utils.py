@@ -1012,12 +1012,13 @@ def process_config(
         ),
     )
 
-    for k, v in _count_correction.items():
-        set_dict_value(
-            data,
-            "count_correction",
-            k,
-            value=v,
-        )
+    if _count_correction is not None and len(_count_correction) > 0:
+        for k, v in _count_correction.items():
+            set_dict_value(
+                data,
+                "count_correction",
+                k,
+                value=v,
+            )
 
     return None

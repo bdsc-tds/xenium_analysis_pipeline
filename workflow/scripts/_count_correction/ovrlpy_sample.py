@@ -50,7 +50,7 @@ def parse_args():
     # )
 
     ret = parser.parse_args()
-    if not os.path.isdir(ret.sample_transcripts_path):
+    if not os.path.isfile(ret.sample_transcripts_path):
         raise RuntimeError(
             f"Error! Input file does not exist: {ret.sample_transcripts_path}"
         )
