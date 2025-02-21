@@ -215,5 +215,5 @@ def get_mem_mb4runResolvi(wildcards, attempt, multiplier: int = 1) -> int:
 #              Subrules              #
 ######################################
 
-include: 'resolvi_unsupervised.smk'
-include: 'resolvi_supervised.smk'
+include: '_resolvi/resolvi_unsupervised.smk'
+include: '_resolvi/resolvi_supervised.smk'

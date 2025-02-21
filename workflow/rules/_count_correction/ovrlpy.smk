@@ -70,7 +70,7 @@ rule runOvrlpy:
                     wildcards,
                     for_input=False,
                 )
-            ) * 1e-6 * attempt**3 * 100,
+            ) * 1e-6 * attempt**2 * 100,
             1024000
         )
     shell:

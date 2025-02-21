@@ -398,7 +398,7 @@ def get_output4count_correction(
             print(
                 'No results from count correction method "resolvi_supervised" will be generated even though it is configured to run, as annotation isn\'t.',
             )
-    
+
     return ret
 
 
