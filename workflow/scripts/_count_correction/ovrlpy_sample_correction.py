@@ -8,7 +8,16 @@ import os
 
 import pandas as pd
 import anndata as ad
-from ..utils import readwrite
+
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+        ),
+    ),
+)
+from utils import readwrite
 
 
 def transcripts_to_count_matrix(

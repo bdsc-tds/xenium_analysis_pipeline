@@ -9,8 +9,16 @@ import argparse
 import os
 import sys
 
-from .._preprocessing import preprocessing
-from ..utils import readwrite
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+        ),
+    ),
+)
+from _preprocessing import preprocessing
+from utils import readwrite
 
 
 # Set up argument parser
