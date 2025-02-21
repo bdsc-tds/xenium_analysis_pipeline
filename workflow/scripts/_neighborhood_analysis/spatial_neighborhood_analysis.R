@@ -8,10 +8,10 @@ if (!requireNamespace("puRCTD", quietly = TRUE)){
 }
 library(puRCTD)
 
-
 xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])
 
+### Compute Spatial network & conduct analysis ###
 sp_nw <- build_spatial_network(
   xe, 
   dims = 1:2, 
