@@ -118,14 +118,7 @@ rule runSeggerTrain:
             "num_tx_tokens",
             replace_none=500
         ),
-        accelerator=lambda wildcards: get_dict_value(
-            config,
-            "segmentation",
-            "segger",
-            "train",
-            "accelerator",
-            replace_none="cpu"
-        ),
+        accelerator=lambda wildcards: "cuda" if _use_gpu() else "cpu",
         devices=lambda wildcards: get_dict_value(
             config,
             "segmentation",
