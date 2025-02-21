@@ -18,3 +18,5 @@ results_df$cell_id <- rownames(results_df)
 results_df <- results_df %>% select(cell_id, everything())
 
 write_parquet(results_df, snakemake@output[["post_processed_rctd_df"]])
+
+saveRDS(rctd, file = snakemake@output[["post_processed_rctd"]])
