@@ -14,7 +14,7 @@ rule runResolviSupervisedTrain:
             for_training=True,
         )
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedTrain.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviSupervisedTrain.log'
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised"
     container:
@@ -60,7 +60,7 @@ rule runResolviSupervisedPredict:
             for_training=False,
         )
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedPredict.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviSupervisedPredict.log'
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised"
     container:
