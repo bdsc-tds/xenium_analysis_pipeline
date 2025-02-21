@@ -7,6 +7,7 @@ from typing import Any, Callable
 import re
 import os
 import yaml
+import warnings
 
 import config_constants as cc
 
@@ -783,6 +784,60 @@ def _process_cell_type_annotation(
     return paths, levels, cell_min_instances, wildcards
 
 
+def _process_count_correction(
+    data: dict[str, Any],
+) -> dict[str, Any] | None:
+    _methods: list[str] = [
+        i
+        for i in _convert2list(
+            get_dict_value(
+                data,
+                "methods",
+            ),
+            match_length=False,
+        )
+        if (
+            re.match(
+                r"^resolvi.*",
+                i,
+                flags=re.IGNORECASE,
+            )
+            is not None
+        )
+    ]
+
+    if len(_methods) == 0:
+        return None
+
+    ret: dict[str, Any] = {}
+
+    assert "resolvi" in data
+    assert "train" in data["resolvi"]
+    assert "predict" in data["resolvi"]
+
+    for m in _methods:
+        assert m not in ret
+        ret[m] = {}
+
+    for k, v in data["resolvi"].items():
+
+        for m in _methods:
+            assert k not in ret[m]
+            ret[m][k] = {}
+
+        for _k, _v in v.items():
+            __v = _convert2list(
+                _v,
+                length=len(_methods),
+                match_length=len(_methods) != 1,
+            )
+
+            for idx, m in enumerate(_methods):
+                ret[m][k][_k] = __v[idx]
+
+    return ret
+
+
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
 ) -> None:
@@ -810,7 +865,10 @@ def process_config(
 
     # Process `experiments` section.
     _experiments = _process_experiments(
-        get_dict_value(data, "experiments"),
+        get_dict_value(
+            data,
+            "experiments",
+        ),
         root_path,
     )
 
@@ -833,7 +891,12 @@ def process_config(
     )
 
     # Process `segmentation` section.
-    _segmentation = _process_segmentation(get_dict_value(data, "segmentation"))
+    _segmentation = _process_segmentation(
+        get_dict_value(
+            data,
+            "segmentation",
+        ),
+    )
 
     set_dict_value(
         data,
@@ -850,7 +913,12 @@ def process_config(
     )
 
     for k, v in _segmentation[2].items():
-        set_dict_value(data, "segmentation", k, value=v)
+        set_dict_value(
+            data,
+            "segmentation",
+            k,
+            value=v,
+        )
 
     # Process `standard_seurat_analysis`, `normalisation` section.
     _seurat_norm = _process_seurat_norm(
@@ -859,7 +927,7 @@ def process_config(
             "standard_seurat_analysis",
             "normalisation",
             "methods",
-        )
+        ),
     )
 
     set_dict_value(
@@ -872,7 +940,10 @@ def process_config(
     # Process `coexpression` section.
     _coexpression = _process_coexpression(
         _experiments[5],
-        get_dict_value(data, "coexpression"),
+        get_dict_value(
+            data,
+            "coexpression",
+        ),
     )
 
     set_dict_value(
@@ -885,7 +956,10 @@ def process_config(
     # Process `cell_type_annotation` section.
     _cell_type_annotation = _process_cell_type_annotation(
         _experiments[6],
-        get_dict_value(data, "cell_type_annotation"),
+        get_dict_value(
+            data,
+            "cell_type_annotation",
+        ),
     )
 
     set_dict_value(
@@ -918,3 +992,33 @@ def process_config(
         cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
         value=_cell_type_annotation[3],
     )
+
+    # Process `count_correction` section.
+    _count_correction = _process_count_correction(
+        get_dict_value(
+            data,
+            "count_correction",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_COUNT_CORRECTION_NAME,
+        value=get_dict_value(
+            data,
+            "count_correction",
+            "methods",
+        ),
+    )
+
+    if _count_correction is not None and len(_count_correction) > 0:
+        for k, v in _count_correction.items():
+            set_dict_value(
+                data,
+                "count_correction",
+                k,
+                value=v,
+            )
+
+    return None

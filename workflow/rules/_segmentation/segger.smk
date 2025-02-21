@@ -18,28 +18,6 @@ def get_model_version4runSeggerPredict(wildcards) -> int:
     
     return -1
 
-def _use_gpu4segger() -> bool:
-    return get_dict_value(
-        config,
-        "segmentation",
-        "segger",
-        "train",
-        "accelerator"
-    ) == "cuda"
-
-def get_slurm_extra4runSeggerTrain(wildcards) -> str:
-    num_gpus: int = get_dict_value(
-        config,
-        "segmentation",
-        "segger",
-        "train",
-        "devices"
-    )
-    return f"'--gres=gpu:{num_gpus}'" if _use_gpu4segger() else ""
-
-def get_slurm_extra4runSeggerPredict(wildcards) -> str:
-    return f"'--gres=gpu:1'" if _use_gpu4segger() else ""
-
 def get_input2_or_params4normaliseSegger(wildcards) -> dict[str, str]:
     ret: dict[str, str] = {
         "data_dir": get_input2_or_params4run10x(wildcards),
@@ -113,7 +91,7 @@ rule runSeggerPreprocess:
     resources:
         mem_mb=lambda wildcards, threads, attempt: threads * 4096 * attempt
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/create_dataset_fast.py "
         "--base_dir {params.input} "
@@ -140,14 +118,7 @@ rule runSeggerTrain:
             "num_tx_tokens",
             replace_none=500
         ),
-        accelerator=lambda wildcards: get_dict_value(
-            config,
-            "segmentation",
-            "segger",
-            "train",
-            "accelerator",
-            replace_none="cpu"
-        ),
+        accelerator=lambda wildcards: "cuda" if _use_gpu() else "cpu",
         devices=lambda wildcards: get_dict_value(
             config,
             "segmentation",
@@ -190,11 +161,23 @@ rule runSeggerTrain:
             replace_none=2
         )
     resources:
-        slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
+        slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
+            wildcards,
+        ) if _use_gpu() else "cpu",
         mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu4segger() else 20480),
-        slurm_extra=get_slurm_extra4runSeggerTrain
+        slurm_extra=lambda wildcards: get_slurm_extra(
+            wildcards,
+            get_dict_value(
+                config,
+                "segmentation",
+                "segger",
+                "train",
+                "devices",
+                replace_none=1,
+            ),
+        )
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/train_model.py "
         "--dataset_dir {input} "
@@ -242,7 +225,9 @@ rule runSeggerPredict:
     threads:
         1
     resources:
-        slurm_partition=lambda wildcards: "gpu" if _use_gpu4segger() else "cpu",
+        slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
+            wildcards,
+        ) if _use_gpu() else "cpu",
         mem_mb=lambda wildcards, attempt: min(
             get_size(
                 get_input2_or_params4runProseg(
@@ -252,9 +237,9 @@ rule runSeggerPredict:
             ) * 10**-6 * attempt * (100 if _use_gpu4segger() else 500),
             1024000
         ),
-        slurm_extra=get_slurm_extra4runSeggerPredict
+        slurm_extra=get_slurm_extra
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/predict_fast.py "
         "--segger_data_dir {input.processed_data} "
@@ -308,7 +293,7 @@ rule runSegger2Baysor:
     resources:
         mem_mb=lambda wildcards, input, attempt: input.size_mb * 60 * attempt
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 workflow/scripts/_segmentation/convert_segger2baysor.py "
         "--inseg {input.data_file} "

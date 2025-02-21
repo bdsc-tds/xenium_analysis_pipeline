@@ -6,9 +6,9 @@ import os
 import argparse
 import sys
 
-import spatialdata_io
-
 import coexpression as ce
+
+from ..utils import readwrite
 
 
 def parse_args():
@@ -18,7 +18,7 @@ def parse_args():
         "-i",
         required=True,
         type=str,
-        help="path to the 10X XeniumRanger output folder",
+        help="path to the 10X XeniumRanger output folder or proseg raw_results folder",
     )
     sys_args_parser.add_argument(
         "-l",
@@ -75,10 +75,11 @@ if __name__ == "__main__":
         sys.stderr = _log
 
     # read counts
-    adata = spatialdata_io.xenium(
+    adata = readwrite.read_xenium_sample(
         args.i,
         cells_as_circles=False,
         cells_boundaries=False,
+        cells_boundaries_layers=False,
         nucleus_boundaries=False,
         cells_labels=False,
         nucleus_labels=False,
@@ -86,7 +87,8 @@ if __name__ == "__main__":
         morphology_mip=False,
         morphology_focus=False,
         aligned_images=False,
-    )["table"]
+        anndata=True,
+    )
 
     # compute coexpression
     CC, X_downsampled, pos, pos_rate, mask = ce.coexpression(

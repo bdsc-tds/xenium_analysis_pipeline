@@ -33,6 +33,7 @@ Stage: main
 
 %files
     segger_cuda.yml /opt/_env
+    general_cuda.yml /opt/_env
 
 %environment
     export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
@@ -42,9 +43,12 @@ Stage: main
 
 %post
 # Set up build time environment variables, such as versions
-    export SEGGER_REPO=https://github.com/senbaikang/segger_dev.git
     #https://github.com/EliHei2/segger_dev.git
+    export SEGGER_REPO=https://github.com/senbaikang/segger_dev.git
     export SEGGER_VERSION=4bf56dec2a364de8eee4fcab663e798eb106e21a
+
+    export SCVI_REPO=https://github.com/scverse/scvi-tools
+    export SCVI_VERSION=c3926eb7a0b83e869d17b5b05fe247aa9bc36019
 
 # DNS
     # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
@@ -71,7 +75,7 @@ Stage: main
 # Install system packages
     apt-get install -y git vim cmake wget curl
 
-# Create a new environment for Segger
+# Create a new environment: segger_cuda
     mamba env create -q -y -f /opt/_env/segger_cuda.yml
 
 # Pull Segger from GitHub and install
@@ -81,5 +85,16 @@ Stage: main
     git checkout ${SEGGER_VERSION}
     
     mamba run -n segger_cuda pip install -e "."
+
+# Create a new environment: general_cuda
+    mamba env create -q -y -f /opt/_env/general_cuda.yml
+
+# Pull SCVI from GitHub and install
+    cd /opt
+    git clone ${SCVI_REPO}
+    cd scvi-tools
+    git checkout ${SCVI_VERSION}
+    
+    mamba run -n general_cuda pip install "."
 
     cd /

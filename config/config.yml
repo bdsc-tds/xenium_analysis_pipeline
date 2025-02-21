@@ -1,13 +1,17 @@
 output_path: results
 
 containers:
+  python_cuda:
   r:
   10x:
   baysor:
   proseg:
-  segger:
 
 experiments: experiments.yml
+
+gpu:
+  available: true
+  partition_name: "gpu"
 
 reprocess:
   level: 1
@@ -68,7 +72,6 @@ segmentation:
 
     train:
       num_tx_tokens: 500
-      accelerator: "cuda"
       devices: 1
       max_epochs: 200
       batch_size: 4
@@ -164,3 +167,23 @@ cell_type_annotation:
       eta: 0.3
 
       _other_options:
+
+count_correction:
+  methods:
+    - ovrlpy
+    - resolvi_unsupervised
+    - resolvi_supervised
+
+  ovrlpy:
+    signal_integrity_threshold: 0.5
+
+  resolvi:
+    train:
+      max_epochs:
+        - 50
+        - 100
+      mixture_k: 50
+
+    predict:
+      num_samples: 30
+      batch_size: 1000
