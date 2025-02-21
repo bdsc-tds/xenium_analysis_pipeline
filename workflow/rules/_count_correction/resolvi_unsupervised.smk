@@ -35,15 +35,15 @@ rule runResolviUnsupervisedTrain:
         slurm_extra=get_slurm_extra
     shell:
         "python workflow/scripts/xenium/resolvi_sample_training.py "
-        "--path {params[0].data_dir} "
+        "--path {params[0][data_dir]} "
         "--out_dir_resolvi_model {output} "
-        "--min_counts {params[0].min_counts} "
-        "--min_features {params[0].min_features} "
-        "--max_counts {params[0].max_counts} "
-        "--max_features {params[0].max_features} "
-        "--min_cells {params[0].min_cells} "
-        "--max_epochs {params[0].max_epochs} "
-        "--mixture_k {params[0].mixture_k} "
+        "--min_counts {params[0][min_counts]} "
+        "--min_features {params[0][min_features]} "
+        "--max_counts {params[0][max_counts]} "
+        "--max_features {params[0][max_features]} "
+        "--min_cells {params[0][min_cells]} "
+        "--max_epochs {params[0][max_epochs]} "
+        "--mixture_k {params[0][mixture_k]} "
         "-l {log}"
 
 rule runResolviUnsupervisedPredict:
@@ -56,7 +56,7 @@ rule runResolviUnsupervisedPredict:
     params:
         lambda wildcards: get_params4runResolvi(
             wildcards,
-            for_training=True,
+            for_training=False,
         )
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedPredict.log'
@@ -81,15 +81,15 @@ rule runResolviUnsupervisedPredict:
         slurm_extra=get_slurm_extra
     shell:
         "python workflow/scripts/xenium/resolvi_sample_inference.py "
-        "--path {params[0].data_dir} "
+        "--path {params[0][data_dir]} "
         "--dir_resolvi_model {input.model_dir} "
         "--out_file_resolvi_corrected_counts {output.corrected_counts} "
         "--out_file_resolvi_proportions {output.proportions} "
-        "--min_counts {params[0].min_counts} "
-        "--min_features {params[0].min_features} "
-        "--max_counts {params[0].max_counts} "
-        "--max_features {params[0].max_features} "
-        "--min_cells {params[0].min_cells} "
-        "--num_samples {params[0].num_samples} "
-        "--batch_size {params[0].batch_size} "
+        "--min_counts {params[0][min_counts]} "
+        "--min_features {params[0][min_features]} "
+        "--max_counts {params[0][max_counts]} "
+        "--max_features {params[0][max_features]} "
+        "--min_cells {params[0][min_cells]} "
+        "--num_samples {params[0][num_samples]} "
+        "--batch_size {params[0][batch_size]} "
         "-l {log}"
