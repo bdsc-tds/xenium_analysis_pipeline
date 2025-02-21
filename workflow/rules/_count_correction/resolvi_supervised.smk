@@ -33,7 +33,7 @@ rule runResolviSupervisedTrain:
         ) if _use_gpu() else "cpu",
         slurm_extra=get_slurm_extra
     shell:
-        "mamba run -n general_cuda python3 workflow/scripts/xenium/resolvi_sample_training.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_count_correction/resolvi_sample_training.py "
         "--path {params[0][data_dir]} "
         "--cell_type_labels {input.annotation} "
         "--out_dir_resolvi_model {output}"
@@ -79,7 +79,7 @@ rule runResolviSupervisedPredict:
         ) if _use_gpu() else "cpu",
         slurm_extra=get_slurm_extra
     shell:
-        "mamba run -n general_cuda python3 workflow/scripts/xenium/resolvi_sample_inference.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_count_correction/resolvi_sample_inference.py "
         "--path {params[0][data_dir]} "
         "--dir_resolvi_model {input.model_dir} "
         "--cell_type_labels {input.annotation} "
