@@ -201,7 +201,7 @@ def get_mem_mb4runResolvi(wildcards, attempt, multiplier: int = 1) -> int:
         r"^proseg_expected$",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
-    ) is not none:
+    ) is not None:
         ret *= 10
 
     if not _use_gpu():

@@ -91,7 +91,7 @@ rule runSeggerPreprocess:
     resources:
         mem_mb=lambda wildcards, threads, attempt: threads * 4096 * attempt
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/create_dataset_fast.py "
         "--base_dir {params.input} "
@@ -177,7 +177,7 @@ rule runSeggerTrain:
             ),
         )
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/train_model.py "
         "--dataset_dir {input} "
@@ -239,7 +239,7 @@ rule runSeggerPredict:
         ),
         slurm_extra=get_slurm_extra
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 /opt/segger_dev/src/segger/cli/predict_fast.py "
         "--segger_data_dir {input.processed_data} "
@@ -293,7 +293,7 @@ rule runSegger2Baysor:
     resources:
         mem_mb=lambda wildcards, input, attempt: input.size_mb * 60 * attempt
     container:
-        config["containers"]["segger"]
+        config["containers"]["python_cuda"]
     shell:
         "mamba run -n segger_cuda python3 workflow/scripts/_segmentation/convert_segger2baysor.py "
         "--inseg {input.data_file} "

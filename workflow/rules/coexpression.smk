@@ -26,15 +26,13 @@ rule computeCoexpression:
             sep_in="_",
         )[0]
     container:
-        config["containers"]["r"]
-    conda:
-        "../envs/coexpression.yml"
+        config["containers"]["python_cuda"]
     threads:
         1
     resources:
         mem_mb=lambda wildcards, attempt: attempt**2 * 512
     shell:
-        "python3 workflow/scripts/_coexpression/compute_coexpression.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_coexpression/compute_coexpression.py "
         "-i {params.data_dir} "
         "-l {log} "
         "--outcoexp {output.co_exp} "

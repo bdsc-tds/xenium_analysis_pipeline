@@ -6,12 +6,10 @@ import os
 import argparse
 import sys
 
-import spatialdata_io
-
 import coexpression as ce
 
-sys.path.append("workflow/scripts/utils/readwrite.py")
-import readwrite
+from ..utils import readwrite
+
 
 def parse_args():
     sys_args_parser = argparse.ArgumentParser(description="Compute coexpression.")

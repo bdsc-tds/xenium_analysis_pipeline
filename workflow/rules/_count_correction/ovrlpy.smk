@@ -110,9 +110,7 @@ rule getCorrectedCountsFromOvrlpy:
     wildcard_constraints:
         segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
     container:
-        config["containers"]["r"]
-    conda:
-        "../../envs/general.yml"
+        config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
             get_size(
@@ -124,7 +122,7 @@ rule getCorrectedCountsFromOvrlpy:
             512000
         )
     shell:
-        "python workflow/scripts/_count_correction/ovrlpy_sample_correction.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_count_correction/ovrlpy_sample_correction.py "
         "--sample_transcripts_path {params.input_transcripts} "
         "--sample_signal_integrity {input.signal_integrity} "
         "--sample_transcript_info {input.transcript_info} "
@@ -152,9 +150,7 @@ rule getUnfilteredCellMeanIntegrityFromOvrlpy:
     wildcard_constraints:
         segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
     container:
-        config["containers"]["r"]
-    conda:
-        "../../envs/general.yml"
+        config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
             get_size(
@@ -166,7 +162,7 @@ rule getUnfilteredCellMeanIntegrityFromOvrlpy:
             512000
         )
     shell:
-        "python workflow/scripts/_count_correction/ovrlpy_sample_cell_mean_integrity.py "
+        "mamba run -n general_cuda python3 workflow/scripts/_count_correction/ovrlpy_sample_cell_mean_integrity.py "
         "--sample_transcripts_path {params.input_transcripts} "
         "--sample_signal_integrity {input.signal_integrity} "
         "--sample_transcript_info {input.transcript_info} "
