@@ -18,9 +18,7 @@ rule runResolviSupervisedTrain:
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised"
     container:
-        config["containers"]["r"]
-    conda:
-        "../../envs/general.yml"
+        config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
             get_mem_mb4runResolvi(
@@ -35,7 +33,7 @@ rule runResolviSupervisedTrain:
         ) if _use_gpu() else "cpu",
         slurm_extra=get_slurm_extra
     shell:
-        "python workflow/scripts/xenium/resolvi_sample_training.py "
+        "mamba run -n general_cuda python3 workflow/scripts/xenium/resolvi_sample_training.py "
         "--path {params[0][data_dir]} "
         "--cell_type_labels {input.annotation} "
         "--out_dir_resolvi_model {output}"
@@ -66,9 +64,7 @@ rule runResolviSupervisedPredict:
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised"
     container:
-        config["containers"]["r"]
-    conda:
-        "../../envs/general.yml"
+        config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
             get_mem_mb4runResolvi(
@@ -83,7 +79,7 @@ rule runResolviSupervisedPredict:
         ) if _use_gpu() else "cpu",
         slurm_extra=get_slurm_extra
     shell:
-        "python workflow/scripts/xenium/resolvi_sample_inference.py "
+        "mamba run -n general_cuda python3 workflow/scripts/xenium/resolvi_sample_inference.py "
         "--path {params[0][data_dir]} "
         "--dir_resolvi_model {input.model_dir} "
         "--cell_type_labels {input.annotation} "
