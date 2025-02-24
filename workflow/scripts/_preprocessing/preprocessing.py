@@ -1,6 +1,5 @@
 import scanpy as sc
 import torch
-import ot
 import os
 import pathlib
 import pandas as pd
@@ -131,7 +130,6 @@ def preprocess(
     max_genes=None,
     min_cells=None,
 ):
-
     """
     Preprocess anndata object.
 
@@ -270,7 +268,3 @@ def preprocess(
         backend=backend,
         device=device,
     )
-
-
-
-

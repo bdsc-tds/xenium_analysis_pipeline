@@ -24,15 +24,24 @@ from utils import readwrite
 
 # Set up argument parser
 def parse_args():
-    parser = argparse.ArgumentParser(description="Embed panel of Xenium samples.")parser.add_argument(
+    parser = argparse.ArgumentParser(description="Embed panel of Xenium samples.")
+    parser.add_argument(
         "-l",
         type=str,
         help="Path to log file.",
     )
-    parser.add_argument("--path", type=str, 
-        required=True, help="Path to the xenium sample file.",)
-    parser.add_argument("--dir_resolvi_model", type=str, 
-        required=True, help="directory with saved RESOLVI model weights",)
+    parser.add_argument(
+        "--path",
+        type=str,
+        required=True,
+        help="Path to the xenium sample file.",
+    )
+    parser.add_argument(
+        "--dir_resolvi_model",
+        type=str,
+        required=True,
+        help="directory with saved RESOLVI model weights",
+    )
     parser.add_argument(
         "--out_file_resolvi_corrected_counts",
         type=str,
@@ -43,24 +52,42 @@ def parse_args():
         type=str,
         help="Path to resolvi proportions parquet file.",
     )
-    parser.add_argument("--min_counts", type=int, help="QC parameter from pipeline config")
-    parser.add_argument("--min_features", type=int, help="QC parameter from pipeline config")
-    parser.add_argument("--max_counts", type=float, help="QC parameter from pipeline config")
-    parser.add_argument("--max_features", type=float, help="QC parameter from pipeline config")
-    parser.add_argument("--min_cells", type=int, help="QC parameter from pipeline config")
+    parser.add_argument(
+        "--min_counts", type=int, help="QC parameter from pipeline config"
+    )
+    parser.add_argument(
+        "--min_features", type=int, help="QC parameter from pipeline config"
+    )
+    parser.add_argument(
+        "--max_counts", type=float, help="QC parameter from pipeline config"
+    )
+    parser.add_argument(
+        "--max_features", type=float, help="QC parameter from pipeline config"
+    )
+    parser.add_argument(
+        "--min_cells", type=int, help="QC parameter from pipeline config"
+    )
     parser.add_argument(
         "--num_samples",
         type=int,
         help="Number of samples for RESOLVI generative model.",
     )
-    parser.add_argument("--batch_size", type=int, default=1000, help="batch size parameter")
-    parser.add_argument("--cell_type_labels", type=str, help="optional cell_type_labels for semi-supervised mode")
+    parser.add_argument(
+        "--batch_size", type=int, default=1000, help="batch size parameter"
+    )
+    parser.add_argument(
+        "--cell_type_labels",
+        type=str,
+        help="optional cell_type_labels for semi-supervised mode",
+    )
 
     ret = parser.parse_args()
     if not os.path.isdir(ret.path):
         raise RuntimeError(f"Error! Input directory to data does not exist: {ret.path}")
     if not os.path.isdir(ret.dir_resolvi_model):
-        raise RuntimeError(f"Error! Input directory to trained model does not exist: {ret.dir_resolvi_model}")
+        raise RuntimeError(
+            f"Error! Input directory to trained model does not exist: {ret.dir_resolvi_model}"
+        )
 
     return ret
 

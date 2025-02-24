@@ -70,7 +70,7 @@ rule runOvrlpy:
                     wildcards,
                     for_input=False,
                 )
-            ) * 1e-6 * attempt**2 * 100,
+            ) * 1e-6 * attempt**2 * 80,
             1024000
         )
     shell:
@@ -116,7 +116,7 @@ rule getCorrectedCountsFromOvrlpy:
                     wildcards,
                     for_input=False,
                 )
-            ) * 1e-6 * attempt * 50,
+            ) * 1e-6 * attempt,
             512000
         )
     shell:
@@ -156,7 +156,7 @@ rule getUnfilteredCellMeanIntegrityFromOvrlpy:
                     wildcards,
                     for_input=False,
                 )
-            ) * 1e-6 * attempt * 50,
+            ) * 1e-6 * attempt,
             512000
         )
     shell:

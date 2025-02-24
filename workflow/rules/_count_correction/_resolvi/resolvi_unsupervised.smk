@@ -23,7 +23,7 @@ rule runResolviUnsupervisedTrain:
             get_mem_mb4runResolvi(
                 wildcards,
                 attempt,
-                20,
+                1,
             ),
             1024000
         ),

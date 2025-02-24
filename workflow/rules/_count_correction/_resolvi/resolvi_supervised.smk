@@ -24,7 +24,7 @@ rule runResolviSupervisedTrain:
             get_mem_mb4runResolvi(
                 wildcards,
                 attempt,
-                20,
+                1,
             ),
             1024000,
         ),
@@ -36,7 +36,7 @@ rule runResolviSupervisedTrain:
         "mamba run -n general_cuda python3 workflow/scripts/_count_correction/resolvi_sample_training.py "
         "--path {params[0][data_dir]} "
         "--cell_type_labels {input.annotation} "
-        "--out_dir_resolvi_model {output}"
+        "--out_dir_resolvi_model {output} "
         "--min_counts {params[0][min_counts]} "
         "--min_features {params[0][min_features]} "
         "--max_counts {params[0][max_counts]} "

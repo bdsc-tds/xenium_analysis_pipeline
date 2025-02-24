@@ -29,7 +29,8 @@ dependencies:
   - pip
   - pip:
       - cupy-cuda12x==13.3.0
-      - cudf-cu12==25.02
+      - cudf-cu12==24.12.0
+      - cuml-cu12==24.12.0
       - rapids-singlecell==0.11.1
       - spatialdata==0.3.0
       - spatialdata-io==0.1.7
