@@ -72,7 +72,7 @@ Stage: main
     export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/lib:$LD_LIBRARY_PATH
 
 # Install system packages
-    apt-get install -y ninja-build git vim cmake wget curl pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
+    apt-get install -y m4 automake ninja-build git vim cmake wget curl pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev
 
 # Install Clang
     apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang
