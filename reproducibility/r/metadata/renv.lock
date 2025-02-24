@@ -1543,6 +1543,16 @@
       ],
       "Hash": "fee28529f0a4225ede46e0297d16ed0d"
     },
+    "entropy": {
+      "Package": "entropy",
+      "Version": "1.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "99df3344e9a4efeef32ff01ed94ff225"
+    },
     "evaluate": {
       "Package": "evaluate",
       "Version": "1.0.1",
@@ -1806,6 +1816,52 @@
         "vipor"
       ],
       "Hash": "899f28fe0388b7f687d7453429c2474d"
+    },
+    "ggforce": {
+      "Package": "ggforce",
+      "Version": "0.4.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "MASS",
+        "R",
+        "Rcpp",
+        "RcppEigen",
+        "cli",
+        "ggplot2",
+        "grDevices",
+        "grid",
+        "gtable",
+        "lifecycle",
+        "polyclip",
+        "rlang",
+        "scales",
+        "stats",
+        "systemfonts",
+        "tidyselect",
+        "tweenr",
+        "utils",
+        "vctrs",
+        "withr"
+      ],
+      "Hash": "384b388bd9155468d2c851846ee69f9f"
+    },
+    "ggfun": {
+      "Package": "ggfun",
+      "Version": "0.1.8",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cli",
+        "dplyr",
+        "ggplot2",
+        "grid",
+        "rlang",
+        "utils",
+        "yulab.utils"
+      ],
+      "Hash": "ec2db46b707458520f6cd821cb313732"
     },
     "ggplot2": {
       "Package": "ggplot2",
@@ -3378,6 +3434,25 @@
       ],
       "Hash": "d316e4abb854dd1677f7bd3ad08bc4e8"
     },
+    "scatterpie": {
+      "Package": "scatterpie",
+      "Version": "0.2.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "dplyr",
+        "ggforce",
+        "ggfun",
+        "ggplot2",
+        "rlang",
+        "stats",
+        "tidyr",
+        "utils",
+        "yulab.utils"
+      ],
+      "Hash": "cdcdfb3c27a81d3f1f12a70a8f6bfa5c"
+    },
     "scran": {
       "Package": "scran",
       "Version": "1.34.0",
@@ -3966,6 +4041,21 @@
       ],
       "Hash": "3ec7e3ddcacc2d34a9046941222bf94d"
     },
+    "tweenr": {
+      "Package": "tweenr",
+      "Version": "2.0.3",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cpp11",
+        "farver",
+        "magrittr",
+        "rlang",
+        "vctrs"
+      ],
+      "Hash": "82fac2b73e6a1f3874fc000aaf96d8bc"
+    },
     "tzdb": {
       "Package": "tzdb",
       "Version": "0.4.0",
@@ -4160,6 +4250,22 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "51dab85c6c98e50a18d7551e9d49f76c"
+    },
+    "yulab.utils": {
+      "Package": "yulab.utils",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cli",
+        "digest",
+        "fs",
+        "rlang",
+        "tools",
+        "utils"
+      ],
+      "Hash": "6298953be4b60e23b75cf48c9bf9b0a2"
     },
     "zellkonverter": {
       "Package": "zellkonverter",
