@@ -29,9 +29,15 @@ def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -
                 ]
             ]
     else:
+        seg_id: str = "proseg" if re.match(
+            r"^proseg_mode$",
+            wildcards.segmentation_id,
+            flags=re.IGNORECASE,
+        ) is not None else wildcards.segmentation_id
+
         ret = os.path.join(
             prefix,
-            f"{wildcards.segmentation_id}/{wildcards.sample_id}/normalised_results",
+            f"{seg_id}/{wildcards.sample_id}/normalised_results",
         )
 
         if not for_input:
@@ -194,6 +200,7 @@ def get_mem_mb4runResolvi(wildcards, attempt, multiplier: int = 1) -> int:
     ret: int = get_size(
         get_seg_data4input2_or_param4runResolvi(
             wildcards,
+            for_input=False,
         ),
     ) * 1e-6 * attempt
 

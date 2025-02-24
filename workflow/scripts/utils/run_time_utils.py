@@ -6,7 +6,9 @@ import os
 from typing import Any
 
 
-def uniquify_elements_in_list(*x: list[list[Any]]) -> list[Any]:
+def uniquify_elements_in_list(
+    *x: list[list[Any]],
+) -> list[Any]:
     """Remove duplicates in a list of lists.
 
     Args:
@@ -23,7 +25,8 @@ def uniquify_elements_in_list(*x: list[list[Any]]) -> list[Any]:
 
 
 def cross_values_by_key(
-    vals_1: dict[str, list[str]], vals_2: dict[str, list[str]]
+    vals_1: dict[str, list[str]],
+    vals_2: dict[str, list[str]],
 ) -> list[tuple[str, str]]:
     """For each key, cross their values.
 
@@ -46,7 +49,9 @@ def cross_values_by_key(
     return ret
 
 
-def get_size(path) -> int:
+def get_size(
+    path: str,
+) -> int:
     """Get the size of a file or directory.
 
     Args:

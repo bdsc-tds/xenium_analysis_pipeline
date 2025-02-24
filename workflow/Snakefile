@@ -376,22 +376,39 @@ def get_output4count_correction(
     # Results from `resolvi_supervised`, if it is specified, and cell tyep annotation is configured to run.
     if "resolvi_supervised" in COUNT_CORRECTION_ID:
         if run_cell_type_annotation:
+            samples_by_conditions: dict[str, list[str]] = get_dict_value(
+                config,
+                "experiments",
+                cc.EXPERIMENTS_COLLECTIONS_NAME,
+                cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
+            )
+
+            annotations_by_conditions: dict[str, list[str]] = get_dict_value(
+                config,
+                cc.WILDCARDS_NAME,
+                cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+            )
+
+            samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+                samples_by_conditions,
+                annotations_by_conditions,
+            )
+
             ret.extend(
                 [
                     os.path.join(
                         prefix,
                         i,
-                        j,
+                        j[0],
                         k,
-                        l,
+                        j[1],
                         "resolvi_supervised",
-                        m,
+                        l,
                     )
                     for i in SEGMENTATION_ID
-                    for j in SAMPLE_ID
+                    for j in samples_annotations
                     for k in NORMALISATION_ID
-                    for l in ANNOTATION_ID
-                    for m in ["corrected_counts.h5", "proportions.parquet"]
+                    for l in ["corrected_counts.h5", "proportions.parquet"]
                 ]
             )
         else:
