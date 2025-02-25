@@ -1,5 +1,6 @@
 import sys
 
+import numpy as np
 import pandas as pd
 
 old_stdout = sys.stdout
@@ -9,7 +10,19 @@ sys.stdout = _log
 sys.stderr = _log
 
 
-info: pd.DataFrame = (
+def per_row_func(row: pd.Series) -> pd.Series:
+    if np.isnan(row.ncell):
+        return row
+
+    if row.ncell > 0:
+        return row.fillna(
+            value=0,
+        )
+
+    return row
+
+
+(
     pd.concat(
         [
             pd.read_parquet(
@@ -21,13 +34,13 @@ info: pd.DataFrame = (
     .reset_index(
         drop=True,
     )
-    .fillna(
-        value=0,
+    .apply(
+        per_row_func,
+        axis=1,
     )
-)
-
-info.to_parquet(
-    snakemake.output[0],
+    .to_parquet(
+        snakemake.output[0],
+    )
 )
 
 

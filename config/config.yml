@@ -87,6 +87,8 @@ segmentation:
     _memory: 128
 
   _qc:
+    _create_dummy_table: false
+
     reference_name:
     reference_level:
 

@@ -162,7 +162,24 @@ def get_output4reports(
     # Reports from segmentation QC.
 
     ## Reports from RCTD results, if RCTD is used for annotation.
-    if run_cell_type_annotation and any(
+    ## Make sure that `run_cell_type_annotation` has higher priority than `_create_dummy_table`.
+    ## If `run_cell_type_annotation` is True, then `_create_dummy_table` must be False.
+    if run_cell_type_annotation and get_dict_value(
+        config,
+        "segmentation",
+        "_qc",
+        "_create_dummy_table",
+        replace_none=False,
+    ):
+        raise RuntimeError("Error! If annotation is to be generated, then dummy tables must not be created. Please set '_create_dummy_table' to False.")
+
+    if (run_cell_type_annotation or get_dict_value(
+        config,
+        "segmentation",
+        "_qc",
+        "_create_dummy_table",
+        replace_none=False,
+    )) and any(
         False if re.match(
             r"reference_based/.+/rctd_.+",
             i,
@@ -182,7 +199,7 @@ def get_output4reports(
         )
     else:
         print(
-            "No reports from reference based RCTD will be generated, as RCTD is not used for annotation.",
+            "No reports from reference based RCTD will be generated, as annotion results from RCTD is not available.",
         )
 
     return ret

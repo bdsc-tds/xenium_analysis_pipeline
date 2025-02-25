@@ -51,13 +51,13 @@ def parse_args():
         help="annotation id",
     )
     sys_args_parser.add_argument(
-        "--ref_name",
+        "--reference_name",
         required=True,
         type=str,
         help="reference name used to run RCTD",
     )
     sys_args_parser.add_argument(
-        "--ref_level",
+        "--reference_level",
         type=str,
         help="reference level used to run RCTD",
     )
@@ -79,8 +79,8 @@ def get_meta_data(
     file_path: str,
     normalisation_id: str | None,
     annotation_id: str | None,
-    ref_name: str | None,
-    ref_level: str | None,
+    reference_name: str | None,
+    reference_level: str | None,
 ) -> pd.DataFrame:
     return (
         pd.read_parquet(
@@ -111,8 +111,8 @@ def get_meta_data(
                 normalisation_id if normalisation_id is not None else np.nan
             ),
             annotation_id=annotation_id if annotation_id is not None else np.nan,
-            reference_name=ref_name if ref_name is not None else np.nan,
-            reference_level=ref_level if ref_level is not None else np.nan,
+            reference_name=reference_name if reference_name is not None else np.nan,
+            reference_level=reference_level if reference_level is not None else np.nan,
             ncell=len,
         )
     )
@@ -230,8 +230,8 @@ if __name__ == "__main__":
         args.in_meta,
         args.normalisation_id,
         args.annotation_id,
-        args.ref_name,
-        args.ref_level,
+        args.reference_name,
+        args.reference_level,
     )
     rctd_info: pd.DataFrame = get_info_from_rctd(
         args.in_rctd,
