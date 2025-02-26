@@ -500,7 +500,7 @@ def get_output4count_correction(
                 for j in samples_annotations
                 for k in NORMALISATION_ID
                 for l in purctd_methods
-                for m in ["corrected_counts.h5", "counts_metadata.parquet"]
+                for m in ["corrected_counts.h5", "corrected_counts_metadata.parquet"]
             ]
         )
     else:
