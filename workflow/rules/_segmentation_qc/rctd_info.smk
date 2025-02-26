@@ -23,7 +23,7 @@ def generate_dummy_table(wildcards) -> bool:
     return False
 
 
-def get_input2gatherReferenceBasedRCTDInfo(wildcards) -> str | list[str]:
+def get_input2gatherRCTDInfo(wildcards) -> str | list[str]:
     if generate_dummy_table(wildcards):
         return f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/versions.json'
 
@@ -33,7 +33,7 @@ def get_input2gatherReferenceBasedRCTDInfo(wildcards) -> str | list[str]:
     ]
 
 
-def get_shell_cmd4gatherReferenceBasedRCTDInfo(
+def get_shell_cmd4gatherRCTDInfo(
     wildcards,
     input,
     output,
@@ -110,7 +110,7 @@ def get_shell_cmd4gatherReferenceBasedRCTDInfo(
     return " ".join(
         [
             "python3",
-            "workflow/scripts/_segmentation_qc/gather_reference_based_rctd_info.py",
+            "workflow/scripts/_segmentation_qc/gather_rctd_info.py",
             "--in_meta",
             input[0],
             "--in_rctd",
@@ -135,22 +135,22 @@ def get_shell_cmd4gatherReferenceBasedRCTDInfo(
 #                Rules                #
 #######################################
 
-rule gatherReferenceBasedRCTDInfo:
+rule gatherRCTDInfo:
     input:
-        get_input2gatherReferenceBasedRCTDInfo
+        get_input2gatherRCTDInfo
     output:
         protected(f'{config["output_path"]}/segmentation_qc/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_info.parquet')
     params:
-        cmd=lambda wildcards, input, output: get_shell_cmd4gatherReferenceBasedRCTDInfo(
+        cmd=lambda wildcards, input, output: get_shell_cmd4gatherRCTDInfo(
             wildcards,
             input,
             output,
-            f'{config["output_path"]}/segmentation_qc/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/{wildcards.annotation_id}/logs/gatherReferenceBasedRCTDInfo.log',
+            f'{config["output_path"]}/segmentation_qc/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/{wildcards.annotation_id}/logs/gatherRCTDInfo.log',
         )
     log:
-        f'{config["output_path"]}/segmentation_qc/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/gatherReferenceBasedRCTDInfo.log'
+        f'{config["output_path"]}/segmentation_qc/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/gatherRCTDInfo.log'
     wildcard_constraints:
-        annotation_id=r"reference_based/.+/rctd_.+"
+        annotation_id=r".+/rctd_.+"
     conda:
         "../../envs/pyarrow.yml"
     resources:

@@ -2,10 +2,11 @@
 #              Functions              #
 #######################################
 
-def get_input2combineGenePanelWiseReferenceBasedRCTDInfo(wildcards) -> list[str]:
+def get_input2combineGenePanelWiseRCTDInfo(wildcards) -> list[str]:
     prefix: str = f'{config["output_path"]}/segmentation_qc'
     suffix: str = f'rctd_info.parquet'
 
+    # Get all the annotations for the condition of the gene panel.
     annotations: list[str] = [
         i
         for i in get_dict_value(
@@ -18,12 +19,13 @@ def get_input2combineGenePanelWiseReferenceBasedRCTDInfo(wildcards) -> list[str]
             )[0],
         )
         if re.match(
-            r"reference_based/.+/rctd_.+",
+            r".+/rctd_.+",
             i,
             flags=re.IGNORECASE,
         ) is not None
     ]
 
+    # Get all the samples for the gene panel.
     samples: list[str] = get_dict_value(
         config,
         "experiments",
@@ -52,16 +54,16 @@ def get_input2combineGenePanelWiseReferenceBasedRCTDInfo(wildcards) -> list[str]
 #                Rules                #
 #######################################
 
-rule combineGenePanelWiseReferenceBasedRCTDInfo:
+rule combineGenePanelWiseRCTDInfo:
     input:
-        get_input2combineGenePanelWiseReferenceBasedRCTDInfo
+        get_input2combineGenePanelWiseRCTDInfo
     output:
-        protected(f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/reference_based_rctd_info.parquet')
+        protected(f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/rctd_info.parquet')
     log:
-        f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/logs/combineGenePanelWiseReferenceBasedRCTDInfo.log'
+        f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/logs/combineGenePanelWiseRCTDInfo.log'
     conda:
         "../../envs/pyarrow.yml"
     resources:
         mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt * 2000, 20480)
     script:
-        "../../scripts/_segmentation_qc/combine_reference_based_rctd_info.py"
+        "../../scripts/_segmentation_qc/combine_rctd_info.py"

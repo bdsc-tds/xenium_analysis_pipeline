@@ -183,7 +183,7 @@ def get_output4reports(
         replace_none=False,
     )) and any(
         False if re.match(
-            r"reference_based/.+/rctd_.+",
+            r".+/rctd_.+",
             i,
             flags=re.IGNORECASE,
         ) is None else True
@@ -194,14 +194,14 @@ def get_output4reports(
                 os.path.join(
                     prefix,
                     i,
-                    "segmentation_qc_reference_based_rctd.html",
+                    "segmentation_qc_rctd.html",
                 )
                 for i in GENE_PANEL_ID
             ]
         )
     else:
         print(
-            "No reports from reference based RCTD will be generated, as annotion results from RCTD is not available.",
+            "No reports for segmentation QC will be generated, as annotation results from RCTD is not available.",
         )
 
     return ret
