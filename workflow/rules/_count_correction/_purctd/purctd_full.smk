@@ -15,5 +15,10 @@ rule runPuRCTDFull:
         annotation_id=r".+/rctd_.+"
     container:
         config["containers"]["r"]
+    resources:
+        mem_mb=lambda wildcards, input, attempt: max(
+            input.size_mb * attempt * 10,
+            20480,
+        )
     script:
         "../../scripts/_purification/purctd_full.R"

@@ -16,5 +16,10 @@ rule runSpatialNeighborhoodAnalysis:
         f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runSpatialNeighborhoodAnalysis.log'
     container:
         config["containers"]["r"]
+    resources:
+        mem_mb=lambda wildcards, input, attempt: max(
+            input.size_mb * attempt * 10,
+            1024,
+        )
     script:
         "../../scripts/_neighborhood_analysis/spatial_neighborhood_analysis.R"

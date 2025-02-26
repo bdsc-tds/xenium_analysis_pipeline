@@ -14,5 +14,10 @@ rule runPostprocessRCTD:
         annotation_id=r".+/rctd_.+"
     container:
         config["containers"]["r"]
+    resources:
+        mem_mb=lambda wildcards, input, attempt: max(
+            input.size_mb * attempt * 10,
+            512,
+        )
     script:
         "../../scripts/_neighborhood_analysis/postprocess_rctd.R"
