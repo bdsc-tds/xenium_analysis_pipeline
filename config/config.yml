@@ -172,6 +172,9 @@ cell_type_annotation:
 
 count_correction:
   methods:
+    - purctd_full
+    - purctd_spot_class_balanced
+    - purctd_score_balanced
     - ovrlpy
     - resolvi_unsupervised
     - resolvi_supervised
@@ -181,9 +184,7 @@ count_correction:
 
   resolvi:
     train:
-      max_epochs:
-        - 50
-        - 100
+      max_epochs: 50
       mixture_k: 50
 
     predict:

@@ -2,10 +2,6 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
-
-if (!requireNamespace("puRCTD", quietly = TRUE)){
-  remotes::install_git("git@github.com:bdsc-tds/puRCTD.git")
-}
 library(puRCTD)
 
 xe <- readRDS(snakemake@input[["xe"]])

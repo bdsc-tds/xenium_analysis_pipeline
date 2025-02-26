@@ -25,26 +25,33 @@ def uniquify_elements_in_list(
 
 
 def cross_values_by_key(
-    vals_1: dict[str, list[str]],
-    vals_2: dict[str, list[str]],
+    dict_1: dict[str, list[str]],
+    dict_2: dict[str, list[str]],
 ) -> list[tuple[str, str]]:
-    """For each key, cross their values.
+    """For each common key, cross values in two dictionaries.
 
     Args:
-        vals_1 (dict[str, list[str]]): Left dictionary of values organized by key.
-        vals_2 (dict[str, list[str]]): Right dictionary of values organized by key.
+        dict_1 (dict[str, list[str]]): Left dictionary of values organized by key.
+        dict_2 (dict[str, list[str]]): Right dictionary of values organized by key.
 
     Returns:
-        list[list[str]]: Results of crossed vals_1 and vals_2.
+        list[list[str]]: Results of crossed dict_1 and dict_2.
     """
-    assert len(vals_1) == len(vals_2)
+    common_keys: set[str] = set(dict_1.keys()) & set(dict_2.keys())
 
     ret: list[tuple[str, str]] = []
 
-    for k, v in vals_1.items():
-        assert k in vals_2
+    for k in common_keys:
+        if dict_1[k] is None or dict_2[k] is None:
+            continue
 
-        ret.extend([(i, j) for i in v for j in vals_2[k]])
+        assert isinstance(dict_1[k], list) and isinstance(dict_2[k], list)
+        if len(dict_1[k]) == 0 or len(dict_2[k]) == 0:
+            continue
+
+        ret.extend(
+            [(i, j) for i in dict_1[k] for j in dict_2[k]],
+        )
 
     return ret
 
