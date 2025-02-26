@@ -125,6 +125,3 @@ write_parquet(RCTD@results$weights %>% as.data.frame(), snakemake@output[["out_w
 write_parquet(RCTD@results$weights_doublet %>% as.data.frame(), snakemake@output[["out_wd"]])
 write_parquet(singlet_scores, snakemake@output[["out_sc"]])
 write_parquet(score_mat, snakemake@output[["out_sm"]])
-
-
-

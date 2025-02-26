@@ -129,6 +129,7 @@ include: 'rules/segmentation.smk'
 include: 'rules/count_correction.smk'
 include: 'rules/standard_seurat_analysis.smk'
 include: 'rules/coexpression.smk'
+include: 'rules/neighborhood_analysis.smk'
 include: 'rules/cell_type_annotation.smk'
 include: 'rules/segmentation_qc.smk'
 
@@ -181,7 +182,7 @@ def get_output4reports(
         replace_none=False,
     )) and any(
         False if re.match(
-            r"reference_based/.+/rctd_.+",
+            r".+/rctd_.+",
             i,
             flags=re.IGNORECASE,
         ) is None else True
@@ -192,14 +193,14 @@ def get_output4reports(
                 os.path.join(
                     prefix,
                     i,
-                    "segmentation_qc_reference_based_rctd.html",
+                    "segmentation_qc_rctd.html",
                 )
                 for i in GENE_PANEL_ID
             ]
         )
     else:
         print(
-            "No reports from reference based RCTD will be generated, as annotion results from RCTD is not available.",
+            "No reports for segmentation QC will be generated, as annotation results from RCTD is not available.",
         )
 
     return ret
@@ -339,7 +340,7 @@ def get_output4count_correction(
 
     prefix: str = f'{config["output_path"]}/count_correction'
 
-    # Outputs from Ovrlpy, if it is specified.
+    # Results from Ovrlpy, if it is specified.
     if "ovrlpy" in COUNT_CORRECTION_ID:
         valid_seg_methods: list[str] = [
             i
@@ -431,6 +432,80 @@ def get_output4count_correction(
         else:
             print(
                 'No results from count correction method "resolvi_supervised" will be generated even though it is configured to run, as annotation isn\'t.',
+            )
+    
+    # Results from `purctd_*`, if they are specified.
+    purctd_methods: list[str] = [
+        i
+        for i in COUNT_CORRECTION_ID
+        if re.match(
+            r"^purctd_.+$",
+            i,
+            flags=re.IGNORECASE,
+        ) is not None
+    ]
+
+    if "purctd_full" not in purctd_methods and len(purctd_methods) > 0:
+        raise RuntimeError("Error! If any method from 'purctd_*' is specified, then 'purctd_full' must be specified as well.")
+
+    if run_cell_type_annotation and any(
+        False if re.match(
+            r".+/rctd_.+",
+            i,
+            flags=re.IGNORECASE,
+        ) is None else True
+        for i in ANNOTATION_ID
+    ):
+        samples_by_conditions: dict[str, list[str]] = get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_COLLECTIONS_NAME,
+            cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
+        )
+
+        annotations_by_conditions: dict[str, list[str]] = {
+            cond: [
+                i
+                for i in anno
+                if re.match(
+                    r".+/rctd_.+",
+                    i,
+                    flags=re.IGNORECASE,
+                ) is not None
+            ]
+            for cond, anno in get_dict_value(
+                config,
+                cc.WILDCARDS_NAME,
+                cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+            ).items()
+        }
+
+        samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+            samples_by_conditions,
+            annotations_by_conditions,
+        )
+
+        ret.extend(
+            [
+                os.path.join(
+                    prefix,
+                    i,
+                    j[0],
+                    k,
+                    j[1],
+                    l,
+                    m,
+                )
+                for i in SEGMENTATION_ID
+                for j in samples_annotations
+                for k in NORMALISATION_ID
+                for l in purctd_methods
+                for m in ["corrected_counts.h5", "corrected_counts_metadata.parquet"]
+            ]
+        )
+    else:
+        print(
+                f'No results from count correction methods {",".join(purctd_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
             )
 
     return ret
