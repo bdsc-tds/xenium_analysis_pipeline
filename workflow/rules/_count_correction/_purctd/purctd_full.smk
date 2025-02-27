@@ -21,4 +21,4 @@ rule runPuRCTDFull:
             20480,
         )
     script:
-        "../../scripts/_purification/purctd_full.R"
+        "../../../scripts/_count_correction/purctd_full.R"

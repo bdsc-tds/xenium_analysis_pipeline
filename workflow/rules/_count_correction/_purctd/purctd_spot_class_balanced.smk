@@ -23,4 +23,4 @@ rule runPuRCTDSpotClassBalanced:
             20480,
         )
     script:
-        "../../scripts/_purification/purctd_spot_class_balanced.R"
+        "../../../scripts/_count_correction/purctd_spot_class_balanced.R"
