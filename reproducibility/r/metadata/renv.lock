@@ -2165,6 +2165,20 @@
       ],
       "Hash": "9171f898db9d9c4c1b2c745adc2c1ef1"
     },
+    "hdf5r": {
+      "Package": "hdf5r",
+      "Version": "1.3.12",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "R6",
+        "bit64",
+        "methods",
+        "utils"
+      ],
+      "Hash": "697780d27f201a778615764861718401"
+    },
     "here": {
       "Package": "here",
       "Version": "1.0.1",
@@ -3225,7 +3239,7 @@
     },
     "rhdf5": {
       "Package": "rhdf5",
-      "Version": "2.50.0",
+      "Version": "2.50.2",
       "Source": "Bioconductor",
       "Repository": "Bioconductor 3.20",
       "Requirements": [
@@ -3234,7 +3248,7 @@
         "methods",
         "rhdf5filters"
       ],
-      "Hash": "c442180fd94c3d38929094e35a6ef92f"
+      "Hash": "525e1aa19c8bfdffdbf01b2bbd608dad"
     },
     "rhdf5filters": {
       "Package": "rhdf5filters",
