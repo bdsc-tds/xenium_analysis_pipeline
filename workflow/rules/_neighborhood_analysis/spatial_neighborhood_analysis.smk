@@ -17,9 +17,9 @@ rule runSpatialNeighborhoodAnalysis:
     container:
         config["containers"]["r"]
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(
-            input.size_mb * attempt * 10,
-            1024,
+        mem_mb=lambda wildcards, input, attempt: min(
+            input.size_mb * attempt * 50,
+            51200,
         )
     script:
         "../../scripts/_neighborhood_analysis/spatial_neighborhood_analysis.R"

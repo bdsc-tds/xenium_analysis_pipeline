@@ -15,9 +15,9 @@ rule runPostprocessRCTD:
     container:
         config["containers"]["r"]
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(
-            input.size_mb * attempt * 10,
-            512,
+        mem_mb=lambda wildcards, input, attempt: min(
+            input.size_mb * attempt * 50,
+            51200,
         )
     script:
         "../../scripts/_neighborhood_analysis/postprocess_rctd.R"

@@ -27,4 +27,4 @@ rule runPuRCTDScoreBalanced:
             20480,
         )
     script:
-        "../../scripts/_purification/purctd_score_balanced.R"
+        "../../../scripts/_count_correction/purctd_score_balanced.R"
