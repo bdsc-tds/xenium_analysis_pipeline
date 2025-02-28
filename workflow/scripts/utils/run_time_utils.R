@@ -28,7 +28,7 @@ generate_xr_style_cell_names <- function(n, len = 8, seed = 42) {
 
 # Change 1-based index to 0-based 
 quick_generate_cell_names <- function(n, prefix = "") {
-    return(paste0(prefix, seq(n) - 1))
+    return(paste0(prefix, as.integer(seq(n) - 1)))
 }
 
 # Assume `new_counts` is cell-by-gene.
