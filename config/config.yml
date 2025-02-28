@@ -138,7 +138,7 @@ cell_type_annotation:
     rctd:
       # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
       UMI_min_sigma:
-        - 1 # low UMI in single-cell mode
+        - 100 # low UMI in single-cell mode
         - 300 # higher UMI in cluster mode
 
       _threads: 20

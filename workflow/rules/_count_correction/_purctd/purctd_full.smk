@@ -17,7 +17,7 @@ rule runPuRCTDFull:
         config["containers"]["r"]
     resources:
         mem_mb=lambda wildcards, input, attempt: max(
-            input.size_mb * attempt * 10,
+            input.size_mb * attempt * 50,
             20480,
         )
     script:
