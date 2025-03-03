@@ -128,7 +128,13 @@ if __name__ == "__main__":
     if args.cell_type_labels is not None:
         labels_key = "labels_key"
         semisupervised = True
-        adata.obs[labels_key] = pd.read_parquet(args.cell_type_labels).iloc[:, 0]
+        adata.obs[labels_key] = (
+            pd.read_parquet(args.cell_type_labels)
+            .set_index("cell_id")
+            .iloc[:, 0]
+            .astype("category")
+        )
+        adata = adata[adata.obs[labels_key].notna()]
     else:
         labels_key = None
         semisupervised = False
