@@ -2,32 +2,39 @@
 #              Functions              #
 #######################################
 
-def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -> str | list[str]:
+def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -> dict[str, str]:
     prefix: str = f'{config["output_path"]}/segmentation'
-    ret: str = ""
+    ret: dict[str, str] = {}
 
     if re.match(
         r"^proseg_expected$",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret = os.path.join(
+        dir_path: str = os.path.join(
             prefix,
             f'proseg/{wildcards.sample_id}/raw_results'
         )
 
         if for_input:
-            ret = [
-                os.path.join(
-                    ret,
-                    i
-                ) for i in [
-                    "cell-metadata.csv.gz",
-                    "transcript-metadata.csv.gz",
-                    "cell-polygons.geojson.gz",
-                    "expected-counts.csv.gz"
-                ]
-            ]
+            ret["cell_metadata"] = os.path.join(
+                dir_path,
+                "cell-metadata.csv.gz",
+            )
+            ret["transcript_metadata"] = os.path.join(
+                dir_path,
+                "transcript-metadata.csv.gz",
+            )
+            ret["cell_polygons"] = os.path.join(
+                dir_path,
+                "cell-polygons.geojson.gz",
+            )
+            ret["expected_counts"] = os.path.join(
+                dir_path,
+                "expected-counts.csv.gz",
+            )
+        else:
+            ret["data_dir"] = dir_path
     else:
         seg_id: str = "proseg" if re.match(
             r"^proseg_mode$",
@@ -35,20 +42,19 @@ def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -
             flags=re.IGNORECASE,
         ) is not None else wildcards.segmentation_id
 
-        ret = os.path.join(
+        dir_path = os.path.join(
             prefix,
             f"{seg_id}/{wildcards.sample_id}/normalised_results",
         )
 
-        if not for_input:
-            ret = normalise_path(
-                ret,
-                candidate_paths=("outs",),
-                pat_anchor_file=r"transcripts.parquet",
-                pat_flags=re.IGNORECASE,
-                return_dir=True,
-                check_exist=False
-            )
+        ret["data_dir"] = dir_path if for_input else normalise_path(
+            dir_path,
+            candidate_paths=("outs",),
+            pat_anchor_file=r"transcripts.parquet",
+            pat_flags=re.IGNORECASE,
+            return_dir=True,
+            check_exist=False
+        )
 
     return ret
 
@@ -56,10 +62,11 @@ def get_seg_data4input2_or_param4runResolvi(wildcards, for_input: bool = True) -
 def get_params4runResolvi(wildcards, for_training: bool) -> dict[str, Any]:
     ret: dict[atr, Any] = dict()
 
-    ret["data_dir"] = get_seg_data4input2_or_param4runResolvi(
+    ret = get_seg_data4input2_or_param4runResolvi(
         wildcards,
         for_input=False,
     )
+    assert "data_dir" in ret
 
     ret["min_counts"] = get_dict_value(
         config,
@@ -201,7 +208,7 @@ def get_mem_mb4runResolvi(wildcards, attempt, multiplier: int = 1) -> int:
         get_seg_data4input2_or_param4runResolvi(
             wildcards,
             for_input=False,
-        ),
+        ).values(),
     ) * 1e-6 * attempt
 
     if re.match(

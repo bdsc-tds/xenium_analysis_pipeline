@@ -1,6 +1,8 @@
-import yaml
+import dask
+
+dask.config.set({"dataframe.query-planning": False})
+
 import pandas as pd
-import os
 import json
 import h5py
 import numpy as np
@@ -649,3 +651,52 @@ def write_10X_h5(adata, file):
         "shape",
         data=np.array(list(adata.X.shape)[::-1], dtype=f"<i{int_max(adata.X.shape)}"),
     )
+
+
+######### Add metadata to anndata
+def add_metadata2ad(
+    adata: ad.AnnData,
+    sample_id: str,
+    segmentation_id: str,
+    condition: str,
+    gene_panel: str,
+    donor: str,
+    sample: str,
+    segmentation_method: str,
+) -> ad.AnnData:
+    """
+    Adds metadata to an AnnData object.
+
+    Parameters
+    ----------
+    adata : ad.AnnData
+        The AnnData object to add metadata to.
+    sample_id : str
+        The sample ID.
+    segmentation_id : str
+        The segmentation ID.
+    condition : str
+        The condition.
+    gene_panel : str
+        The gene panel.
+    donor : str
+        The donor.
+    sample : str
+        The sample.
+    segmentation_method : str
+        The segmentation method.
+
+    Returns
+    -------
+    ad.AnnData
+        The AnnData object with metadata added.
+    """
+    adata.obs["sample_id"] = sample_id
+    adata.obs["segmentation_id"] = segmentation_id
+    adata.obs["condition"] = condition
+    adata.obs["gene_panel"] = gene_panel
+    adata.obs["donor"] = donor
+    adata.obs["sample"] = sample
+    adata.obs["segmentation_method"] = segmentation_method
+
+    return adata

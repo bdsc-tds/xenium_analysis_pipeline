@@ -19,7 +19,11 @@ def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = Tr
     )
 
 def use_mode_counts4loadProseg2Seurat(wildcards) -> bool:
-    matched = re.match(r"^proseg_(\w+)", wildcards.segmentation_id, flags=re.IGNORECASE)
+    matched = re.match(
+        r"^proseg_(\w+)",
+        wildcards.segmentation_id,
+        flags=re.IGNORECASE,
+    )
     assert matched is not None
 
     if matched.group(1) == "mode":

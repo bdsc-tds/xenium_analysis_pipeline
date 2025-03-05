@@ -1,14 +1,5 @@
 import scanpy as sc
-import torch
-import os
-import pathlib
-import pandas as pd
-import numpy as np
 import importlib
-import sklearn
-import scipy
-import seaborn as sns
-import warnings
 
 
 if importlib.util.find_spec("rapids_singlecell") is not None:

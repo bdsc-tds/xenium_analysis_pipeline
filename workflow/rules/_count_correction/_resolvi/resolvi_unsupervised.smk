@@ -4,7 +4,7 @@
 
 rule runResolviUnsupervisedTrain:
     input:
-        get_seg_data4input2_or_param4runResolvi
+        unpack(get_seg_data4input2_or_param4runResolvi)
     output:
         directory(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/trained_model')
     params:
@@ -46,7 +46,7 @@ rule runResolviUnsupervisedTrain:
 
 rule runResolviUnsupervisedPredict:
     input:
-        data_dir=get_seg_data4input2_or_param4runResolvi,
+        unpack(get_seg_data4input2_or_param4runResolvi),
         model_dir=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/trained_model'
     output:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/corrected_counts.h5'),
