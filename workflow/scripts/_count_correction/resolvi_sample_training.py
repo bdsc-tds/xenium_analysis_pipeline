@@ -17,7 +17,7 @@ sys.path.append(
         ),
     ),
 )
-from _preprocessing import preprocessing
+from _joint_scanpy_analysis import preprocessing
 from utils import readwrite
 
 

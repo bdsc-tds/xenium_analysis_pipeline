@@ -4,7 +4,7 @@
 
 rule runResolviSupervisedTrain:
     input:
-        data_dir=get_seg_data4input2_or_param4runResolvi,
+        unpack(get_seg_data4input2_or_param4runResolvi),
         annotation=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'
     output:
         directory(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/trained_model')
@@ -48,7 +48,7 @@ rule runResolviSupervisedTrain:
 
 rule runResolviSupervisedPredict:
     input:
-        data_dir=get_seg_data4input2_or_param4runResolvi,
+        unpack(get_seg_data4input2_or_param4runResolvi),
         model_dir=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/trained_model',
         annotation=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'
     output:

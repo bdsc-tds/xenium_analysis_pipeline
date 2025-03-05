@@ -111,6 +111,23 @@ standard_seurat_analysis:
   clustering:
     resolution: 0.8
 
+joint_scanpy_analysis:
+  methods:
+    - condition_wise
+    - gene_panel_wise
+
+  condition_wise:
+    n_comps: 50
+    n_neighbors: 50
+    min_dist: 0.3
+    metric: "cosine"
+
+  gene_panel_wise:
+    n_comps: 50
+    n_neighbors: 50
+    min_dist: 0.3
+    metric: "cosine"
+
 coexpression:
   methods:
     - conditional
