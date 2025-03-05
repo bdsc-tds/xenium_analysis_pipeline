@@ -331,6 +331,37 @@ def get_output4cell_type_annotation() -> list[str]:
     ]
 
 
+def get_output4joint_analysis() -> list[str] | None:
+    methods: list[str] = get_dict_value(
+        config,
+        "joint_scanpy_analysis",
+        "methods",
+    )
+
+    if len(methods) == 0:
+        print("No results from joint analysis will be generated.")
+        return None
+    
+    joint_levels: list[str] = []
+    if "condition_wise" in methods:
+        joint_levels.extend(CONDITION_ID)
+    if "gene_panel_wise" in methods:
+        joint_levels.extend(GENE_PANEL_ID)
+
+    prefix: str = f'{config["output_path"]}/joint_scanpy_analysis'
+
+    return [
+        os.path.join(
+            prefix,
+            i,
+            j,
+            "umap.parquet",
+        )
+        for i in SEGMENTATION_ID
+        for j in joint_levels
+    ]
+
+
 def get_output4count_correction(
     run_cell_type_annotation: bool,
 ) -> list[str]:
@@ -518,6 +549,7 @@ def get_input2all(
     reports: bool = True,
     coexpression: bool = True,
     cell_type_annotation: bool = True,
+    joint_analysis: bool = True,
     count_correction: bool = True,
     cleanup: bool = False
 ) -> list[str]:
@@ -528,6 +560,11 @@ def get_input2all(
 
     if cell_type_annotation:
         ret.extend(get_output4cell_type_annotation())
+
+    if joint_analysis:
+        res = get_output4joint_analysis()
+        if res is not None and len(res) > 0:
+            ret.extend(res)
     
     if count_correction:
         ret.extend(get_output4count_correction(
@@ -556,6 +593,7 @@ rule all:
             reports=True,
             coexpression=True,
             cell_type_annotation=True,
+            joint_analysis=True,
             count_correction=True,
             cleanup=False,
         )
