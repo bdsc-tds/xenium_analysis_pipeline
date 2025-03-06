@@ -27,6 +27,7 @@ dependencies:
   - geopandas=1.0.1
   - shapely=2.0.6
   - zarr=2.18.4
+  - ipykernel=6.29.5
   - git
   - pip
   - pip:
