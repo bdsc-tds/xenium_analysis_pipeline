@@ -7,10 +7,10 @@ library(spacexr)
 library(arrow)
 library(dplyr)
 
-if (!requireNamespace("puRCTD", quietly = TRUE)){
-  remotes::install_git("git@github.com:bdsc-tds/puRCTD.git")
+if (!requireNamespace("SPLIT", quietly = TRUE)){
+  remotes::install_git("git@github.com:bdsc-tds/SPLIT.git")
 }
-library(puRCTD)
+library(SPLIT)
 
 xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])

@@ -6,7 +6,7 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
-library(puRCTD)
+library(SPLIT)
 
 xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])
