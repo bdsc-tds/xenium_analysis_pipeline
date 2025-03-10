@@ -55,7 +55,7 @@ def get_input2_or_params4gatherSegmentedSamples(
 
 # level: 0 for condition-wise, 1 for gene-panel-wise, 2 for donor-wise
 def get_params4runAnalysis(
-    wildcards*,
+    wildcards,
     level: int,
 ) -> dict[str, Any]:
     if level == 0:
