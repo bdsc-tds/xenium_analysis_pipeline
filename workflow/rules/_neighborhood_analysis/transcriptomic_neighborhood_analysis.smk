@@ -10,7 +10,7 @@ rule runTranscriptomicNeighborhoodAnalysis:
         transcriptomic_neighborhood_scores=protected(f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet')
     params:
         DO_prune=False, 
-        k_knn=20
+        k_knn=10
     log:
         f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runTranscriptomicNeighborhoodAnalysis.log'
     container:
