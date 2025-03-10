@@ -6,10 +6,6 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
-
-if (!requireNamespace("SPLIT", quietly = TRUE)){
-  remotes::install_git("git@github.com:bdsc-tds/SPLIT.git")
-}
 library(SPLIT)
 
 xe <- readRDS(snakemake@input[["xe"]])
