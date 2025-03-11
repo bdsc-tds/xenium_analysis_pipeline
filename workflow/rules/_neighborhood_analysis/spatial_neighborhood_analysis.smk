@@ -9,7 +9,7 @@ rule runSpatialNeighborhoodAnalysis:
     output:
         spatial_neighborhood_scores=protected(f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/spatial_neighborhood_scores.parquet')
     params:
-        DO_prune=True, 
+        DO_prune=True,
         pruning_radius=15,
         k_knn=20
     log:
