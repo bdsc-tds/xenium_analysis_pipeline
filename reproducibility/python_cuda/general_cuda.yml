@@ -17,6 +17,7 @@ dependencies:
   - scanpy=1.10.4
   - python-igraph=0.11.8
   - leidenalg=0.10.2
+  - ipykernel=6.29.5
   # - libjpeg-turbo=3.0.0
   # - cudnn
   # - cutensor
