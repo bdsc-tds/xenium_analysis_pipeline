@@ -9,6 +9,7 @@ rule runTranscriptomicNeighborhoodAnalysis:
     output:
         transcriptomic_neighborhood_scores=protected(f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet')
     params:
+        future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         DO_prune=False,
         k_knn=10
     log:
