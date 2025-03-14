@@ -24,6 +24,11 @@ condition_1:
   gene_panel_1:
     _gene_panel_file: /path/to/or/name/of/gene/panel/file
 
+    # Are other stainings available in this panel besides DAPI for nuleus?
+    _extra_stain:
+      boundary: false
+      interior: false
+
     _qc:
       # Comment out any of them if they are the same as the global QC thresholds.
       min_counts: 10

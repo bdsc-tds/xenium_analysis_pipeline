@@ -13,7 +13,7 @@ def get_input2_or_params4run10x(wildcards, for_input: bool = True) -> str:
             ret,
             pat_flags=re.IGNORECASE,
             return_dir=True,
-            check_exist=True
+            check_exist=True,
         )
 
     return normalise_path(
@@ -21,8 +21,51 @@ def get_input2_or_params4run10x(wildcards, for_input: bool = True) -> str:
         candidate_paths=("outs",),
         pat_flags=re.IGNORECASE,
         return_dir=True,
-        check_exist=False
+        check_exist=False,
     )
+
+
+def get_other_options4run10x(wildcards) -> str:
+    options: str = get_dict_value(
+        config,
+        "segmentation",
+        wildcards.compact_segmentation_id,
+        "_other_options",
+        replace_none="",
+    )
+
+    extra_stains: dict[str, bool] = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
+        extract_layers_from_experiments(
+            wildcards.sample_id,
+            [0, 1],
+        )[0],
+    )
+
+    if re.match(
+        r"10x_\w+_\d+um",
+        wildcards.compact_segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None or len(options) == 0 or all(extra_stains.values()):
+        return options
+
+    tmp: list[str] = []
+    prev_kept: bool = False
+    for elem in options.split():
+        if elem.startswith("--"):
+            if (
+                elem == "--boundary-stain" and extra_stains["boundary"] or elem == "--interior-stain" and extra_stains["interior"]
+            ):
+                prev_kept = True
+                tmp.append(elem)
+            else:
+                prev_kept = False
+        elif prev_kept:
+            tmp.append(elem)
+
+    return " ".join(tmp)
 
 
 #######################################
@@ -56,15 +99,9 @@ rule run10x:
             wildcards.compact_segmentation_id,
             "localmem"
         ),
-        other_options=lambda wildcards: get_dict_value(
-            config,
-            "segmentation",
-            wildcards.compact_segmentation_id,
-            "_other_options",
-            replace_none=""
-        )
+        other_options=get_other_options4run10x
     wildcard_constraints:
-        compact_segmentation_id=r"10x_\w*?_?\d+?um"
+        compact_segmentation_id=r"10x_\w+um"
     threads:
         lambda wildcards: get_dict_value(
             config,
