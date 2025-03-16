@@ -7,7 +7,6 @@ from typing import Any, Callable
 import re
 import os
 import yaml
-import warnings
 
 import config_constants as cc
 
@@ -382,6 +381,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                     cc.EXPERIMENTS_BASE_PATH_NAME,
                     cc.EXPERIMENTS_COLLECTIONS_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                    cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                     cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                     cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
@@ -419,6 +419,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_CONFIG_PATH_NAME,
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
@@ -431,6 +432,48 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         val_func=None,
         key_val_func=None,
         simplify=lambda x: {k: v[0] if len(v) == 1 else v for k, v in x.items()},
+    )
+
+    def extra_extra_sanity_check(x: dict[str, Any]) -> dict[str, Any]:
+        values: tuple = ("boundary", "interior")
+
+        for _, v in x.items():
+            assert len(v) == len(values)
+
+            for _k in v:
+                assert _k in values
+
+        return x
+
+    extra_stains: dict[str, Any] = _collect_experiments(
+        _flatten_struct(
+            data,
+            key_layer2pat_include={
+                (0, 1): r"^(?!_+).+",
+                (2,): cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
+                (3,): lambda v: v in ("boundary", "interior"),
+                (4,): lambda v: isinstance(v, bool),
+            },
+            key_layer2pat_exclude={
+                (0, 1, 2, 3): "|".join(
+                    [
+                        cc.EXPERIMENTS_CONFIG_PATH_NAME,
+                        cc.EXPERIMENTS_BASE_PATH_NAME,
+                        cc.EXPERIMENTS_COLLECTIONS_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
+                        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+                    ]
+                )
+            },
+        ),
+        1,
+        drop_layers=(2,),
+        val_func=lambda vs: {vs[0]: vs[1]},
+        key_val_func=None,
+        vals_func=_merge_dicts,
+        simplify=extra_extra_sanity_check,
     )
 
     gene_panel_qc_thresholds = _collect_experiments(
@@ -450,6 +493,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
@@ -482,6 +526,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                         cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
                     ]
@@ -515,6 +560,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
                         cc.EXPERIMENTS_BASE_PATH_NAME,
                         cc.EXPERIMENTS_COLLECTIONS_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_FILES_NAME,
+                        cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
                         cc.EXPERIMENTS_GENE_PANEL_TARGET_COUNTS_NAME,
                     ]
@@ -533,6 +579,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
         data[cc.EXPERIMENTS_BASE_PATH_NAME],
         collections,
         gene_panel_files,
+        extra_stains,
         gene_panel_qc_thresholds,
         gene_panel_target_counts,
         cell_type_annotation,
@@ -540,7 +587,7 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
 
 
 def _process_segmentation(
-    data: dict[str, Any]
+    data: dict[str, Any],
 ) -> tuple[list[str], list[str], dict[str, Any]]:
     methods: list[str] = []
     compact_methods: list[str] = []
@@ -886,7 +933,8 @@ def process_config(
             cc.EXPERIMENTS_BASE_PATH_NAME: _experiments[1],
             cc.EXPERIMENTS_COLLECTIONS_NAME: _experiments[2],
             cc.EXPERIMENTS_GENE_PANEL_FILES_NAME: _experiments[3],
-            cc.EXPERIMENTS_GENE_PANEL_QC_NAME: _experiments[4],
+            cc.EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME: _experiments[4],
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME: _experiments[5],
         },
     )
 
@@ -939,7 +987,7 @@ def process_config(
 
     # Process `coexpression` section.
     _coexpression = _process_coexpression(
-        _experiments[5],
+        _experiments[6],
         get_dict_value(
             data,
             "coexpression",
@@ -955,7 +1003,7 @@ def process_config(
 
     # Process `cell_type_annotation` section.
     _cell_type_annotation = _process_cell_type_annotation(
-        _experiments[6],
+        _experiments[7],
         get_dict_value(
             data,
             "cell_type_annotation",

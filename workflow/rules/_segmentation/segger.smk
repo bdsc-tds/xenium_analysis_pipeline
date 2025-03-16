@@ -164,7 +164,7 @@ rule runSeggerTrain:
         slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
             wildcards,
         ) if _use_gpu() else "cpu",
-        mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu4segger() else 20480),
+        mem_mb=lambda wildcards, threads, attempt: threads * attempt * (2048 if _use_gpu() else 20480),
         slurm_extra=lambda wildcards: get_slurm_extra(
             wildcards,
             get_dict_value(
@@ -234,7 +234,7 @@ rule runSeggerPredict:
                     wildcards,
                     for_input=False
                     )
-            ) * 10**-6 * attempt * (100 if _use_gpu4segger() else 500),
+            ) * 10**-6 * attempt * (100 if _use_gpu() else 500),
             1024000
         ),
         slurm_extra=get_slurm_extra

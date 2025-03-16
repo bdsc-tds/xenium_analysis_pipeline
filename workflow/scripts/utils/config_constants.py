@@ -32,6 +32,8 @@ EXPERIMENTS_CONFIG_PATH_NAME: str = "_config_path"
 EXPERIMENTS_BASE_PATH_NAME: str = "_base_path"
 # Child of `experiments` (second level); for the name of or path to the gene panel files.
 EXPERIMENTS_GENE_PANEL_FILES_NAME: str = "_gene_panel_file"
+# Child of `experiments` (second level); for the availability of extra stainings.
+EXPERIMENTS_GENE_PANEL_EXTRA_STAIN_NAME: str = "_extra_stain"
 # Child of `experiments` (second level); for QC thresholds on gene panel level.
 EXPERIMENTS_GENE_PANEL_QC_NAME: str = "_qc"
 # Child of `experiments` (second level); for target counts for coexpression on gene panel level.
