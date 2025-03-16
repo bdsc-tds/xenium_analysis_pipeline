@@ -16,9 +16,9 @@ rule runSplitFull:
     container:
         config["containers"]["r"]
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(
-            input.size_mb * attempt * 50,
-            20480,
+        mem_mb=lambda wildcards, input, attempt: min(
+            input.size_mb * attempt**2 * 100, #70
+            1024000,
         )
     script:
         "../../../scripts/_count_correction/split_full.R"
