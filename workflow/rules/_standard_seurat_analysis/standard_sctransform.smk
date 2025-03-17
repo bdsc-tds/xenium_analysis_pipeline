@@ -31,3 +31,14 @@ rule runStandardScTransform:
         config["containers"]["r"]
     script:
         "../../scripts/_standard_seurat_analysis/standard_sctransform.R"
+
+use rule runStandardScTransform as runPostCountCorrectionStandardScTransform with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/normalised_seurat.rds',
+        cells=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/cells.parquet'),
+        data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/data.parquet'),
+        scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/scale_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/logs/runPostCountCorrectionStandardScTransform.log'

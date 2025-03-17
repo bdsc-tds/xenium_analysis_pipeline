@@ -55,3 +55,17 @@ rule runReferenceBasedXGBoost:
         config["containers"]["r"]
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/xgboost.R"
+
+use rule runReferenceBasedXGBoost as runPostCountCorrectionReferenceBasedXGBoost with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(
+            wildcards,
+            is_post_correction=True,
+        ),
+        reference=get_path2reference4reference_based_annotation
+    output:
+        protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedXGBoost.log'

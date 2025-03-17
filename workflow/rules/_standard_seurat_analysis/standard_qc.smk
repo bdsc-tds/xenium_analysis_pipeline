@@ -94,3 +94,12 @@ rule runStandardQC:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     script:
         "../../scripts/_standard_seurat_analysis/standard_qc.R"
+
+use rule runStandardQC as runPostCountCorrectionStandardQC with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds',
+        meta_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/standard_qc/meta_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runPostCountCorrectionStandardQC.log'

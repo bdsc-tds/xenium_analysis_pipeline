@@ -5,14 +5,17 @@ import scripts._cell_type_annotation.cell_type_annotation_constants as cac
 #              Functions              #
 #######################################
 
-def get_path2query4annotation(wildcards) -> str:
+def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> str:
     """
     Get the default or specific path to the query used in annotation.
     """
     annotation_mode = extract_layers_from_experiments(wildcards.annotation_id, [4])[0]
 
     if annotation_mode == "single_cell":
-        return f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/preprocessed/preprocessed_seurat.rds'
+        if is_post_correction:
+            return f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/{wildcards.annotation_id}/{wildcards.count_correction_id}/{wildcards.normalisation_id}/preprocessed/preprocessed_seurat.rds'
+        else:
+            return f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/preprocessed/preprocessed_seurat.rds'
     else:
         raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell'.")
 
