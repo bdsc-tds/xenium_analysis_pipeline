@@ -68,7 +68,7 @@ generate_reference_obj <- function(
     chrom,
     query_features,
     donor_id,
-    reference_type = "matched_reference", # deprecated 
+    # reference_type = "matched_reference", # deprecated 
     annotation_level = "Level3",
     ref_assay = "RNA",
     MIN_UMI_ref = 10,
