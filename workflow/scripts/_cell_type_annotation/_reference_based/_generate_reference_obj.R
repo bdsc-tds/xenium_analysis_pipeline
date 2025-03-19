@@ -9,7 +9,7 @@ chrom <- generate_reference_obj(
   chrom = chrom,
   query_features = rownames(xe),
   donor_id = xe@misc$sample_metadata[["donor"]],
-  reference_type = reference_type,
+  # reference_type = reference_type,
   annotation_level = annotation_level,
   ref_assay = ref_assay,
   MIN_UMI_ref = REF_MIN_UMI,
