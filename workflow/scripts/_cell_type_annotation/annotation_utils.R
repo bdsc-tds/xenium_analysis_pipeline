@@ -68,7 +68,7 @@ generate_reference_obj <- function(
     chrom,
     query_features,
     donor_id,
-    reference_type = "matched_reference",
+    reference_type = "matched_reference", # deprecated 
     annotation_level = "Level3",
     ref_assay = "RNA",
     MIN_UMI_ref = 10,
@@ -76,9 +76,9 @@ generate_reference_obj <- function(
     CELL_MIN_INSTANCE = 25
 ) {
   
-  # Check if reference is matched or external
-  if (reference_type == "matched_reference") {
-    ref_donors <- unique(chrom$donor)
+  # Check if donor is in the reference 
+  if ("donor" %in% colnames(chrom@meta.data)) {
+    ref_donors <- unique(chrom@meta.data$donor)
     DONOR_IN_REF <- donor_id %in% ref_donors
   } else {
     DONOR_IN_REF <- FALSE
