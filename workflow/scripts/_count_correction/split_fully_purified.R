@@ -15,17 +15,17 @@ xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])
 
 ################################## PURIFICATION ############################################
-message("Runing SPLIT::split...\n")
+message("Runing SPLIT::purify... \n")
 ### Run full purification (ie., purify all cells except for highly confident singlets (ie., those that do not have the second cell type)
-res_split <- SPLIT::split(
+res_split <- SPLIT::purify(
   counts = GetAssayData(xe, assay = 'Xenium', layer = 'counts'),
   rctd = rctd,
   DO_purify_singlets = TRUE
 )
-message("Done SPLIT::split...\n")
+message("Done SPLIT::purify\n")
 
-message("Saving SPLIT::split output ...\n")
+message("Saving SPLIT::purify output ...\n")
 # Output purified counts
 write10xCounts(path = snakemake@output[["corrected_counts"]], x = res_split$purified_counts)
 write_parquet(as.data.frame(res_split$cell_meta), snakemake@output[["corrected_counts_metadata"]])
-message("Done saving SPLIT::split output ...\n")
+message("Done saving SPLIT::purify output \n")
