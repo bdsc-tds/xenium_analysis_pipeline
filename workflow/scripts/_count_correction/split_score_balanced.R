@@ -6,7 +6,7 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
-library(puRCTD)
+library(SPLIT)
 
 snakemake@source("../../scripts/utils/readwrite.R")
 
