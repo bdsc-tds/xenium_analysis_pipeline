@@ -10,7 +10,7 @@ rule runSplitFullyPurified:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_fully_purified/corrected_counts.h5'),
         corrected_counts_metadata=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_fully_purified/corrected_counts_metadata.parquet')
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_fully_purified/logs/runSplitFull.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_fully_purified/logs/runSplitFullyPurified.log'
     wildcard_constraints:
         annotation_id=r".+/rctd_.+"
     container:
