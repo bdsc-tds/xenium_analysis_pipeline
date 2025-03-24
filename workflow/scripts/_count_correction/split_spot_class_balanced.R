@@ -28,8 +28,9 @@ xe <- AddMetaData(xe, rctd@results$results_df)
 xe_balanced_spot_class <- balance_raw_and_purified_data_by_spot_class(
   xe_raw = xe,
   xe_purified = xe_purified,
+  assay = "Xenium", # should be param, but can wait 
   spot_class_key = "spot_class",
-  DO_swap_lables = TRUE
+  DO_swap_lables = TRUE  # should be param, but can wait 
 )
 
 # Output spot-class-based purified counts
