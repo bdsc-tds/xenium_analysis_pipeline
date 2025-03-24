@@ -189,7 +189,7 @@ cell_type_annotation:
 
 count_correction:
   methods:
-    - split_full
+    - split_fully_purified
     # - purctd_spot_class_balanced
     # - purctd_score_balanced
     - ovrlpy

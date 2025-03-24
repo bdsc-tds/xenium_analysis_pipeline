@@ -520,8 +520,8 @@ def get_output4count_correction(
         ) is not None
     ]
 
-    if "split_full" not in split_methods and len(split_methods) > 0:
-        raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_full' must be specified as well.")
+    if "split_fully_purified" not in split_methods and len(split_methods) > 0:
+        raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
 
     if run_cell_type_annotation and any(
         False if re.match(
