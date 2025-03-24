@@ -16,7 +16,7 @@ rule runSplitFullyPurified:
     container:
         config["containers"]["r"]
     resources:
-        mem_mb=min(
+        mem_mb=lambda wildcards, input, attempt: min(
             input.size_mb * attempt**2 * 100, #70
             1024000,
         )
