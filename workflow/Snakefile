@@ -362,6 +362,49 @@ def get_output4joint_analysis() -> list[str] | None:
     ]
 
 
+def get_output4neighbirhood_analysis(
+    run_cell_type_annotation: bool,
+) -> list[str]:
+    prefix: str = f'{config["output_path"]}/neighborhood_analysis'
+    suffix: list[str] = [
+        "spatial_neighborhood_scores.parquet",
+        "transcriptomic_neighborhood_scores.parquet",
+    ]
+
+    samples_by_conditions: dict[str, list[str]] = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_COLLECTIONS_NAME,
+        cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
+    )
+
+    annotations_by_conditions: dict[str, list[str]] = get_dict_value(
+        config,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+    )
+
+    samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+        samples_by_conditions,
+        annotations_by_conditions,
+    )
+
+    return [
+        os.path.join(
+            prefix,
+            i,
+            j[0],
+            k,
+            j[1],
+            l,
+        )
+        for i in SEGMENTATION_ID
+        for j in samples_annotations
+        for k in NORMALISATION_ID
+        for l in suffix
+    ]
+
+
 def get_output4count_correction(
     run_cell_type_annotation: bool,
 ) -> list[str]:
@@ -466,19 +509,19 @@ def get_output4count_correction(
                 'No results from count correction method "resolvi_supervised" will be generated even though it is configured to run, as annotation isn\'t.',
             )
     
-    # Results from `purctd_*`, if they are specified.
-    purctd_methods: list[str] = [
+    # Results from `split_*`, if they are specified.
+    split_methods: list[str] = [
         i
         for i in COUNT_CORRECTION_ID
         if re.match(
-            r"^purctd_.+$",
+            r"^split_.+$",
             i,
             flags=re.IGNORECASE,
         ) is not None
     ]
 
-    if "purctd_full" not in purctd_methods and len(purctd_methods) > 0:
-        raise RuntimeError("Error! If any method from 'purctd_*' is specified, then 'purctd_full' must be specified as well.")
+    if "split_fully_purified" not in split_methods and len(split_methods) > 0:
+        raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
 
     if run_cell_type_annotation and any(
         False if re.match(
@@ -531,13 +574,13 @@ def get_output4count_correction(
                 for i in SEGMENTATION_ID
                 for j in samples_annotations
                 for k in NORMALISATION_ID
-                for l in purctd_methods
+                for l in split_methods
                 for m in ["corrected_counts.h5", "corrected_counts_metadata.parquet"]
             ]
         )
     else:
         print(
-                f'No results from count correction methods {",".join(purctd_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
+                f'No results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
             )
 
     return ret
@@ -550,6 +593,7 @@ def get_input2all(
     coexpression: bool = True,
     cell_type_annotation: bool = True,
     joint_analysis: bool = True,
+    neighbirhood_analysis: bool = True,
     count_correction: bool = True,
     cleanup: bool = False
 ) -> list[str]:
@@ -565,6 +609,11 @@ def get_input2all(
         res = get_output4joint_analysis()
         if res is not None and len(res) > 0:
             ret.extend(res)
+    
+    if neighbirhood_analysis:
+        ret.extend(get_output4neighbirhood_analysis(
+            cell_type_annotation,
+        ))
     
     if count_correction:
         ret.extend(get_output4count_correction(
@@ -594,6 +643,7 @@ rule all:
             coexpression=True,
             cell_type_annotation=True,
             joint_analysis=True,
+            neighbirhood_analysis=True,
             count_correction=True,
             cleanup=False,
         )

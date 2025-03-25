@@ -6,11 +6,9 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
+library(SPLIT)
 
-if (!requireNamespace("puRCTD", quietly = TRUE)){
-  remotes::install_git("git@github.com:bdsc-tds/puRCTD.git")
-}
-library(puRCTD)
+options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
 
 xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])

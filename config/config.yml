@@ -189,9 +189,9 @@ cell_type_annotation:
 
 count_correction:
   methods:
-    - purctd_full
-    - purctd_spot_class_balanced
-    - purctd_score_balanced
+    - split_fully_purified
+    # - split_spot_class_balanced
+    # - split_score_balanced
     - ovrlpy
     - resolvi_unsupervised
     - resolvi_supervised

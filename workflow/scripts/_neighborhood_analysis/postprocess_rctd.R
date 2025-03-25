@@ -5,12 +5,12 @@ sink(log, type = "message")
 library(spacexr)
 library(arrow)
 library(dplyr)
-library(puRCTD)
+library(SPLIT)
 
 rctd <- readRDS(snakemake@input[["rctd_result"]])
 
 ### Post RCTD -- correct rctd scores and compute additional
-rctd <- puRCTD::run_post_process_RCTD(rctd = rctd)
+rctd <- run_post_process_RCTD(rctd = rctd)
 
 ### Output post-processed RCTD
 results_df <- rctd@results$results_df

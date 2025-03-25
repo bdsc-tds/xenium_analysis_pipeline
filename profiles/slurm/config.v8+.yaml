@@ -15,3 +15,5 @@ set-resources:
     runtime: 4320
   runReferenceBasedRCTD:
     runtime: 4320
+  runSplitFull:
+    runtime: 4320

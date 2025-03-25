@@ -6,7 +6,9 @@ library(Seurat)
 library(spacexr)
 library(arrow)
 library(dplyr)
-library(puRCTD)
+library(SPLIT)
+
+options(future.globals.maxSize = snakemake@params[["future_globals_maxSize"]])
 
 xe <- readRDS(snakemake@input[["xe"]])
 rctd <- readRDS(snakemake@input[["post_processed_rctd"]])
