@@ -31,7 +31,7 @@ xe <- AddMetaData(xe, sp_neigh_df)
 xe_balanced_score <- balance_raw_and_purified_data_by_score(
   xe_raw = xe,
   xe_purified = xe_purified,
-  assay = "Xenium", # should be param, but can wait 
+  default_assay = "Xenium", # should be param, but can wait 
   threshold = snakemake@params[["score_threshold"]],
   score_name = snakemake@params[["score_name"]],
   DO_swap_lables = TRUE # should be param, but can wait 
