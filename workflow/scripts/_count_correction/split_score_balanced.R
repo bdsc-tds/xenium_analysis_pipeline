@@ -47,6 +47,6 @@ write10xCounts(
 )
 
 write_parquet(
-  xe_balanced_score@meta.data %>% select(all_of(colnames(purified_counts_metadata))), 
+  xe_balanced_score@meta.data %>% select(all_of(c(colnames(purified_counts_metadata), "swap"))), 
   snakemake@output[["corrected_counts_metadata"]]
 )
