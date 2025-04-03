@@ -25,7 +25,7 @@ rule runSplitScoreBalanced:
         config["containers"]["r"]
     resources:
         mem_mb=lambda wildcards, input, attempt: min(
-            input.size_mb * attempt**2 * 70,
+            input.size_mb * attempt * 70,
             1024000,
         )
     script:
