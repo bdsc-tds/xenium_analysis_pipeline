@@ -34,3 +34,31 @@ use runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
         scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/normalised_counts/scale_data.parquet')
     log:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/logs/runPostCountCorrectionStandardLogNorm.log'
+    wildcard_constraints:
+        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
+
+use runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/standard_qc/qced_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/lognorm/normalised_counts/normalised_seurat.rds',
+        cells=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/lognorm/normalised_counts/cells.parquet'),
+        data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/lognorm/normalised_counts/data.parquet'),
+        scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/lognorm/normalised_counts/scale_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/lognorm/logs/runPostCountCorrectionByOvrlpyStandardLogNorm.log'
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy"
+
+use runStandardLogNorm as runPostCountCorrectionByResolviUnsupervisedStandardLogNorm with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/lognorm/normalised_counts/normalised_seurat.rds',
+        cells=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/lognorm/normalised_counts/cells.parquet'),
+        data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/lognorm/normalised_counts/data.parquet'),
+        scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/lognorm/normalised_counts/scale_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/lognorm/logs/runPostCountCorrectionByResolviUnsupervisedStandardLogNorm.log'
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised"
