@@ -17,6 +17,8 @@ rule runSpatialNeighborhoodAnalysis:
         f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runSpatialNeighborhoodAnalysis.log'
     container:
         config["containers"]["r"]
+    wildcard_constraints:
+        annotation_id=r".+/rctd_.+"
     resources:
         mem_mb=lambda wildcards, input, attempt: min(
             input.size_mb * attempt * 50,

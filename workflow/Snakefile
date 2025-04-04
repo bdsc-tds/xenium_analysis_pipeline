@@ -378,11 +378,22 @@ def get_output4neighbirhood_analysis(
         cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
     )
 
-    annotations_by_conditions: dict[str, list[str]] = get_dict_value(
-        config,
-        cc.WILDCARDS_NAME,
-        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-    )
+    annotations_by_conditions: dict[str, list[str]] = {
+        cond: [
+            i
+            for i in anno
+            if re.match(
+                r".+/rctd_.+",
+                i,
+                flags=re.IGNORECASE,
+            ) is not None
+        ]
+        for cond, anno in get_dict_value(
+            config,
+            cc.WILDCARDS_NAME,
+            cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+        ).items()
+    }
 
     samples_annotations: list[tuple[str, str]] = cross_values_by_key(
         samples_by_conditions,
