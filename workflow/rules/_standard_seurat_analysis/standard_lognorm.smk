@@ -24,7 +24,7 @@ rule runStandardLogNorm:
     script:
         "../../scripts/_standard_seurat_analysis/standard_lognorm.R"
 
-use runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
+use rule runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
     output:
@@ -37,7 +37,7 @@ use runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
     wildcard_constraints:
         count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
 
-use runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
+use rule runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/standard_qc/qced_seurat.rds'
     output:
@@ -50,7 +50,7 @@ use runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
     wildcard_constraints:
         count_correction_id=r"ovrlpy"
 
-use runStandardLogNorm as runPostCountCorrectionByResolviUnsupervisedStandardLogNorm with:
+use rule runStandardLogNorm as runPostCountCorrectionByResolviUnsupervisedStandardLogNorm with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
     output:

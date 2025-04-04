@@ -140,7 +140,7 @@ include: 'rules/segmentation_qc.smk'
 #######################################
 
 def get_output4reports(
-    run_cell_type_annotation: bool
+    run_cell_type_annotation: bool,
     run_count_correction: bool,
 ) -> list[str]:
     prefix: str = f'{config["output_path"]}/reports'
