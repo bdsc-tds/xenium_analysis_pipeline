@@ -772,6 +772,8 @@ def get_output4post_count_correction_cell_type_annotation(
     prefix: str = f'{config["output_path"]}/post_count_correction_cell_type_annotation'
     filenames: list[str] = ["output.rds", "labels.parquet", "scores.parquet"]
 
+    ret: list[str] = []
+
     samples_by_conditions: dict[str, list[str]] = get_dict_value(
         config,
         "experiments",

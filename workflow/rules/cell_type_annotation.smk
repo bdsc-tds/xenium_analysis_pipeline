@@ -25,7 +25,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
         if re.match(
             r"^ovrlpy$",
             wildcards.count_correction_id,
-            flags=re.IGNOREXASE,
+            flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
                 prefix,
@@ -37,7 +37,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
         elif re.match(
             r"^resolvi_unsupervised$",
             wildcards.count_correction_id,
-            flags=re.IGNOREXASE,
+            flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
                 prefix,
