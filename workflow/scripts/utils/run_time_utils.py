@@ -3,7 +3,10 @@ Utility functions during run time.
 """
 
 import os
+import re
 from typing import Any
+
+COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT = r"(?!(ovrlpy|resolvi_unsupervised)).*"
 
 
 def uniquify_elements_in_list(
@@ -54,6 +57,29 @@ def cross_values_by_key(
         )
 
     return ret
+
+
+def get_valid_segmentation_methods_per_count_correction_method(
+    candidate_segmentation_methods: list[str],
+    count_correction_method: str,
+) -> list[str]:
+    if re.match(
+        r"^ovrlpy$",
+        count_correction_method,
+        flags=re.IGNORECASE,
+    ):
+        return [
+            i
+            for i in candidate_segmentation_methods
+            if re.match(
+                r"(^10x_\w*?_?0um$)|(^proseg_expected$)",
+                i,
+                flags=re.IGNORECASE,
+            )
+            is not None
+        ]
+
+    return candidate_segmentation_methods
 
 
 def get_size(

@@ -94,3 +94,36 @@ rule runStandardQC:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480)
     script:
         "../../scripts/_standard_seurat_analysis/standard_qc.R"
+
+use rule runStandardQC as runPostCountCorrectionStandardQC with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds',
+        meta_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/standard_qc/meta_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runPostCountCorrectionStandardQC.log'
+    wildcard_constraints:
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+
+use rule runStandardQC as runPostCountCorrectionByOvrlpyStandardQC with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/standard_qc/qced_seurat.rds',
+        meta_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/standard_qc/meta_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/runPostCountCorrectionByOvrlpyStandardQC.log'
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy"
+
+use rule runStandardQC as runPostCountCorrectionByResolviUnsupervisedStandardQC with:
+    input:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/raw_seurat.rds'
+    output:
+        obj=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds',
+        meta_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/standard_qc/meta_data.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/logs/runPostCountCorrectionByResolviUnsupervisedStandardQC.log'
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised"

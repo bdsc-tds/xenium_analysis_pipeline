@@ -5,14 +5,55 @@ import scripts._cell_type_annotation.cell_type_annotation_constants as cac
 #              Functions              #
 #######################################
 
-def get_path2query4annotation(wildcards) -> str:
+def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> str:
     """
     Get the default or specific path to the query used in annotation.
     """
+    suffix: str = "preprocessed/preprocessed_seurat.rds"
+
     annotation_mode = extract_layers_from_experiments(wildcards.annotation_id, [4])[0]
 
     if annotation_mode == "single_cell":
-        return f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}/preprocessed/preprocessed_seurat.rds'
+        if not is_post_correction:
+            return os.path.join(
+                f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}',
+                suffix,
+            )
+
+        prefix: str = f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}'
+
+        if re.match(
+            r"^ovrlpy$",
+            wildcards.count_correction_id,
+            flags=re.IGNORECASE,
+        ) is not None:
+            return os.path.join(
+                prefix,
+                "ovrlpy",
+                f'signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}',
+                wildcards.normalisation_id,
+                suffix,
+            )
+        elif re.match(
+            r"^resolvi_unsupervised$",
+            wildcards.count_correction_id,
+            flags=re.IGNORECASE,
+        ) is not None:
+            return os.path.join(
+                prefix,
+                "resolvi_unsupervised",
+                wildcards.normalisation_id,
+                suffix,
+            )
+        else:
+            return os.path.join(
+                prefix,
+                wildcards.normalisation_id,
+                wildcards.annotation_id,
+                wildcards.count_correction_id,
+                wildcards.normalisation_id,
+                suffix,
+            )
     else:
         raise RuntimeError(f"Error! Unknown mode for annotation: {annotation_mode}. Valid modes include 'single_cell'.")
 
