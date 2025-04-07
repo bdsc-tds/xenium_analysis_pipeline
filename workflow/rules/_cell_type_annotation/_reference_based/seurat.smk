@@ -72,7 +72,7 @@ use rule runReferenceBasedSeurat as runPostCountCorrectionReferenceBasedSeurat w
     log:
         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedRCTD.log'
     wildcard_constraints:
-        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)",
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT,
         annotation_id=r"reference_based/.+/seurat/.+"
 
 use rule runReferenceBasedSeurat as runPostCountCorrectionByOvrlpyReferenceBasedSeurat with:

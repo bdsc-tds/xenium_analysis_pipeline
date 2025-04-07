@@ -43,7 +43,7 @@ use rule runStandardScTransform as runPostCountCorrectionStandardScTransform wit
     log:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/logs/runPostCountCorrectionStandardScTransform.log'
     wildcard_constraints:
-        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
 
 use rule runStandardScTransform as runPostCountCorrectionByOvrlpyStandardScTransform with:
     input:

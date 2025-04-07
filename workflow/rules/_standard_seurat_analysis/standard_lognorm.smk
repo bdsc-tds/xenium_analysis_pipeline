@@ -35,7 +35,7 @@ use rule runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
     log:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/logs/runPostCountCorrectionStandardLogNorm.log'
     wildcard_constraints:
-        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
 
 use rule runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
     input:

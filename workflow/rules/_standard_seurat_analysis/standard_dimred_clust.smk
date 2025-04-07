@@ -48,7 +48,7 @@ use rule runStandardDimRedClust as runPostCountCorrectionStandardDimRedClust wit
     log:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/logs/runPostCountCorrectionStandardDimRedClust.log'
     wildcard_constraints:
-        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
 
 use rule runStandardDimRedClust as runPostCountCorrectionByOvrlpyStandardDimRedClust with:
     input:

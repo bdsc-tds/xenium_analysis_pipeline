@@ -11,7 +11,7 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
     if re.match(
         r"^ovrlpy$",
         wildcards.count_correction_id,
-        flags=re.IGNOREXASE,
+        flags=re.IGNORECASE,
     ) is not None:
         ret = os.path.join(
             prefix,
@@ -22,7 +22,7 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
     elif re.match(
         r"^resolvi_unsupervised$",
         wildcards.count_correction_id,
-        flags=re.IGNOREXASE,
+        flags=re.IGNORECASE,
     ) is not None:
         ret = os.path.join(
             prefix,
@@ -56,7 +56,7 @@ rule adaptCorrectedCounts2Seurat:
     container:
         config["containers"]["r"]
     wildcard_constraints:
-        count_correction_id=r"(?!ovrlpy)(?!resolvi_unsupervised)"
+        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
     resources:
         mem_mb=lambda wildcards, attempt: min(attempt**2 * 2048, 512000)
     script:
