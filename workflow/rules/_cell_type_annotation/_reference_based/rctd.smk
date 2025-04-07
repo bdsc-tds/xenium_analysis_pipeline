@@ -28,7 +28,14 @@ def get_class_level4runReferenceBasedRCTD(wildcards) -> str | None:
         raise RuntimeError(f"Error! Unknown method name: {method_name}.")
 
 
-def is_int_counts4runReferenceBasedRCTD(wildcards) -> bool:
+def is_int_counts4runReferenceBasedRCTD(wildcards, input) -> bool:
+    if re.search(
+        r"post_count_correction",
+        input.query,
+        flags=re.IGNORECASE,
+    ) is not None:
+        return False
+
     return False if re.match(
         "proseg_expected",
         wildcards.segmentation_id,
@@ -79,7 +86,10 @@ rule runReferenceBasedRCTD:
             extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
             "UMI_min_sigma",
         ),
-        is_int_counts=is_int_counts4runReferenceBasedRCTD,
+        is_int_counts=lambda wildcards, input: is_int_counts4runReferenceBasedRCTD(
+            wildcards,
+            input,
+        ),
         cores=lambda wildcards: get_dict_value(
             config,
             "cell_type_annotation",
