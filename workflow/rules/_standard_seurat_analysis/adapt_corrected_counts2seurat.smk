@@ -62,7 +62,7 @@ rule adaptCorrectedCounts2Seurat:
     script:
         "../../scripts/_standard_seurat_analysis/adapt_corrected_counts2seurat.R"
 
-use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByOvrlpy2Seurat:
+use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with:
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds')
     log:
@@ -70,7 +70,7 @@ use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByOvrlpy2Seurat:
     wildcard_constraints:
         count_correction_id=r"ovrlpy"
 
-use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByResolviUnsupervised2Seurat:
+use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByResolviUnsupervised2Seurat with:
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/raw_seurat.rds')
     log:
