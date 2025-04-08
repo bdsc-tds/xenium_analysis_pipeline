@@ -966,6 +966,16 @@ def process_config(
 
     set_dict_value(
         data,
+        cc.WILDCARDS_WRAP_SAMPLES_NAME,
+        value=extract_layers_from_experiments(
+            _experiments[0],
+            [0, 1, 2, 3],
+            sep_out="+",
+        ),
+    )
+
+    set_dict_value(
+        data,
         "experiments",
         value={
             cc.EXPERIMENTS_CONFIG_PATH_NAME: get_dict_value(data, "experiments"),
