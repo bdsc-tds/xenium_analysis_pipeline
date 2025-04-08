@@ -1066,6 +1066,13 @@ def get_output4post_count_correction_cell_type_annotation(
     return ret
 
 
+def get_output4wrap() -> list[str]:
+    return [
+        f'{config["output_path"]}/wraps/raw_data/{i}.tgz'
+        for i in WRAP_SAMPLE_ID
+    ]
+
+
 def get_output4post_count_correction_neighbirhood_analysis() -> list[str]:
     prefix: str = f'{config["output_path"]}/post_count_correction_neighborhood_analysis'
     filenames: list[str] = [
@@ -1273,7 +1280,8 @@ def get_input2all(
     count_correction: bool = True,
     post_count_correction_cell_type_annotation: bool = True,
     post_count_correction_neighbirhood_analysis: bool = False,
-    cleanup: bool = False
+    cleanup: bool = False,
+    wrap: bool = False,
 ) -> list[str]:
     ret: list[str] = []
 
@@ -1316,6 +1324,9 @@ def get_input2all(
     if cleanup:
         ret.extend(get_output4cleanup())
 
+    if wrap:
+        ret.extend(get_output4wrap())
+
     return ret
 
 
@@ -1337,4 +1348,5 @@ rule all:
             post_count_correction_cell_type_annotation=True,
             post_count_correction_neighbirhood_analysis=False,
             cleanup=False,
+            wrap=False,
         )
