@@ -28,6 +28,6 @@ rule wrapRawData:
     log:
         f'{config["output_path"]}/wraps/raw_data/logs/{{wrap_sample_id}}.log'
     resources:
-        runtime=30
+        runtime=300
     shell:
         "tar -czf {output} -C {input} . &> {log}"
