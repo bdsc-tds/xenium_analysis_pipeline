@@ -4,15 +4,15 @@
 
 def get_input2wrapRawData(wildcards) -> str:
     sample_id: str = extract_layers_from_experiments(
-        wildcards.warp_sample_id,
+        wildcards.wrap_sample_id,
         [0, 1, 2, 3],
         "+"
-    )
+    )[0]
 
     return normalise_path(
         f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{sample_id}',
         pat_flags=re.IGNORECASE,
-        return_dir=True
+        return_dir=True,
     )
 
 
@@ -24,6 +24,10 @@ rule wrapRawData:
     input:
         get_input2wrapRawData
     output:
-        f'{config["output_path"]}/wraps/raw_data/{{warp_sample_id}}.tgz'
+        f'{config["output_path"]}/wraps/raw_data/{{wrap_sample_id}}.tgz'
+    log:
+        f'{config["output_path"]}/wraps/raw_data/logs/{{wrap_sample_id}}.log'
+    resources:
+        runtime=30
     shell:
-        "tar -czf {output} {input}"
+        "tar -czf {output} -C {input} . &> {log}"
