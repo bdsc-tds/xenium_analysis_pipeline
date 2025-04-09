@@ -210,33 +210,27 @@ def get_output4reports(
 
         # Results from Ovrlpy, if it is specified.
         if "ovrlpy" in COUNT_CORRECTION_ID:
-            valid_seg_methods: list[str] = get_valid_segmentation_methods_per_count_correction_method(
-                SEGMENTATION_ID,
-                "ovrlpy",
-            )
-
-            if len(valid_seg_methods) > 0:
-                ret.extend(
-                    [
-                        os.path.join(
-                            prefix,
-                            i,
-                            j,
+            ret.extend(
+                [
+                    os.path.join(
+                        prefix,
+                        i,
+                        j,
+                        "ovrlpy",
+                        f'signal_integrity_threshold={get_dict_value(
+                            config,
+                            "count_correction",
                             "ovrlpy",
-                            f'signal_integrity_threshold={get_dict_value(
-                                config,
-                                "count_correction",
-                                "ovrlpy",
-                                "signal_integrity_threshold",
-                            )}',
-                            k,
-                            "standard_seurat_analysis.html",
-                        )
-                        for i in valid_seg_methods
-                        for j in SAMPLE_ID
-                        for k in NORMALISATION_ID
-                    ]
-                )
+                            "signal_integrity_threshold",
+                        )}',
+                        k,
+                        "standard_seurat_analysis.html",
+                    )
+                    for i in SEGMENTATION_ID
+                    for j in SAMPLE_ID
+                    for k in NORMALISATION_ID
+                ]
+            )
 
         # Results from `resolvi_unsupervised`, if it is specified.
         if "resolvi_unsupervised" in COUNT_CORRECTION_ID:
@@ -250,10 +244,7 @@ def get_output4reports(
                         k,
                         "standard_seurat_analysis.html",
                     )
-                    for i in get_valid_segmentation_methods_per_count_correction_method(
-                        SEGMENTATION_ID,
-                        "resolvi_unsupervised",
-                    )
+                    for i in SEGMENTATION_ID
                     for j in SAMPLE_ID
                     for k in NORMALISATION_ID
                 ]
@@ -294,10 +285,7 @@ def get_output4reports(
                                 k,
                                 "standard_seurat_analysis.html",
                             )
-                            for i in get_valid_segmentation_methods_per_count_correction_method(
-                                SEGMENTATION_ID,
-                                "resolvi_supervised",
-                            )
+                            for i in SEGMENTATION_ID
                             for j in samples_annotations
                             for k in NORMALISATION_ID
                         ]
@@ -318,64 +306,62 @@ def get_output4reports(
                 ) is not None
             ]
 
-            if "split_fully_purified" not in split_methods and len(split_methods) > 0:
-                raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
+            if len(split_methods) > 0:
+                if "split_fully_purified" not in split_methods:
+                    raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
 
-            if run_cell_type_annotation and any(
-                False if re.match(
-                    r".+/rctd_.+",
-                    i,
-                    flags=re.IGNORECASE,
-                ) is None else True
-                for i in ANNOTATION_ID
-            ):
-                annotations_by_conditions: dict[str, list[str]] = {
-                    cond: [
-                        i
-                        for i in anno
-                        if re.match(
-                            r".+/rctd_.+",
-                            i,
-                            flags=re.IGNORECASE,
-                        ) is not None
-                    ]
-                    for cond, anno in get_dict_value(
-                        config,
-                        cc.WILDCARDS_NAME,
-                        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-                    ).items()
-                }
+                if run_cell_type_annotation and any(
+                    False if re.match(
+                        r".+/rctd_.+",
+                        i,
+                        flags=re.IGNORECASE,
+                    ) is None else True
+                    for i in ANNOTATION_ID
+                ):
+                    annotations_by_conditions: dict[str, list[str]] = {
+                        cond: [
+                            i
+                            for i in anno
+                            if re.match(
+                                r".+/rctd_.+",
+                                i,
+                                flags=re.IGNORECASE,
+                            ) is not None
+                        ]
+                        for cond, anno in get_dict_value(
+                            config,
+                            cc.WILDCARDS_NAME,
+                            cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+                        ).items()
+                    }
 
-                samples_annotations: list[tuple[str, str]] = cross_values_by_key(
-                    samples_by_conditions,
-                    annotations_by_conditions,
-                )
+                    samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+                        samples_by_conditions,
+                        annotations_by_conditions,
+                    )
 
-                ret.extend(
-                    [
-                        os.path.join(
-                            prefix,
-                            i,
-                            j[0],
-                            k,
-                            j[1],
-                            l,
-                            k,
-                            "standard_seurat_analysis.html",
-                        )
-                        for i in get_valid_segmentation_methods_per_count_correction_method(
-                            SEGMENTATION_ID,
-                            "split_fully_purified",
-                        )
-                        for j in samples_annotations
-                        for k in NORMALISATION_ID
-                        for l in split_methods
-                    ]
-                )
-            else:
-                print(
-                    f'No results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
-                )
+                    ret.extend(
+                        [
+                            os.path.join(
+                                prefix,
+                                i,
+                                j[0],
+                                k,
+                                j[1],
+                                l,
+                                k,
+                                "standard_seurat_analysis.html",
+                            )
+                            for i in SEGMENTATION_ID
+                            for j in samples_annotations
+                            for k in NORMALISATION_ID
+                            for l in split_methods
+                        ]
+                    )
+                else:
+                    print(
+                        f'No results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
+                    )
 
     return ret
 
@@ -599,32 +585,25 @@ def get_output4count_correction(
 
     # Results from Ovrlpy, if it is specified.
     if "ovrlpy" in COUNT_CORRECTION_ID:
-        valid_seg_methods: list[str] = get_valid_segmentation_methods_per_count_correction_method(
-            SEGMENTATION_ID,
-            "ovrlpy",
-        )
-
-        if len(valid_seg_methods) > 0:
-            ret.extend(
-                [
-                    os.path.join(
-                        prefix,
-                        i,
-                        j,
+        ret.extend(
+            [
+                os.path.join(
+                    prefix,
+                    i,
+                    j,
+                    "ovrlpy",
+                    f'signal_integrity_threshold={get_dict_value(
+                        config,
+                        "count_correction",
                         "ovrlpy",
-                        f'signal_integrity_threshold={get_dict_value(
-                            config,
-                            "count_correction",
-                            "ovrlpy",
-                            "signal_integrity_threshold",
-                        )}',
-                        k,
-                    )
-                    for i in valid_seg_methods
-                    for j in SAMPLE_ID
-                    for k in ["corrected_counts.h5", "cells_mean_integrity_filtered.parquet"]
-                ]
-            )
+                        "signal_integrity_threshold",
+                    )}',
+                    "corrected_counts.h5",
+                )
+                for i in SEGMENTATION_ID
+                for j in SAMPLE_ID
+            ]
+        )
 
     # Results from `resolvi_unsupervised`, if it is specified.
     if "resolvi_unsupervised" in COUNT_CORRECTION_ID:
@@ -637,10 +616,7 @@ def get_output4count_correction(
                     "resolvi_unsupervised",
                     k,
                 )
-                for i in get_valid_segmentation_methods_per_count_correction_method(
-                    SEGMENTATION_ID,
-                    "resolvi_unsupervised",
-                )
+                for i in SEGMENTATION_ID
                 for j in SAMPLE_ID
                 for k in ["corrected_counts.h5", "proportions.parquet"]
             ]
@@ -679,10 +655,7 @@ def get_output4count_correction(
                         "resolvi_supervised",
                         l,
                     )
-                    for i in get_valid_segmentation_methods_per_count_correction_method(
-                        SEGMENTATION_ID,
-                        "resolvi_supervised",
-                    )
+                    for i in SEGMENTATION_ID
                     for j in samples_annotations
                     for k in NORMALISATION_ID
                     for l in ["corrected_counts.h5", "proportions.parquet"]
@@ -704,64 +677,62 @@ def get_output4count_correction(
         ) is not None
     ]
 
-    if "split_fully_purified" not in split_methods and len(split_methods) > 0:
-        raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
+    if len(split_methods) > 0:
+        if "split_fully_purified" not in split_methods:
+            raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
 
-    if run_cell_type_annotation and any(
-        False if re.match(
-            r".+/rctd_.+",
-            i,
-            flags=re.IGNORECASE,
-        ) is None else True
-        for i in ANNOTATION_ID
-    ):
-        annotations_by_conditions: dict[str, list[str]] = {
-            cond: [
-                i
-                for i in anno
-                if re.match(
-                    r".+/rctd_.+",
-                    i,
-                    flags=re.IGNORECASE,
-                ) is not None
-            ]
-            for cond, anno in get_dict_value(
-                config,
-                cc.WILDCARDS_NAME,
-                cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-            ).items()
-        }
+        if run_cell_type_annotation and any(
+            False if re.match(
+                r".+/rctd_.+",
+                i,
+                flags=re.IGNORECASE,
+            ) is None else True
+            for i in ANNOTATION_ID
+        ):
+            annotations_by_conditions: dict[str, list[str]] = {
+                cond: [
+                    i
+                    for i in anno
+                    if re.match(
+                        r".+/rctd_.+",
+                        i,
+                        flags=re.IGNORECASE,
+                    ) is not None
+                ]
+                for cond, anno in get_dict_value(
+                    config,
+                    cc.WILDCARDS_NAME,
+                    cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+                ).items()
+            }
 
-        samples_annotations: list[tuple[str, str]] = cross_values_by_key(
-            samples_by_conditions,
-            annotations_by_conditions,
-        )
+            samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+                samples_by_conditions,
+                annotations_by_conditions,
+            )
 
-        ret.extend(
-            [
-                os.path.join(
-                    prefix,
-                    i,
-                    j[0],
-                    k,
-                    j[1],
-                    l,
-                    m,
-                )
-                for i in get_valid_segmentation_methods_per_count_correction_method(
-                    SEGMENTATION_ID,
-                    "split_fully_purified",
-                )
-                for j in samples_annotations
-                for k in NORMALISATION_ID
-                for l in split_methods
-                for m in ["corrected_counts.h5", "corrected_counts_metadata.parquet"]
-            ]
-        )
-    else:
-        print(
-            f'No results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
-        )
+            ret.extend(
+                [
+                    os.path.join(
+                        prefix,
+                        i,
+                        j[0],
+                        k,
+                        j[1],
+                        l,
+                        m,
+                    )
+                    for i in SEGMENTATION_ID
+                    for j in samples_annotations
+                    for k in NORMALISATION_ID
+                    for l in split_methods
+                    for m in ["corrected_counts.h5", "corrected_counts_metadata.parquet"]
+                ]
+            )
+        else:
+            print(
+                f'No results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
+            )
 
     return ret
 
@@ -794,35 +765,29 @@ def get_output4post_count_correction_cell_type_annotation(
 
     # Results from Ovrlpy, if it is specified.
     if "ovrlpy" in COUNT_CORRECTION_ID:
-        valid_seg_methods: list[str] = get_valid_segmentation_methods_per_count_correction_method(
-            SEGMENTATION_ID,
-            "ovrlpy",
-        )
-
-        if len(valid_seg_methods) > 0:
-            ret.extend(
-                [
-                    os.path.join(
-                        prefix,
-                        i,
-                        j[0],
+        ret.extend(
+            [
+                os.path.join(
+                    prefix,
+                    i,
+                    j[0],
+                    "ovrlpy",
+                    f'signal_integrity_threshold={get_dict_value(
+                        config,
+                        "count_correction",
                         "ovrlpy",
-                        f'signal_integrity_threshold={get_dict_value(
-                            config,
-                            "count_correction",
-                            "ovrlpy",
-                            "signal_integrity_threshold",
-                        )}',
-                        k,
-                        j[1],
-                        m,
-                    )
-                    for i in valid_seg_methods
-                    for j in samples_annotations
-                    for k in NORMALISATION_ID
-                    for m in filenames
-                ]
-            )
+                        "signal_integrity_threshold",
+                    )}',
+                    k,
+                    j[1],
+                    m,
+                )
+                for i in SEGMENTATION_ID
+                for j in samples_annotations
+                for k in NORMALISATION_ID
+                for m in filenames
+            ]
+        )
 
     # Results from `resolvi_unsupervised`, if it is specified.
     if "resolvi_unsupervised" in COUNT_CORRECTION_ID:
@@ -837,10 +802,7 @@ def get_output4post_count_correction_cell_type_annotation(
                     j[1],
                     m,
                 )
-                for i in get_valid_segmentation_methods_per_count_correction_method(
-                    SEGMENTATION_ID,
-                    "resolvi_unsupervised",
-                )
+                for i in SEGMENTATION_ID
                 for j in samples_annotations
                 for k in NORMALISATION_ID
                 for m in filenames
@@ -863,10 +825,7 @@ def get_output4post_count_correction_cell_type_annotation(
                         j[1],
                         l,
                     )
-                    for i in get_valid_segmentation_methods_per_count_correction_method(
-                        SEGMENTATION_ID,
-                        "resolvi_supervised",
-                    )
+                    for i in SEGMENTATION_ID
                     for j in samples_annotations
                     for k in NORMALISATION_ID
                     for l in filenames
@@ -888,66 +847,64 @@ def get_output4post_count_correction_cell_type_annotation(
         ) is not None
     ]
 
-    if "split_fully_purified" not in split_methods and len(split_methods) > 0:
-        raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
+    if len(split_methods) > 0:
+        if "split_fully_purified" not in split_methods:
+            raise RuntimeError("Error! If any method from 'split_*' is specified, then 'split_fully_purified' must be specified as well.")
 
-    if run_cell_type_annotation and any(
-        False if re.match(
-            r".+/rctd_.+",
-            i,
-            flags=re.IGNORECASE,
-        ) is None else True
-        for i in ANNOTATION_ID
-    ):
-        annotations_by_conditions_split: dict[str, list[str]] = {
-            cond: [
-                i
-                for i in anno
-                if re.match(
-                    r".+/rctd_.+",
-                    i,
-                    flags=re.IGNORECASE,
-                ) is not None
-            ]
-            for cond, anno in get_dict_value(
-                config,
-                cc.WILDCARDS_NAME,
-                cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
-            ).items()
-        }
+        if run_cell_type_annotation and any(
+            False if re.match(
+                r".+/rctd_.+",
+                i,
+                flags=re.IGNORECASE,
+            ) is None else True
+            for i in ANNOTATION_ID
+        ):
+            annotations_by_conditions_split: dict[str, list[str]] = {
+                cond: [
+                    i
+                    for i in anno
+                    if re.match(
+                        r".+/rctd_.+",
+                        i,
+                        flags=re.IGNORECASE,
+                    ) is not None
+                ]
+                for cond, anno in get_dict_value(
+                    config,
+                    cc.WILDCARDS_NAME,
+                    cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+                ).items()
+            }
 
-        samples_annotations_split: list[tuple[str, str]] = cross_values_by_key(
-            samples_by_conditions,
-            annotations_by_conditions_split,
-        )
+            samples_annotations_split: list[tuple[str, str]] = cross_values_by_key(
+                samples_by_conditions,
+                annotations_by_conditions_split,
+            )
 
-        ret.extend(
-            [
-                os.path.join(
-                    prefix,
-                    i,
-                    j[0],
-                    k,
-                    j[1],
-                    l,
-                    k,
-                    j[1],
-                    m,
-                )
-                for i in get_valid_segmentation_methods_per_count_correction_method(
-                    SEGMENTATION_ID,
-                    "split_fully_purified",
-                )
-                for j in samples_annotations_split
-                for k in NORMALISATION_ID
-                for l in split_methods
-                for m in filenames
-            ]
-        )
-    else:
-        print(
-            f'No cell type annotation results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
-        )
+            ret.extend(
+                [
+                    os.path.join(
+                        prefix,
+                        i,
+                        j[0],
+                        k,
+                        j[1],
+                        l,
+                        k,
+                        j[1],
+                        m,
+                    )
+                    for i in SEGMENTATION_ID
+                    for j in samples_annotations_split
+                    for k in NORMALISATION_ID
+                    for l in split_methods
+                    for m in filenames
+                ]
+            )
+        else:
+            print(
+                f'No cell type annotation results from count correction methods {",".join(split_methods)} will be generated even though they are configured to run, as annotation using RCTD isn\'t.',
+            )
 
     return ret
 

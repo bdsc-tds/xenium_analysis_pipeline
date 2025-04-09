@@ -7,7 +7,7 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
     ret: str = ""
 
     if re.match(
-        r"^10x_\w*?_?0um$",
+        r"^10x_0um$",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
@@ -40,6 +40,65 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
     return ret
 
 
+def get_input2_or_params4getCorrectedCountsFromOvrlpy(wildcards, for_input: bool = True) -> dict[str, str]:
+    prefix_seg: str = f'{config["output_path"]}/segmentation'
+    prefix_ovrlpy: str = f'{config["output_path"]}/count_correction'
+
+    ret: dict[str, str] = {}
+
+    segmentation_id: str = ""
+
+    if re.match(
+        r"^proseg_expected$",
+        wildcards.segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
+        ret["transcripts"] = os.path.join(
+            prefix_seg,
+            f'proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz',
+        )
+
+        segmentation_id = "proseg_expected"
+    else:
+        segmentation_id = "10x_0um"
+        _segmentation_id: str = wildcards.segmentation_id if re.match(
+            r"^proseg_mode$",
+            wildcards.segmentation_id,
+            flags=re.IGNORECASE,
+        ) is None else "proseg"
+
+        ret["transcripts"] = os.path.join(
+            prefix_seg,
+            f"{_segmentation_id}/{wildcards.sample_id}/normalised_results",
+        )
+
+        if not for_input:
+            ret["transcripts"] = normalise_path(
+                ret["transcripts"],
+                candidate_paths=("outs",),
+                pat_anchor_file=r"transcripts.parquet",
+                pat_flags=re.IGNORECASE,
+                return_dir=False,
+                check_exist=False,
+            )
+
+    ret["signal_integrity"] = os.path.join(
+        prefix_ovrlpy,
+        segmentation_id,
+        wildcards.sample_id,
+        "ovrlpy/signal_integrity.parquet",
+    )
+
+    ret["transcript_info"] = os.path.join(
+        prefix_ovrlpy,
+        segmentation_id,
+        wildcards.sample_id,
+        "ovrlpy/transcript_info.parquet",
+    )
+
+    return ret
+
+
 #######################################
 #                Rules                #
 #######################################
@@ -60,7 +119,7 @@ rule runOvrlpy:
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/runOvrlpy.log'
     wildcard_constraints:
-        segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
+        segmentation_id=r"(10x_0um)|(proseg_expected)"
     container:
         config["containers"]["python_cuda"]
     resources:
@@ -84,16 +143,17 @@ rule runOvrlpy:
 
 rule getCorrectedCountsFromOvrlpy:
     input:
-        transcripts=get_input2_or_params4runOvrlpy,
-        signal_integrity=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity.parquet',
-        transcript_info=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/transcript_info.parquet'
+        unpack(get_input2_or_params4getCorrectedCountsFromOvrlpy)
     output:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
         cells_mean_integrity_filtered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_filtered.parquet')
     params:
-        input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
-            wildcards,
-            for_input=False,
+        input_transcripts=lambda wildcards: get_dict_value(
+            get_input2_or_params4getCorrectedCountsFromOvrlpy(
+                wildcards,
+                for_input=False,
+            ),
+            "transcripts",
         ),
         signal_integrity_threshold=get_dict_value(
             config,
@@ -105,17 +165,18 @@ rule getCorrectedCountsFromOvrlpy:
         proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id == 'proseg_expected' else ''
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/getCorrectedCountsFromOvrlpy.log'
-    wildcard_constraints:
-        segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
     container:
         config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
-            get_size(
-                get_input2_or_params4runOvrlpy(
-                    wildcards,
-                    for_input=False,
-                )
+            sum(
+                [
+                    get_size(i)
+                    for i in get_input2_or_params4getCorrectedCountsFromOvrlpy(
+                        wildcards,
+                        for_input=False,
+                    ).values()
+                ]
             ) * 1e-6 * attempt,
             512000
         )
@@ -132,30 +193,32 @@ rule getCorrectedCountsFromOvrlpy:
 
 rule getUnfilteredCellMeanIntegrityFromOvrlpy:
     input:
-        transcripts=get_input2_or_params4runOvrlpy,
-        signal_integrity=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity.parquet',
-        transcript_info=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/transcript_info.parquet'
+        unpack(get_input2_or_params4getCorrectedCountsFromOvrlpy)
     output:
         protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/cells_mean_integrity_unfiltered.parquet')
     params:
-        input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
-            wildcards,
-            for_input=False,
+        input_transcripts=lambda wildcards: get_dict_value(
+            get_input2_or_params4getCorrectedCountsFromOvrlpy(
+                wildcards,
+                for_input=False,
+            ),
+            "transcripts",
         ),
         proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id == 'proseg' else ''
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/getCorrectedCountsFromOvrlpy.log'
-    wildcard_constraints:
-        segmentation_id=r"(10x_\w*?_?0um)|(proseg_expected)"
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/getUnfilteredCellMeanIntegrityFromOvrlpy.log'
     container:
         config["containers"]["python_cuda"]
     resources:
         mem_mb=lambda wildcards, attempt: min(
-            get_size(
-                get_input2_or_params4runOvrlpy(
-                    wildcards,
-                    for_input=False,
-                )
+            sum(
+                [
+                    get_size(i)
+                    for i in get_input2_or_params4getCorrectedCountsFromOvrlpy(
+                        wildcards,
+                        for_input=False,
+                    ).values()
+                ]
             ) * 1e-6 * attempt,
             512000
         )
