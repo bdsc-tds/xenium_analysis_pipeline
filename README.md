@@ -1,3 +1,5 @@
+[![Snakemake](https://img.shields.io/badge/snakemake-≥8.0.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+
 # xenium_analysis_pipeline
 
 ## Reproducibility
