@@ -166,8 +166,8 @@ if __name__ == "__main__":
     ]
 
     # compute mean cell integrity QC metric from unfiltered transcripts
-    cell_mean_integrity_filtered = (
-        coordinate_df_filtered.query("cell_id != 'UNASSIGNED'")
+    cell_mean_integrity = (
+        coordinate_df.query("cell_id != 'UNASSIGNED'")
         .groupby("cell_id")["signal_integrity"]
         .mean()
     )
@@ -181,7 +181,7 @@ if __name__ == "__main__":
     # store results
     adata_out = ad.AnnData(corrected_counts)
     readwrite.write_10X_h5(adata_out, args.out_file_corrected_counts)
-    cell_mean_integrity_filtered.to_frame().to_parquet(
+    cell_mean_integrity.to_frame().to_parquet(
         args.out_file_cells_mean_integrity_filtered
     )
 
