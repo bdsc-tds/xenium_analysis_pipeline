@@ -190,4 +190,3 @@ rule getCorrectedCountsFromOvrlpy:
         "--signal_integrity_threshold {params.signal_integrity_threshold} "
         "{params.proseg_format} "
         "-l {log}"
-
