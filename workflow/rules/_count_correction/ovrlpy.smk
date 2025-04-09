@@ -146,7 +146,7 @@ rule getCorrectedCountsFromOvrlpy:
         unpack(get_input2_or_params4getCorrectedCountsFromOvrlpy)
     output:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
-        cells_mean_integrity_filtered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
+        cells_mean_integrity_unfiltered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
     params:
         input_transcripts=lambda wildcards: get_dict_value(
             get_input2_or_params4getCorrectedCountsFromOvrlpy(
@@ -186,7 +186,7 @@ rule getCorrectedCountsFromOvrlpy:
         "--sample_signal_integrity {input.signal_integrity} "
         "--sample_transcript_info {input.transcript_info} "
         "--out_file_corrected_counts {output.corrected_counts} "
-        "--out_file_cells_mean_integrity_filtered {output.cells_mean_integrity_filtered} "
+        "--out_file_cells_mean_integrity_unfiltered {output.cells_mean_integrity_unfiltered} "
         "--signal_integrity_threshold {params.signal_integrity_threshold} "
         "{params.proseg_format} "
         "-l {log}"
