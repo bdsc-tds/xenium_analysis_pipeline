@@ -30,7 +30,12 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
             return os.path.join(
                 prefix,
                 "ovrlpy",
-                f'signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}',
+                f'signal_integrity_threshold={get_dict_value(
+                    config,
+                    "count_correction",
+                    "ovrlpy",
+                    "signal_integrity_threshold",
+                )}',
                 wildcards.normalisation_id,
                 suffix,
             )
@@ -42,6 +47,47 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
             return os.path.join(
                 prefix,
                 "resolvi_unsupervised",
+                f'mixture_k={get_dict_value(
+                    config,
+                    "count_correction",
+                    "resolvi",
+                    "train",
+                    "mixture_k",
+                )}',
+                f'num_samples={get_dict_value(
+                    config,
+                    "count_correction",
+                    "resolvi",
+                    "predict",
+                    "num_samples",
+                )}',
+                wildcards.normalisation_id,
+                suffix,
+            )
+        elif re.match(
+            r"^resolvi_supervised$",
+            wildcards.count_correction_id,
+            flags=re.IGNORECASE,
+        ) is not None:
+            return os.path.join(
+                prefix,
+                wildcards.normalisation_id,
+                wildcards.annotation_id,
+                "resolvi_supervised",
+                f'mixture_k={get_dict_value(
+                    config,
+                    "count_correction",
+                    "resolvi",
+                    "train",
+                    "mixture_k",
+                )}',
+                f'num_samples={get_dict_value(
+                    config,
+                    "count_correction",
+                    "resolvi",
+                    "predict",
+                    "num_samples",
+                )}',
                 wildcards.normalisation_id,
                 suffix,
             )

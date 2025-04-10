@@ -60,7 +60,7 @@ rule runResolviSupervisedPredict:
             for_training=False,
         )
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/runResolviSupervisedPredict.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/logs/runResolviSupervisedPredict.log'
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised"
     container:
