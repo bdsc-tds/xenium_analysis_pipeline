@@ -6,14 +6,14 @@ rule runResolviUnsupervisedTrain:
     input:
         unpack(get_seg_data4input2_or_param4runResolvi)
     output:
-        directory(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/trained_model')
+        directory(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/model')
     params:
         lambda wildcards: get_params4runResolvi(
             wildcards,
             for_training=True,
         )
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedTrain.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/logs/runResolviUnsupervisedTrain.log'
     wildcard_constraints:
         count_correction_id=r"resolvi_unsupervised"
     container:
@@ -47,17 +47,17 @@ rule runResolviUnsupervisedTrain:
 rule runResolviUnsupervisedPredict:
     input:
         unpack(get_seg_data4input2_or_param4runResolvi),
-        model_dir=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/trained_model'
+        model_dir=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/model'
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/corrected_counts.h5'),
-        proportions=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/proportions.parquet')
+        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/corrected_counts.h5'),
+        proportions=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/proportions.parquet')
     params:
         lambda wildcards: get_params4runResolvi(
             wildcards,
             for_training=False,
         )
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/logs/runResolviUnsupervisedPredict.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/logs/runResolviUnsupervisedPredict.log'
     wildcard_constraints:
         count_correction_id=r"resolvi_unsupervised"
     container:

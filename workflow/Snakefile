@@ -241,6 +241,20 @@ def get_output4reports(
                         i,
                         j,
                         "resolvi_unsupervised",
+                        f'mixture_k={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "train",
+                            "mixture_k",
+                        )}',
+                        f'num_samples={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "predict",
+                            "num_samples",
+                        )}',
                         k,
                         "standard_seurat_analysis.html",
                     )
@@ -282,6 +296,20 @@ def get_output4reports(
                                 k,
                                 j[1],
                                 "resolvi_supervised",
+                                f'mixture_k={get_dict_value(
+                                    config,
+                                    "count_correction",
+                                    "resolvi",
+                                    "train",
+                                    "mixture_k",
+                                )}',
+                                f'num_samples={get_dict_value(
+                                    config,
+                                    "count_correction",
+                                    "resolvi",
+                                    "predict",
+                                    "num_samples",
+                                )}',
                                 k,
                                 "standard_seurat_analysis.html",
                             )
@@ -614,14 +642,26 @@ def get_output4count_correction(
                     i,
                     j,
                     "resolvi_unsupervised",
-                    k,
+                    f'mixture_k={get_dict_value(
+                        config,
+                        "count_correction",
+                        "resolvi",
+                        "train",
+                        "mixture_k",
+                    )}',
+                    f'num_samples={get_dict_value(
+                        config,
+                        "count_correction",
+                        "resolvi",
+                        "predict",
+                        "num_samples",
+                    )}',
+                    "corrected_counts.h5",
                 )
                 for i in SEGMENTATION_ID
                 for j in SAMPLE_ID
-                for k in ["corrected_counts.h5", "proportions.parquet"]
             ]
         )
-    
 
     samples_by_conditions: dict[str, list[str]] = get_dict_value(
         config,
@@ -653,12 +693,25 @@ def get_output4count_correction(
                         k,
                         j[1],
                         "resolvi_supervised",
-                        l,
+                        f'mixture_k={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "train",
+                            "mixture_k",
+                        )}',
+                        f'num_samples={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "predict",
+                            "num_samples",
+                        )}',
+                        "corrected_counts.h5",
                     )
                     for i in SEGMENTATION_ID
                     for j in samples_annotations
                     for k in NORMALISATION_ID
-                    for l in ["corrected_counts.h5", "proportions.parquet"]
                 ]
             )
         else:
@@ -798,6 +851,20 @@ def get_output4post_count_correction_cell_type_annotation(
                     i,
                     j[0],
                     "resolvi_unsupervised",
+                    f'mixture_k={get_dict_value(
+                        config,
+                        "count_correction",
+                        "resolvi",
+                        "train",
+                        "mixture_k",
+                    )}',
+                    f'num_samples={get_dict_value(
+                        config,
+                        "count_correction",
+                        "resolvi",
+                        "predict",
+                        "num_samples",
+                    )}',
                     k,
                     j[1],
                     m,
@@ -821,6 +888,20 @@ def get_output4post_count_correction_cell_type_annotation(
                         k,
                         j[1],
                         "resolvi_supervised",
+                        f'mixture_k={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "train",
+                            "mixture_k",
+                        )}',
+                        f'num_samples={get_dict_value(
+                            config,
+                            "count_correction",
+                            "resolvi",
+                            "predict",
+                            "num_samples",
+                        )}',
                         k,
                         j[1],
                         l,

@@ -164,7 +164,7 @@ rule getCorrectedCountsFromOvrlpy:
         ),
         proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id == 'proseg_expected' else ''
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/getCorrectedCountsFromOvrlpy.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/getCorrectedCountsFromOvrlpy.log'
     container:
         config["containers"]["python_cuda"]
     resources:

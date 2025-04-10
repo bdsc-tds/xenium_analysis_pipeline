@@ -6,7 +6,7 @@ import os
 import re
 from typing import Any
 
-COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT = r"(?!(ovrlpy|resolvi_unsupervised)).*"
+COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT = r"(?!(ovrlpy|resolvi_unsupervised|resolvi_supervised)).*"
 
 
 def uniquify_elements_in_list(

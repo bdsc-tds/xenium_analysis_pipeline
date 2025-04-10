@@ -36,4 +36,4 @@ dependencies:
       - spatialdata==0.3.0
       - spatialdata-io==0.1.7
       - spatialdata-plot==0.2.9
-      - git+https://github.com/HiDiHlabs/ovrl.py@777bc3fe7bd5575e20ebe83f315e0218cec1dcbc
+      - git+https://github.com/HiDiHlabs/ovrl.py@213680dbf9fb641c51f9a5ebaf0f41ea483c0e08
