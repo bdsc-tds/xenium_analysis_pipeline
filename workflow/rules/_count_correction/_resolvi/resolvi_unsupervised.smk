@@ -66,8 +66,8 @@ rule runResolviUnsupervisedPredict:
         mem_mb=lambda wildcards, attempt: min(
             get_mem_mb4runResolvi(
                 wildcards,
-                attempt,
-                20,
+                attempt**2,
+                1,
             ),
             1024000
         ),
