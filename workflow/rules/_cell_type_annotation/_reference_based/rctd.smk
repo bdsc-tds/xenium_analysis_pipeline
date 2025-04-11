@@ -120,7 +120,7 @@ rule runReferenceBasedRCTD:
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/rctd.R"
 
-use rule runReferenceBasedRCTD as runPostCountCorrectionReferenceBasedRCTD with:
+use rule runReferenceBasedRCTD as runPostCountCorrectionBySplitReferenceBasedRCTD with:
     input:
         query=lambda wildcards: get_path2query4annotation(
             wildcards,
@@ -137,9 +137,9 @@ use rule runReferenceBasedRCTD as runPostCountCorrectionReferenceBasedRCTD with:
         out_sc=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/output/singlet_score.parquet'),
         out_sm=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/output/score_mat.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedRCTD.log'
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionBySplitReferenceBasedRCTD.log'
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT,
+        count_correction_id=r"split.+",
         annotation_id=r"reference_based/.+/rctd_.+"
 
 use rule runReferenceBasedRCTD as runPostCountCorrectionByOvrlpyReferenceBasedRCTD with:

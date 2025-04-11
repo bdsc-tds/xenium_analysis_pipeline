@@ -85,7 +85,7 @@ rule runReferenceBasedSingleR:
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/singler.R"
 
-# use rule runReferenceBasedSingleR as runPostCountCorrectionReferenceBasedSingleR with:
+# use rule runReferenceBasedSingleR as runPostCountCorrectionBySplitReferenceBasedSingleR with:
 #     input:
 #         query=lambda wildcards: get_path2query4annotation(
 #             wildcards,
@@ -97,9 +97,9 @@ rule runReferenceBasedSingleR:
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
 #     log:
-#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedSingleR.log'
+#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionBySplitReferenceBasedSingleR.log'
 #     wildcard_constraints:
-#         count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT,
+#         count_correction_id=r"split.+",
 #         annotation_id=r"reference_based/.+/singler/.+"
 
 use rule runReferenceBasedSingleR as runPostCountCorrectionByOvrlpyReferenceBasedSingleR with:

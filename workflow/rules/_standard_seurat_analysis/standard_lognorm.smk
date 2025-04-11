@@ -24,7 +24,7 @@ rule runStandardLogNorm:
     script:
         "../../scripts/_standard_seurat_analysis/standard_lognorm.R"
 
-use rule runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
+use rule runStandardLogNorm as runPostCountCorrectionBySplitStandardLogNorm with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
     output:
@@ -33,9 +33,9 @@ use rule runStandardLogNorm as runPostCountCorrectionStandardLogNorm with:
         data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/normalised_counts/data.parquet'),
         scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/normalised_counts/scale_data.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/logs/runPostCountCorrectionStandardLogNorm.log'
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/lognorm/{{annotation_id}}/{{count_correction_id}}/lognorm/logs/runPostCountCorrectionBySplitStandardLogNorm.log'
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+        count_correction_id=r"split.+"
 
 use rule runStandardLogNorm as runPostCountCorrectionByOvrlpyStandardLogNorm with:
     input:

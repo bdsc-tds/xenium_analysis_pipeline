@@ -58,7 +58,7 @@ rule runReferenceBasedSeurat:
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/seurat.R"
 
-# use rule runReferenceBasedSeurat as runPostCountCorrectionReferenceBasedSeurat with:
+# use rule runReferenceBasedSeurat as runPostCountCorrectionBySplitReferenceBasedSeurat with:
 #     input:
 #         query=lambda wildcards: get_path2query4annotation(
 #             wildcards,
@@ -70,9 +70,9 @@ rule runReferenceBasedSeurat:
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
 #     log:
-#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedRCTD.log'
+#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionBySplitReferenceBasedRCTD.log'
 #     wildcard_constraints:
-#         count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT,
+#         count_correction_id=r"split.+",
 #         annotation_id=r"reference_based/.+/seurat/.+"
 
 use rule runReferenceBasedSeurat as runPostCountCorrectionByOvrlpyReferenceBasedSeurat with:

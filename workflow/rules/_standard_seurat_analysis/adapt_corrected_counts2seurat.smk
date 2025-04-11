@@ -90,24 +90,24 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
 #                Rules                #
 #######################################
 
-rule adaptCorrectedCounts2Seurat:
+rule adaptCorrectedCountsBySplit2Seurat:
     input:
         raw_obj=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds',
         corrected_counts=get_corrected_counts4adaptCorrectedCounts2Seurat
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds')
     log:
-        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/adaptCorrectedCounts2Seurat.log'
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/logs/adaptCorrectedCountsBySplit2Seurat.log'
     container:
         config["containers"]["r"]
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+        count_correction_id=r"split.+"
     resources:
         mem_mb=lambda wildcards, attempt: min(attempt**3 * 2048, 512000)
     script:
         "../../scripts/_standard_seurat_analysis/adapt_corrected_counts2seurat.R"
 
-use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with:
+use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with:
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds')
     log:
@@ -115,7 +115,7 @@ use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with
     wildcard_constraints:
         count_correction_id=r"ovrlpy"
 
-use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByResolviUnsupervised2Seurat with:
+use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviUnsupervised2Seurat with:
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds')
     log:

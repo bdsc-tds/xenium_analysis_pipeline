@@ -32,7 +32,7 @@ rule runStandardScTransform:
     script:
         "../../scripts/_standard_seurat_analysis/standard_sctransform.R"
 
-use rule runStandardScTransform as runPostCountCorrectionStandardScTransform with:
+use rule runStandardScTransform as runPostCountCorrectionBySplitStandardScTransform with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/standard_qc/qced_seurat.rds'
     output:
@@ -41,9 +41,9 @@ use rule runStandardScTransform as runPostCountCorrectionStandardScTransform wit
         data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/data.parquet'),
         scale_data=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/normalised_counts/scale_data.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/logs/runPostCountCorrectionStandardScTransform.log'
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/sctransform/{{annotation_id}}/{{count_correction_id}}/sctransform/logs/runPostCountCorrectionBySplitStandardScTransform.log'
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+        count_correction_id=r"split.+"
 
 use rule runStandardScTransform as runPostCountCorrectionByOvrlpyStandardScTransform with:
     input:
