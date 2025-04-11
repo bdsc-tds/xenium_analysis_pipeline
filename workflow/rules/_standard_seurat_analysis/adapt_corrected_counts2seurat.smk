@@ -123,7 +123,7 @@ use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviUnsu
     wildcard_constraints:
         count_correction_id=r"resolvi_unsupervised"
 
-use rule adaptCorrectedCounts2Seurat as adaptCorrectedCountsByResolviSupervised2Seurat with:
+use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviSupervised2Seurat with:
     output:
         protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds')
     log:
