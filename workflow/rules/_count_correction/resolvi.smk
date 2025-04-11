@@ -204,11 +204,14 @@ def get_params4runResolvi(wildcards, for_training: bool) -> dict[str, Any]:
 
 
 def get_mem_mb4runResolvi(wildcards, attempt, multiplier: int = 1) -> int:
-    ret: int = get_size(
-        get_seg_data4input2_or_param4runResolvi(
-            wildcards,
-            for_input=False,
-        ).values(),
+    ret: int = sum(
+        [
+            get_size(i)
+            for i in get_seg_data4input2_or_param4runResolvi(
+                wildcards,
+                for_input=False,
+            ).values()
+        ]
     ) * 1e-6 * attempt
 
     if re.match(
