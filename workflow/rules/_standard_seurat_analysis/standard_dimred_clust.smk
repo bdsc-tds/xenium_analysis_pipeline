@@ -37,7 +37,7 @@ rule runStandardDimRedClust:
     script:
         "../../scripts/_standard_seurat_analysis/standard_dimred_clust.R"
 
-use rule runStandardDimRedClust as runPostCountCorrectionStandardDimRedClust with:
+use rule runStandardDimRedClust as runPostCountCorrectionBySplitStandardDimRedClust with:
     input:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/normalised_counts/normalised_seurat.rds'
     output:
@@ -46,9 +46,9 @@ use rule runStandardDimRedClust as runPostCountCorrectionStandardDimRedClust wit
         pca=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/preprocessed/pca.parquet'),
         umap=protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/preprocessed/umap.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/logs/runPostCountCorrectionStandardDimRedClust.log'
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/logs/runPostCountCorrectionBySplitStandardDimRedClust.log'
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+        count_correction_id=r"split.+"
 
 use rule runStandardDimRedClust as runPostCountCorrectionByOvrlpyStandardDimRedClust with:
     input:

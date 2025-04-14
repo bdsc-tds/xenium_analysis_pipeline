@@ -56,7 +56,7 @@ rule runReferenceBasedXGBoost:
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/xgboost.R"
 
-# use rule runReferenceBasedXGBoost as runPostCountCorrectionReferenceBasedXGBoost with:
+# use rule runReferenceBasedXGBoost as runPostCountCorrectionBySplitReferenceBasedXGBoost with:
 #     input:
 #         query=lambda wildcards: get_path2query4annotation(
 #             wildcards,
@@ -68,9 +68,9 @@ rule runReferenceBasedXGBoost:
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
 #         protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/scores.parquet')
 #     log:
-#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionReferenceBasedXGBoost.log'
+#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionBySplitReferenceBasedXGBoost.log'
 #     wildcard_constraints:
-#         count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT,
+#         count_correction_id=r"split.+",
 #         annotation_id=r"reference_based/.+/xgboost/.+"
 
 use rule runReferenceBasedXGBoost as runPostCountCorrectionByOvrlpyReferenceBasedXGBoost with:

@@ -25,7 +25,7 @@ rule generateStandardSeuratReport:
     script:
         "../../scripts/_standard_seurat_analysis/generate_standard_seurat_report.R"
 
-use rule generateStandardSeuratReport as generatePostCountCorrectionStandardSeuratReport with:
+use rule generateStandardSeuratReport as generatePostCountCorrectionBySplitStandardSeuratReport with:
     input:
         raw=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
@@ -40,9 +40,9 @@ use rule generateStandardSeuratReport as generatePostCountCorrectionStandardSeur
         intermediates_dir=f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/_intermediates_seurat_report',
         knit_root_dir=f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/_knit_root_seurat_report'
     log:
-        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/logs/generatePostCountCorrectionStandardSeuratReport.log'
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/logs/generatePostCountCorrectionBySplitStandardSeuratReport.log'
     wildcard_constraints:
-        count_correction_id=COUNT_CORRECTION_MATHOD_WITH_ANNOTATION_PAT
+        count_correction_id=r"split.+"
 
 use rule generateStandardSeuratReport as generatePostCountCorrectionByOvrlpyStandardSeuratReport with:
     input:
