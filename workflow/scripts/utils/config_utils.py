@@ -832,8 +832,34 @@ def _process_cell_type_annotation(
 
 
 def _process_count_correction(
+    segmentation_methods: list[str],
     data: dict[str, Any],
-) -> dict[str, Any] | None:
+) -> tuple[list[str], dict[str, Any] | None]:
+    assert len(segmentation_methods) > 0
+
+    seg_methods4ovrlpy: list[str] = []
+    if any(
+        re.match(
+            r"^proseg.+",
+            i,
+            flags=re.IGNORECASE,
+        )
+        is not None
+        for i in segmentation_methods
+    ):
+        seg_methods4ovrlpy.append("_proseg")
+
+    if any(
+        re.match(
+            r"(?<!^proseg).+",
+            i,
+            flags=re.IGNORECASE,
+        )
+        is not None
+        for i in segmentation_methods
+    ):
+        seg_methods4ovrlpy.append("_general")
+
     _methods: list[str] = [
         i
         for i in _convert2list(
@@ -854,7 +880,7 @@ def _process_count_correction(
     ]
 
     if len(_methods) == 0:
-        return None
+        return (seg_methods4ovrlpy, None)
 
     ret: dict[str, Any] = {}
 
@@ -882,7 +908,7 @@ def _process_count_correction(
             for idx, m in enumerate(_methods):
                 ret[m][k][_k] = __v[idx]
 
-    return ret
+    return (seg_methods4ovrlpy, ret)
 
 
 def process_config(
@@ -1043,10 +1069,18 @@ def process_config(
 
     # Process `count_correction` section.
     _count_correction = _process_count_correction(
+        _segmentation[0],
         get_dict_value(
             data,
             "count_correction",
         ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_SEGMENTATION4OVRLPY_NAME,
+        value=_count_correction[0],
     )
 
     set_dict_value(
@@ -1060,8 +1094,8 @@ def process_config(
         ),
     )
 
-    if _count_correction is not None and len(_count_correction) > 0:
-        for k, v in _count_correction.items():
+    if _count_correction[1] is not None and len(_count_correction[1]) > 0:
+        for k, v in _count_correction[1].items():
             set_dict_value(
                 data,
                 "count_correction",

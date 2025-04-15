@@ -18,6 +18,8 @@ WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
 WILDCARDS_COMPACT_SEGMENTATION_NAME: str = "_compact_segmentation"
 # Child of `WILDCARDS_NAME` (second level); a list of count correction methods.
 WILDCARDS_COUNT_CORRECTION_NAME: str = "_count_correction"
+# Child of `WILDCARDS_NAME` (second level); a list of segmentation methods to be used in transcripts processing when running Ovrlpy.
+WILDCARDS_SEGMENTATION4OVRLPY_NAME: str = "_segmentation4ovrlpy"
 # Child of `WILDCARDS_NAME` (second level); a list of values for normalization methods with Seurat.
 WILDCARDS_SEURAT_NORM_NAME: str = "_seurat_norm"
 # Child of `WILDCARDS_NAME` (second level); a list of values for coexpression methods.

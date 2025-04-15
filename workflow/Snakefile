@@ -50,6 +50,7 @@ Explanation of wildcards:
 - normalisation_id: The name of a normalisation method to be used.
 - annotation_id: The name of cell-type annotation to be used in a format "approach/reference_name/method/level/mode". E.g., "reference_based/matched_reference/rctd/Level3/single_cell".
 - count_correction_id: The name of a count correction method to be used after segmentation.
+- segmentation_id4ovrlpy: The name of segmentation methods to be used in transcripts processing when running Ovrlpy.
 """
 
 CONDITION_ID = get_dict_value(
@@ -107,6 +108,11 @@ COUNT_CORRECTION_ID=get_dict_value(
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_COUNT_CORRECTION_NAME,
 )
+SEGMENTATION_ID4OVRLPY=get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_SEGMENTATION4OVRLPY_NAME,
+)
 
 wildcard_constraints:
     condition_id='|'.join([re.escape(i) for i in CONDITION_ID]),
@@ -117,7 +123,8 @@ wildcard_constraints:
     coexpression_id='|'.join([re.escape(i) for i in COEXPRESSION_ID]),
     normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
     annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID]),
-    count_correction_id="|".join([re.escape(i) for i in COUNT_CORRECTION_ID])
+    count_correction_id="|".join([re.escape(i) for i in COUNT_CORRECTION_ID]),
+    segmentation_id4ovrlpy="|".join([re.escape(i) for i in SEGMENTATION_ID4OVRLPY])
 
 
 ########################################

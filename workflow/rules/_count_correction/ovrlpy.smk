@@ -3,95 +3,95 @@
 #######################################
 
 def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
-    prefix: str = f'{config["output_path"]}/segmentation'
-    ret: str = ""
-
     if re.match(
-        r"^10x_0um$",
-        wildcards.segmentation_id,
+        r"^_proseg$",
+        wildcards.segmentation_id4ovrlpy,
         flags=re.IGNORECASE,
     ) is not None:
-        ret = os.path.join(
-            prefix,
-            f"10x_0um/{wildcards.sample_id}/normalised_results",
-        )
+        return f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz'
+    
+    if re.match(
+        r"^_general$",
+        wildcards.segmentation_id4ovrlpy,
+        flags=re.IGNORECASE,
+    ) is not None:
+        use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
 
-        if not for_input:
-            ret = normalise_path(
+        if for_input:
+            return ret
+
+        if use_raw_data:
+            return normalise_path(
                 ret,
-                candidate_paths=("outs",),
                 pat_anchor_file=r"transcripts.parquet",
                 pat_flags=re.IGNORECASE,
                 return_dir=False,
-                check_exist=False,
+                check_exist=True,
             )
-    elif re.match(
-        r"^proseg_expected$",
-        wildcards.segmentation_id,
-        flags=re.IGNORECASE,
-    ) is not None:
-        ret = os.path.join(
-            prefix,
-            f'proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz',
-        )
-    else:
-        raise RuntimeError(f'Error! Do not run Ovrlpy on samples segmented by: {wildcards.segmentation_id}, except for "10x_0um" and "proseg_expected".')
 
-    return ret
+        return normalise_path(
+            ret,
+            candidate_paths=("outs",),
+            pat_anchor_file=r"transcripts.parquet",
+            pat_flags=re.IGNORECASE,
+            return_dir=False,
+            check_exist=False,
+        )
+
+    raise RuntimeError(f'Error! Unknown segmentation id: {wildcards.segmentation_id4ovrlpy}.')
 
 
 def get_input2_or_params4getCorrectedCountsFromOvrlpy(wildcards, for_input: bool = True) -> dict[str, str]:
-    prefix_seg: str = f'{config["output_path"]}/segmentation'
     prefix_ovrlpy: str = f'{config["output_path"]}/count_correction'
 
     ret: dict[str, str] = {}
 
-    segmentation_id: str = ""
+    segmentation_id4ovrlpy: str = ""
 
     if re.match(
         r"^proseg_expected$",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret["transcripts"] = os.path.join(
-            prefix_seg,
-            f'proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz',
-        )
+        segmentation_id4ovrlpy = "_proseg"
 
-        segmentation_id = "proseg_expected"
+        ret["transcripts"] = f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz'
     else:
-        segmentation_id = "10x_0um"
-        _segmentation_id: str = wildcards.segmentation_id if re.match(
-            r"^proseg_mode$",
-            wildcards.segmentation_id,
-            flags=re.IGNORECASE,
-        ) is None else "proseg"
+        segmentation_id4ovrlpy = "_general"
 
-        ret["transcripts"] = os.path.join(
-            prefix_seg,
-            f"{_segmentation_id}/{wildcards.sample_id}/normalised_results",
-        )
+        use_raw_data, _ret = get_raw_data_dir(wildcards.sample_id)
 
-        if not for_input:
-            ret["transcripts"] = normalise_path(
-                ret["transcripts"],
-                candidate_paths=("outs",),
-                pat_anchor_file=r"transcripts.parquet",
-                pat_flags=re.IGNORECASE,
-                return_dir=False,
-                check_exist=False,
-            )
+        if for_input:
+            ret["transcripts"] = _ret
+        else:
+            if use_raw_data:
+                ret["transcripts"] = normalise_path(
+                    _ret,
+                    pat_anchor_file=r"transcripts.parquet",
+                    pat_flags=re.IGNORECASE,
+                    return_dir=False,
+                    check_exist=True,
+                )
+            else:
+                ret["transcripts"] = normalise_path(
+                    _ret,
+                    candidate_paths=("outs",),
+                    pat_anchor_file=r"transcripts.parquet",
+                    pat_flags=re.IGNORECASE,
+                    return_dir=False,
+                    check_exist=False,
+                )
 
     ret["signal_integrity"] = os.path.join(
         prefix_ovrlpy,
-        segmentation_id,
+        segmentation_id4ovrlpy,
         wildcards.sample_id,
         "ovrlpy/signal_integrity.parquet",
     )
 
     ret["transcript_info"] = os.path.join(
         prefix_ovrlpy,
-        segmentation_id,
+        segmentation_id4ovrlpy,
         wildcards.sample_id,
         "ovrlpy/transcript_info.parquet",
     )
@@ -107,19 +107,17 @@ rule runOvrlpy:
     input:
         get_input2_or_params4runOvrlpy
     output:
-        signal_integrity=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity.parquet'),
-        signal_strength=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_strength.parquet'),
-        transcript_info=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/transcript_info.parquet')
+        signal_integrity=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity.parquet'),
+        signal_strength=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_strength.parquet'),
+        transcript_info=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/transcript_info.parquet')
     params:
         input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
             wildcards,
             for_input=False,
         ),
-        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id == 'proseg_expected' else ''
+        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id4ovrlpy == '_proseg' else ''
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/logs/runOvrlpy.log'
-    wildcard_constraints:
-        segmentation_id=r"(10x_0um)|(proseg_expected)"
+        f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/logs/runOvrlpy.log'
     container:
         config["containers"]["python_cuda"]
     resources:
