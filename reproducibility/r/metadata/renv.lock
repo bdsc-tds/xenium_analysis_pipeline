@@ -649,6 +649,47 @@
       ],
       "Hash": "20149fcead4dd6f9da3605f98b5220fc"
     },
+    "SPLIT": {
+      "Package": "SPLIT",
+      "Version": "0.1.0",
+      "Source": "GitHub",
+      "Type": "Package",
+      "Title": "Spatial Purification of Layered Intracellular Transcripts",
+      "Authors@R": "c( person( \"Mariia\", \"Bilous\", email = \"Mariia.Bilous@chuv.ch\", role = c(\"aut\", \"cre\") ) )",
+      "Description": "The 'SPLIT' package provides tools for purifying spatial transcriptomics data using decomposition derived from the RCTD (Robust Cell Type Decomposition) algorithm.  It offers a series of functions to enhance the accuracy of cell-type annotations,  handle noisy data, and improve the overall interpretation of single-cell spatial  expression profiles by performing data normalization, entropy analysis, and  annotation confidence scoring.",
+      "License": "MIT",
+      "Encoding": "UTF-8",
+      "LazyData": "true",
+      "Depends": [
+        "R (>= 4.0.0)"
+      ],
+      "Imports": [
+        "Matrix",
+        "dplyr",
+        "magrittr",
+        "forcats",
+        "entropy",
+        "tidyr",
+        "spacexr",
+        "ggplot2",
+        "scatterpie"
+      ],
+      "Suggests": [
+        "testthat",
+        "knitr",
+        "rmarkdown"
+      ],
+      "VignetteBuilder": "knitr",
+      "RoxygenNote": "7.3.2",
+      "Author": "Mariia Bilous [aut, cre]",
+      "Maintainer": "Mariia Bilous <Mariia.Bilous@chuv.ch>",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "bdsc-tds",
+      "RemoteRepo": "SPLIT",
+      "RemoteRef": "2cffa3edbae34d79d183d4982ca60a2e622391f4",
+      "RemoteSha": "2cffa3edbae34d79d183d4982ca60a2e622391f4"
+    },
     "ScaledMatrix": {
       "Package": "ScaledMatrix",
       "Version": "1.14.0",
