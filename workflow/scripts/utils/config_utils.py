@@ -275,7 +275,11 @@ def _flatten_struct(
                     key_layer2pat_exclude=key_layer2pat_exclude,
                     pad_layers=pad_layers,
                 )
-                flattened = _convert2list(key, len(flattened[0])), *list(flattened)
+
+                if len(flattened) == 0:
+                    flattened = ([key],)
+                else:
+                    flattened = _convert2list(key, len(flattened[0])), *list(flattened)
 
                 ret = _merge_flattened_lists(
                     ret, list(flattened), pad_layers=pad_layers
