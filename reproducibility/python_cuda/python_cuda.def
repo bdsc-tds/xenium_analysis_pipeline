@@ -44,7 +44,7 @@ Stage: main
 %post
 # Set up build time environment variables, such as versions
     #https://github.com/EliHei2/segger_dev.git
-    export SEGGER_REPO=https://github.com/senbaikang/segger_dev.git
+    export SEGGER_REPO=https://github.com/bdsc-tds/segger_dev.git
     export SEGGER_VERSION=4bf56dec2a364de8eee4fcab663e798eb106e21a
 
     export SCVI_REPO=https://github.com/scverse/scvi-tools
