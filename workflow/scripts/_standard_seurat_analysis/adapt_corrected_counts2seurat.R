@@ -27,6 +27,6 @@ xe_corrected <- replace_counts_in_seurat(
 
 # Save object
 saveRDS(
-  xe, 
+  xe_corrected,
   file = file.path(snakemake@output[[1]])
 )
