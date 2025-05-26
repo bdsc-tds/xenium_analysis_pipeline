@@ -12,6 +12,7 @@ xe <- LoadXenium(
 )
 
 snakemake@source("../../scripts/_standard_seurat_analysis/_post_seurat_load_xenium.R")
+snakemake@source("../../scripts/_standard_seurat_analysis/_add_metadata_post_seurat_load_xenium.R")
 
 # Save object
 saveRDS(
