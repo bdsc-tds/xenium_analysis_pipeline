@@ -124,6 +124,10 @@ Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --for
         -h,--help: print this message.
 ```
 
+## Other files included in this repo
+
+There are some other files related to Xenium data analysis, residing in `notebooks`. Please refer to the documentation inside for more details.
+
 ## Solutions to known problems
 
 1. Snakemake fails to create conda environments due to the lack of writing permission of `/tmp/conda`.
