@@ -651,45 +651,28 @@
     },
     "SPLIT": {
       "Package": "SPLIT",
-      "Version": "0.1.0",
+      "Version": "0.1.1",
       "Source": "GitHub",
-      "Type": "Package",
-      "Title": "Spatial Purification of Layered Intracellular Transcripts",
-      "Authors@R": "c( person( \"Mariia\", \"Bilous\", email = \"Mariia.Bilous@chuv.ch\", role = c(\"aut\", \"cre\") ) )",
-      "Description": "The SPLIT (Spatial Purification of Layered Intracellular Transcripts) package provides  tools to purify spatial transcriptomics data using decomposition results from the RCTD  (Robust Cell Type Decomposition) algorithm. It offers functionality to adjust cell-type  profiles by removing contributions attributed to background contamination. SPLIT also  computes contamination scores and estimates local diffusion of contaminating profiles  to help distinguish between contamination and phenotypic variation. Additionally,  the package includes methods to refine cell-type annotations based on transcriptomic  neighborhood homogeneity. The resulting output contains profiles with reduced  contamination and increased cell-type specificity.",
-      "License": "MIT",
-      "Encoding": "UTF-8",
-      "LazyData": "true",
-      "Depends": [
-        "R (>= 4.0.0)"
-      ],
-      "Imports": [
-        "Matrix",
-        "dplyr",
-        "forcats",
-        "entropy",
-        "spacexr",
-        "ggplot2",
-        "scatterpie",
-        "Seurat",
-        "BiocParallel",
-        "igraph"
-      ],
-      "Suggests": [
-        "testthat",
-        "knitr",
-        "rmarkdown"
-      ],
-      "VignetteBuilder": "knitr",
-      "RoxygenNote": "7.3.2",
-      "Author": "Mariia Bilous [aut, cre]",
-      "Maintainer": "Mariia Bilous <Mariia.Bilous@chuv.ch>",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteUsername": "bdsc-tds",
       "RemoteRepo": "SPLIT",
-      "RemoteRef": "v0.1.0",
-      "RemoteSha": "cd90fa7572b7a2ad6ac864e07659b8777a5d8ac0"
+      "RemoteRef": "0cdb9252a943e70c4b074048994aa0a70ee39c63",
+      "RemoteSha": "0cdb9252a943e70c4b074048994aa0a70ee39c63",
+      "Requirements": [
+        "BiocParallel",
+        "Matrix",
+        "R",
+        "Seurat",
+        "dplyr",
+        "entropy",
+        "forcats",
+        "ggplot2",
+        "igraph",
+        "scatterpie",
+        "spacexr"
+      ],
+      "Hash": "c78766f20fd7f567956b27060502a64b"
     },
     "ScaledMatrix": {
       "Package": "ScaledMatrix",
