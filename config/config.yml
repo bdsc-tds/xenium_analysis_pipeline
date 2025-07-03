@@ -26,7 +26,8 @@ segmentation:
     - proseg_expected
     - proseg_mode
     - segger
-    - bats
+    - bats_expected
+    - bats_normalised
 
   10x_mm:
     expansion-distance:

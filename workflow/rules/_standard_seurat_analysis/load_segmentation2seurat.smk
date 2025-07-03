@@ -5,7 +5,7 @@
 def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = True) -> str:
     if wildcards.segmentation_id.startswith("proseg"):
         seg_method = "proseg"
-    elif wildcards.segmentation_id == "bats":
+    elif wildcards.segmentation_id.startswith("bats"):
         seg_method = get_dict_value(
             config,
             "segmentation",
@@ -125,6 +125,30 @@ def get_xenium_cell_id4mapping(wildcards) -> str:
 
     return "xenium_ranger_new_cell_id" if is_xr_v4 else "xr_cell_id"
 
+def get_input2loadBats2Seurat(wildcards) -> str:
+    prefix: str = f'{config["output_path"]}/segmentation/bats/{wildcards.sample_id}/raw_results'
+
+    if re.match(
+        r"^bats_expected$",
+        wildcards.segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
+        return os.path.join(
+            prefix,
+            "expected_counts.parquet"
+        )
+    elif re.match(
+        r"^bats_normalised$",
+        wildcards.segmentation_id,
+        flags=re.IGNORECASE,
+    ) is not None:
+        return os.path.join(
+            prefix,
+            "normalised_counts.parquet"
+        )
+    else:
+        raise RunError(f"Error! Invalid segmentation method: {wildcards.segmentation_id}")
+
 
 #######################################
 #                Rules                #
@@ -228,7 +252,7 @@ rule loadProseg2Seurat:
 rule loadBats2Seurat:
     input:
         dir=get_input2_or_params4loadSegmentation2Seurat,
-        expected_counts=f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/raw_results/expected_counts.parquet'
+        counts=get_input2loadBats2Seurat
     output:
         protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds')
     params:
@@ -266,7 +290,7 @@ rule loadBats2Seurat:
     container:
         config["containers"]["r"]
     wildcard_constraints:
-        segmentation_id="bats"
+        segmentation_id=r"bats_\w+"
     resources:
         mem_mb=lambda wildcards, attempt: min(attempt**2 * 4096, 1024000)
     script:
