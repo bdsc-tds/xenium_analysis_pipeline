@@ -62,7 +62,7 @@ replace_counts_in_seurat <- function(xe, new_counts, cell_coords = NULL, cell_id
                 -cell
             )
         
-        if (nrow(cell_coords) != len(cell_ids)) {
+        if (nrow(cell_coords) != length(cell_ids)) {
             stop("Error! The counts matrix has cells not existing in the passed Seurat object.")
         }
     } else {
