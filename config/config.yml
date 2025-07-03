@@ -26,6 +26,7 @@ segmentation:
     - proseg_expected
     - proseg_mode
     - segger
+    - bats
 
   10x_mm:
     expansion-distance:
@@ -81,6 +82,12 @@ segmentation:
     predict:
       use_cc: False
       _other_options:
+
+  bats:
+    load_from: 10x_5um
+    _threads:
+    _memory:
+    _other_options:
 
   _normalisation:
     _threads: 16

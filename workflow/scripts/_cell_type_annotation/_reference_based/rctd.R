@@ -42,7 +42,7 @@ ref.obj <- Reference(
   GetAssayData(chrom, assay = ref_assay, layer = ref_layer)[xe_chrom_common_genes, ], 
   cell_types = ref_labels, 
   min_UMI = REF_MIN_UMI, 
-  require_int = !(xe@misc$sample_metadata[["segmentation_method"]] %in% c("proseg", "segger")))
+  require_int = !(xe@misc$sample_metadata[["segmentation_method"]] %in% c("proseg", "segger", "bats")))
 
 # Create query object
 coords   <- xe@meta.data %>% select(ST_1, ST_2)

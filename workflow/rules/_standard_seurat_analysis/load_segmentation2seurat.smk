@@ -3,7 +3,17 @@
 #######################################
 
 def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = True) -> str:
-    seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
+    if wildcards.segmentation_id.startswith("proseg"):
+        seg_method = "proseg"
+    elif wildcards.segmentation_id == "bats":
+        seg_method = get_dict_value(
+            config,
+            "segmentation",
+            "bats",
+            "load_from",
+        )
+    else:
+        seg_method = wildcards.segmentation_id
 
     ret = f'{config["output_path"]}/segmentation/{seg_method}/{wildcards.sample_id}/normalised_results'
 
@@ -159,7 +169,7 @@ rule loadSegmentation2Seurat:
     container:
         config["containers"]["r"]
     wildcard_constraints:
-        segmentation_id=r"(?!proseg).*"
+        segmentation_id=r"(?!proseg|bats).*"
     resources:
         mem_mb=lambda wildcards, attempt: min(attempt**2 * 2048, 512000)
     script:
@@ -214,3 +224,50 @@ rule loadProseg2Seurat:
         mem_mb=lambda wildcards, attempt: min(attempt**2 * 4096, 1024000)
     script:
         "../../scripts/_standard_seurat_analysis/load_proseg2seurat.R"
+
+rule loadBats2Seurat:
+    input:
+        dir=get_input2_or_params4loadSegmentation2Seurat,
+        expected_counts=f'{config["output_path"]}/segmentation/{{segmentation_id}}/{{sample_id}}/raw_results/expected_counts.parquet'
+    output:
+        protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds')
+    params:
+        data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(
+            wildcards,
+            for_input=False
+        ),
+        spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
+        sample_id=lambda wildcards: wildcards.sample_id,
+        segmentation_id=lambda wildcards: wildcards.segmentation_id,
+        control_gene_pat=sec.XENIUM_CONTROL_GENE_PAT,
+        condition=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            0,
+        )[0],
+        gene_panel=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            1,
+        )[0],
+        donor=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            2,
+        )[0],
+        sample=lambda wildcards: extract_layers_from_experiments(
+            wildcards.sample_id,
+            3,
+        )[0],
+        segmentation_method=lambda wildcards: extract_layers_from_experiments(
+            wildcards.segmentation_id,
+            0,
+            sep_in="_",
+        )[0]
+    log:
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/logs/loadBats2Seurat.log'
+    container:
+        config["containers"]["r"]
+    wildcard_constraints:
+        segmentation_id="bats"
+    resources:
+        mem_mb=lambda wildcards, attempt: min(attempt**2 * 4096, 1024000)
+    script:
+        "../../scripts/_standard_seurat_analysis/load_bats2seurat.R"
