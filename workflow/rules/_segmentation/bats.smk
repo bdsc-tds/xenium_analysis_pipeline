@@ -32,7 +32,8 @@ rule runBats:
     input:
         get_input2_or_params4runBats
     output:
-        protected(f'{config["output_path"]}/segmentation/bats/{{sample_id}}/raw_results/expected_counts.parquet')
+        protected(f'{config["output_path"]}/segmentation/bats/{{sample_id}}/raw_results/expected_counts.parquet'),
+        protected(f'{config["output_path"]}/segmentation/bats/{{sample_id}}/raw_results/normalised_counts.parquet')
     log:
         f'{config["output_path"]}/segmentation/bats/{{sample_id}}/logs/runBats.log'
     params:

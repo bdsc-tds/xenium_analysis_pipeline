@@ -14,17 +14,17 @@ xe <- LoadXenium(
   molecule.coordinates = FALSE
 )
 
-expected_counts <- data.frame(read_parquet(snakemake@input[["expected_counts"]]))
-rownames(expected_counts) <- expected_counts$cell_id
-expected_counts <- expected_counts %>% select(-cell_id)
-expected_counts <- expected_counts[, colnames(expected_counts)[!grepl(
+counts <- data.frame(read_parquet(snakemake@input[["counts"]]))
+rownames(counts) <- counts$cell_id
+counts <- counts %>% select(-cell_id)
+counts <- counts[, colnames(counts)[!grepl(
   snakemake@params[["control_gene_pat"]],
-  colnames(expected_counts)
+  colnames(counts)
 )]]
 
 xe <- replace_counts_in_seurat(
   xe,
-  expected_counts
+  counts
 )
 
 snakemake@source("../../scripts/_standard_seurat_analysis/_post_seurat_load_xenium.R")

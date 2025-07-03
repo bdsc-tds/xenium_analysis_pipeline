@@ -37,7 +37,7 @@ def is_int_counts4runReferenceBasedRCTD(wildcards, input) -> bool:
         return False
 
     return False if re.match(
-        "proseg_expected|bats",
+        "proseg_expected|bats_.+",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) else True

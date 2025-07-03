@@ -696,6 +696,9 @@ def _process_segmentation(
             if m.startswith("proseg"):
                 if "proseg" not in compact_methods:
                     compact_methods.append("proseg")
+            elif m.startswith("bats"):
+                if "bats" not in compact_methods:
+                    compact_methods.append("bats")
             else:
                 compact_methods.append(m)
 
