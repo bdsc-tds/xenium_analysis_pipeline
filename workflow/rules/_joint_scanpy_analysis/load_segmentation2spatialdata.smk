@@ -9,7 +9,7 @@ def get_input2loadSegmentation2SpatialData(wildcards) -> dict[str, str]:
     )
 
     if re.match(
-        r"^proseg_expected$",
+        r"^proseg_\w+",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
@@ -65,11 +65,11 @@ def get_cmd_args4loadSegmentation2SpatialData(wildcards, input) -> dict[str, str
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        assert "mapping" in input
+        assert "mapping" in input.keys(), "Mapping file is required for proseg segmentation"
         args.extend(
             [
                 "--in_mapping",
-                input["mapping"],
+                input.mapping,
                 "--cell_id_col_name",
                 "xr_cell_id" if use_mode_counts4loadProseg2Seurat(
                     wildcards,
@@ -117,5 +117,6 @@ rule loadSegmentation2SpatialData:
         )
     shell:
         "mamba run -n general_cuda python3 workflow/scripts/_joint_scanpy_analysis/load_segmentation2spatialdata.py "
-        "{params.cmd} "
+        "{params.cmd_args} "
+        "-o {output} "
         "-l {log}"

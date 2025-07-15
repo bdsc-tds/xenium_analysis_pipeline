@@ -62,22 +62,15 @@ def get_params4runAnalysis(
         level_name: str = "condition_wise"
     elif level == 1:
         level_name = "gene_panel_wise"
+
+        gene_panel_id: str = extract_layers_from_experiments(
+            wildcards.gene_panel_id,
+            [0, 1],
+        )[0]
     elif level == 2:
         level_name = "donor_wise"
     else:
         raise ValueError("Error! Level must be 0, 1, or 2")
-    
-    level_id: str = extract_layers_from_experiments(
-        wildcards.sample_id,
-        list(
-            range(level + 1)
-        ),
-    )[0]
-
-    gene_panel_id: str = extract_layers_from_experiments(
-        wildcards.sample_id,
-        [0, 1],
-    )[0]
 
     ret: dict[str, Any] = {}
 
@@ -98,20 +91,20 @@ def get_params4runAnalysis(
         replace_none=50,
     )
 
+    ret["min_dist"] = get_dict_value(
+        config,
+        "joint_scanpy_analysis",
+        level_name,
+        "min_dist",
+        replace_none=0.3,
+    )
+
     ret["metric"] = get_dict_value(
         config,
         "joint_scanpy_analysis",
         level_name,
         "metric",
         replace_none="cosine",
-    )
-
-    ret["min_dist"] = get_dict_value(
-        config,
-        "joint_scanpy_analysis",
-        "gene_panel_wise",
-        "min_dist",
-        replace_none=0.3,
     )
 
     ret["min_counts"]=get_dict_value(
@@ -128,6 +121,12 @@ def get_params4runAnalysis(
             replace_none=10,
         ),
         inexist_key_ok=True,
+    ) if level == 1 else get_dict_value(
+        config,
+        "standard_seurat_analysis",
+        "qc",
+        "min_counts",
+        replace_none=10,
     )
 
     ret["min_features"] = get_dict_value(
@@ -144,6 +143,12 @@ def get_params4runAnalysis(
             replace_none=5,
         ),
         inexist_key_ok=True,
+    ) if level == 1 else get_dict_value(
+        config,
+        "standard_seurat_analysis",
+        "qc",
+        "min_features",
+        replace_none=5,
     )
 
     ret["max_counts"] = float(get_dict_value(
@@ -160,6 +165,12 @@ def get_params4runAnalysis(
             replace_none="Inf",
         ),
         inexist_key_ok=True,
+    ) if level == 1 else get_dict_value(
+        config,
+        "standard_seurat_analysis",
+        "qc",
+        "max_counts",
+        replace_none="Inf",
     ))
     
     ret["max_features"] = float(get_dict_value(
@@ -176,6 +187,12 @@ def get_params4runAnalysis(
             replace_none="Inf",
         ),
         inexist_key_ok=True,
+    ) if level == 1 else get_dict_value(
+        config,
+        "standard_seurat_analysis",
+        "qc",
+        "max_features",
+        replace_none="Inf",
     ))
 
     ret["min_cells"] = get_dict_value(
@@ -192,6 +209,12 @@ def get_params4runAnalysis(
             replace_none=5,
         ),
         inexist_key_ok=True,
+    ) if level == 1 else get_dict_value(
+        config,
+        "standard_seurat_analysis",
+        "qc",
+        "min_cells",
+        replace_none=5,
     )
 
     return ret
