@@ -42,7 +42,7 @@ rule runGenePanelWiseAnalysis:
                 wildcards,
                 attempt,
                 level=1,
-                multiplier=4,
+                multiplier=80,
             ),
             102400,
         ),

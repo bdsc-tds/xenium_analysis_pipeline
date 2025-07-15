@@ -42,7 +42,7 @@ rule runConditionWiseAnalysis:
                 wildcards,
                 attempt,
                 level=0,
-                multiplier=4,
+                multiplier=80,
             ),
             102400,
         ),
