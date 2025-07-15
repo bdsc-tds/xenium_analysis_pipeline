@@ -269,7 +269,7 @@ rule cleanSeggerPredictDir:
     resources:
         mem_mb=lambda wildcards, input, attempt: get_size(
             input[0]
-        ) * 4 * 10**-6 * attampt
+        ) * 4 * 10**-6 * attempt
     shell:
         "python3 workflow/scripts/_segmentation/clean_segger_predict_results.py "
         "--dir {input} "
