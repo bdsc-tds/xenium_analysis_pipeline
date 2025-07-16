@@ -136,6 +136,10 @@ There are some other files related to Xenium data analysis, residing in `noteboo
 
    Additionally, for HPCs, users might need to remove `/tmp/your_id:/tmp` from `SINGULARITY_BIND_DIRS` after creating environments as directory `/tmp/your_id` is not likely present in compute nodes.
 
+
+## Original manuscript analyses
+Code to reproduce analyses from the original manuscript can be found at https://github.com/bdsc-tds/Bilous2025
+
 2. For those steps involving 10X xeniumranger, sometimes I get the folowing error: "PermissionError: [Errno 13] Permission denied".
 
    10X xeniumranger copies files from raw data during processing. This error could be because the user, as the owner of the raw data, deprives him-/herself of write permission to it. When 10X xeniumranger conducts copy operation, it also copies the modes of files, and hence this error when it needs to write to the copied files. Although it is a safe behaviour to prevent from accidental change of the raw data, users have to have write permission to the raw data when they are also the owner.
