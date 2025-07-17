@@ -107,115 +107,95 @@ def get_params4runAnalysis(
         replace_none="cosine",
     )
 
-    ret["min_counts"]=get_dict_value(
-        config,
-        "experiments",
-        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-        gene_panel_id,
-        "min_counts",
-        replace_none=get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "qc",
-            "min_counts",
-            replace_none=10,
-        ),
-        inexist_key_ok=True,
-    ) if level == 1 else get_dict_value(
+    ret["min_counts"] = get_dict_value(
         config,
         "standard_seurat_analysis",
         "qc",
         "min_counts",
         replace_none=10,
     )
+    if level == 1:
+        ret["min_counts"] = get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+            gene_panel_id,
+            "min_counts",
+            replace_none=ret["min_counts"],
+            inexist_key_ok=True,
+        )
 
     ret["min_features"] = get_dict_value(
         config,
-        "experiments",
-        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-        gene_panel_id,
-        "min_features",
-        replace_none=get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "qc",
-            "min_features",
-            replace_none=5,
-        ),
-        inexist_key_ok=True,
-    ) if level == 1 else get_dict_value(
-        config,
         "standard_seurat_analysis",
         "qc",
         "min_features",
         replace_none=5,
     )
+    if level == 1:
+        ret["min_features"] = get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+            gene_panel_id,
+            "min_features",
+            replace_none=ret["min_features"],
+            inexist_key_ok=True,
+        )
 
     ret["max_counts"] = float(get_dict_value(
         config,
-        "experiments",
-        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-        gene_panel_id,
-        "max_counts",
-        replace_none=get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "qc",
-            "max_counts",
-            replace_none="Inf",
-        ),
-        inexist_key_ok=True,
-    ) if level == 1 else get_dict_value(
-        config,
         "standard_seurat_analysis",
         "qc",
         "max_counts",
         replace_none="Inf",
     ))
+    if level == 1:
+        ret["max_counts"] = float(get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+            gene_panel_id,
+            "max_counts",
+            replace_none=ret["max_counts"],
+            inexist_key_ok=True,
+        ))
     
     ret["max_features"] = float(get_dict_value(
         config,
-        "experiments",
-        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-        gene_panel_id,
-        "max_features",
-        replace_none=get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "qc",
-            "max_features",
-            replace_none="Inf",
-        ),
-        inexist_key_ok=True,
-    ) if level == 1 else get_dict_value(
-        config,
         "standard_seurat_analysis",
         "qc",
         "max_features",
         replace_none="Inf",
     ))
+    if level == 1:
+        ret["max_features"] = float(get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+            gene_panel_id,
+            "max_features",
+            replace_none=ret["max_features"],
+            inexist_key_ok=True,
+        ))
 
     ret["min_cells"] = get_dict_value(
-        config,
-        "experiments",
-        cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
-        gene_panel_id,
-        "min_cells",
-        replace_none=get_dict_value(
-            config,
-            "standard_seurat_analysis",
-            "qc",
-            "min_cells",
-            replace_none=5,
-        ),
-        inexist_key_ok=True,
-    ) if level == 1 else get_dict_value(
         config,
         "standard_seurat_analysis",
         "qc",
         "min_cells",
         replace_none=5,
     )
+    if level == 1:
+        ret["min_cells"] = get_dict_value(
+            config,
+            "experiments",
+            cc.EXPERIMENTS_GENE_PANEL_QC_NAME,
+            gene_panel_id,
+            "min_cells",
+            replace_none=ret["min_cells"],
+            inexist_key_ok=True,
+        )
 
     return ret
 
