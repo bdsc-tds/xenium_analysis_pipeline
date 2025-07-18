@@ -21,7 +21,7 @@ Some reserved keys are listed as follows:
 
   - `reference_based`: Annotated single-cell RNA sequencing datasets are used as references. Such reference datasets come either from a matched experiment, where samples are taken from the same tissue, or from an externel experiment, where public datasets are used. Users can specify multiple references with unique, user-defined names (not starting with underscores), which share the following specifications:
 
-    - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition.
+    - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition. Note that it is required for the reference dataset to have a column named "nCount", representing the number of counts per cell.
 
     - `levels`: A list of level names in the reference dataset. A valid reference dataset also requires a valid list of levels.
 
