@@ -24,7 +24,15 @@ if(sum(!corrected_cell_ids %in% original_cell_ids) > 0){
 xe <- replace_counts_in_seurat(
   xe = xe, 
   new_counts = t(corrected_counts), 
-  cell_coords = xe@meta.data[corrected_cell_ids, c("ST_1", "ST_2")]
+  cell_coords = xe@meta.data[corrected_cell_ids, c("ST_1", "ST_2")],
+  cell_id_prefix = ifelse(
+    grepl(
+      "^proseg_expected$",
+      snakemake@params[["segmentation_id"]]
+    ),
+    "proseg-",
+    ""
+  )
 )
 
 snakemake@source("../../scripts/_standard_seurat_analysis/_post_seurat_load_xenium.R")
