@@ -124,6 +124,67 @@ generate_reference_obj <- function(
 }
 
 
+
+#' Find top positive markers and return binary celltype x gene matrix
+#'
+#' @param obj Either a Seurat object or a gene expression matrix (genes x cells)
+#' @param celltypes A vector of cell type labels (length = ncol(obj) if matrix)
+#' @param top_n Maximum number of markers to select per cell type
+#' @param min_padj Adjusted p-value cutoff
+#'
+#' @return A binary matrix (celltypes x genes)
+generate_marker_binary_matrix <- function(obj, celltypes, top_n = 20, min_padj = 0.05) {
+  
+  # Ensure input is Seurat
+  if (inherits(obj, "Seurat")) {
+    seu <- obj
+  } else if (is.matrix(obj)) {
+    if (is.null(colnames(obj))) colnames(obj) <- paste0("cell", seq_len(ncol(obj)))
+    seu <- Seurat::CreateSeuratObject(counts = obj)
+  } else {
+    stop("Input must be a Seurat object or expression matrix")
+  }
+  
+  # Add cell type metadata
+  if (length(celltypes) != ncol(seu)) {
+    stop("Length of celltypes vector must match number of cells")
+  }
+  seu$cluster <- factor(celltypes)
+  
+  Seurat::Idents(seu) <- "cluster"
+  # DEA per cell type
+  all_markers <- Seurat::FindAllMarkers(
+    object = seu, 
+    only.pos = TRUE,
+    min.pct = 0.1,
+    logfc.threshold = 0.25,
+    test.use = "wilcox"
+  )
+  
+  # Filter by adjusted p-value
+  all_markers <- all_markers[all_markers$p_val_adj < min_padj, ]
+  
+  # For each cluster, take top N genes
+  top_markers <- all_markers %>%
+    dplyr::group_by(cluster) %>%
+    dplyr::slice_head(n = top_n) %>%
+    dplyr::ungroup()
+  
+  # Build binary matrix
+  celltypes_unique <- unique(top_markers$cluster)
+  genes_unique <- unique(top_markers$gene)
+  bin_mat <- matrix(0, nrow = length(celltypes_unique), ncol = length(genes_unique),
+                    dimnames = list(celltypes_unique, genes_unique))
+  
+  for (i in seq_len(nrow(top_markers))) {
+    bin_mat[top_markers$cluster[i], top_markers$gene[i]] <- 1
+  }
+  
+  return(bin_mat)
+}
+
+
+
 #' Generate a `class_df` Data Frame for Annotation
 #'
 #' This function creates a `class_df` data frame by selecting and processing 
