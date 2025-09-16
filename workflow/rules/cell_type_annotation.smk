@@ -135,3 +135,4 @@ include: "_cell_type_annotation/_reference_based/rctd.smk"
 include: "_cell_type_annotation/_reference_based/singler.smk"
 include: "_cell_type_annotation/_reference_based/seurat.smk"
 include: "_cell_type_annotation/_reference_based/xgboost.smk"
+include: "_cell_type_annotation/_reference_based/tacit.smk" # depends on RCTD
