@@ -915,6 +915,15 @@ def _process_count_correction(
     return (seg_methods4ovrlpy, ret)
 
 
+def _process_doublet_finding(data: dict[str, Any]) -> list[str]:
+    _methods: list[str] = _convert2list(
+        get_dict_value(data, "methods"),
+        match_length=False,
+    )
+
+    return _methods
+
+
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
 ) -> None:
@@ -1106,5 +1115,20 @@ def process_config(
                 k,
                 value=v,
             )
+
+    # Process `doublet_finding` section.
+    _doublet_finding = _process_doublet_finding(
+        get_dict_value(
+            data,
+            "doublet_finding",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_DOUBLET_FINDING_NAME,
+        value=_doublet_finding,
+    )
 
     return None

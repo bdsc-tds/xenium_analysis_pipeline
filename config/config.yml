@@ -207,3 +207,11 @@ count_correction:
     predict:
       num_samples: 30
       batch_size: 1000
+
+doublet_finding:
+  methods:
+    - scdblfinder_label_aware
+    - scdblfinder_label_unaware
+
+  scdblfinder:
+    _other_options:

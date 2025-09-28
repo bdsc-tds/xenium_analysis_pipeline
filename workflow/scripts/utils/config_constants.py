@@ -26,6 +26,8 @@ WILDCARDS_SEURAT_NORM_NAME: str = "_seurat_norm"
 WILDCARDS_COEXPRESSION_NAME: str = "_coexpression"
 # Child of `WILDCARDS_NAME` (second level); a list of values for cell type annotation.
 WILDCARDS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"
+# Child of `WILDCARDS_NAME` (second level); a list of values for doublet finding.
+WILDCARDS_DOUBLET_FINDING_NAME: str = "_doublet_finding"
 
 
 # Child of `experiments` (second level); for the path to the experiments configuration file on the disk.
