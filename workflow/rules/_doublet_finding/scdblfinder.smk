@@ -9,7 +9,10 @@ rule runScdblfinder:
     output:
         doublet_scores=protected(f'{config["output_path"]}/doublet_finding/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{doublet_id}}/doublet_scores.parquet')
     params:
-        label_aware=lambda wildcards: re.fullmatch("scdblfinder_label_aware") is not None
+        label_aware=lambda wildcards: re.fullmatch(
+            "scdblfinder_label_aware",
+            wildcards.doublet_id,
+        ) is not None
     log:
         f'{config["output_path"]}/doublet_finding/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{doublet_id}}/logs/runScdblfinder.log'
     wildcard_constraints:
@@ -23,4 +26,4 @@ rule runScdblfinder:
             1024000,
         )
     script:
-        "../../../scripts/_doublet_finding/scdblfinder.R"
+        "../../scripts/_doublet_finding/scdblfinder.R"
