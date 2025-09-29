@@ -817,8 +817,14 @@ def _process_cell_type_annotation(
 
     for k_1, v_1 in data_from_config.items():
         for k_2, v_2 in v_1.items():
-            if k_2 in ["methods", "modes"]:
+            if k_2 == "modes":
                 continue
+
+            if k_2 == "methods":
+                if "tacit" in v_2 and "rctd_class_aware" not in v_2:
+                    raise RuntimeError(
+                        "Error! 'rctd_class_aware' must be used in celltype annotation if 'tacit' is used."
+                    )
 
             updated_method: dict = {}
 
