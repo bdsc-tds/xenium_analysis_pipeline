@@ -64,3 +64,76 @@ rule runReferenceBasedTACIT:
         config["containers"]["r"]
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/tacit.R"
+
+# use rule runReferenceBasedTACIT as runPostCountCorrectionBySplitReferenceBasedTACIT with:
+#     input:
+#         query=lambda wildcards: get_path2query4annotation(
+#             wildcards,
+#             is_post_correction=True,
+#         ),
+#         reference=get_path2reference4reference_based_annotation,
+#         rctd=get_rctd_results4tacit
+#     output:
+#         tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+#         labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+#         tacit_weights=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/assignment_matrix.parquet')
+#     log:
+#         f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionBySplitReferenceBasedTACIT.log'
+#     wildcard_constraints:
+#         count_correction_id=r"split.+",
+#         annotation_id=r"reference_based/.+/tacit/.+"
+
+use rule runReferenceBasedTACIT as runPostCountCorrectionByOvrlpyReferenceBasedTACIT with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(
+            wildcards,
+            is_post_correction=True,
+        ),
+        reference=get_path2reference4reference_based_annotation,
+        rctd=get_rctd_results4tacit
+    output:
+        tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        tacit_weights=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/assignment_matrix.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByOvrlpyReferenceBasedTACIT.log'
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy",
+        annotation_id=r"reference_based/.+/tacit/.+"
+
+use rule runReferenceBasedTACIT as runPostCountCorrectionByResolviUnsupervisedReferenceBasedTACIT with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(
+            wildcards,
+            is_post_correction=True,
+        ),
+        reference=get_path2reference4reference_based_annotation,
+        rctd=get_rctd_results4tacit
+    output:
+        tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        tacit_weights=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/assignment_matrix.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByResolviUnsupervisedReferenceBasedTACIT.log'
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised",
+        annotation_id=r"reference_based/.+/tacit/.+"
+
+use rule runReferenceBasedTACIT as runPostCountCorrectionByResolviSupervisedReferenceBasedTACIT with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(
+            wildcards,
+            is_post_correction=True,
+        ),
+        reference=get_path2reference4reference_based_annotation,
+        rctd=get_rctd_results4tacit
+    output:
+        tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
+        labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
+        tacit_weights=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/assignment_matrix.parquet')
+    log:
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByResolviSupervisedReferenceBasedTACIT.log'
+    wildcard_constraints:
+        count_correction_id=r"resolvi_supervised",
+        annotation_id=r"reference_based/.+/tacit/.+"
+
