@@ -148,6 +148,7 @@ cell_type_annotation:
       - singler
       - seurat
       - xgboost
+      - tacit
 
     modes:
       - single_cell
@@ -184,6 +185,12 @@ cell_type_annotation:
     xgboost:
       nrounds: 1000
       eta: 0.3
+
+      _other_options:
+
+    tacit:
+      # "binary" or "continuous"
+      mode: "binary"
 
       _other_options:
 
