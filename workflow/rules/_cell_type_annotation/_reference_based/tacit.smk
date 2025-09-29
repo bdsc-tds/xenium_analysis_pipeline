@@ -56,6 +56,19 @@ rule runReferenceBasedTACIT:
         )
     wildcard_constraints:
         annotation_id=r"reference_based/.+/tacit/.+"
+    threads:
+        lambda wildcards: max(
+            get_dict_value(
+                config,
+                "cell_type_annotation",
+                extract_layers_from_experiments(wildcards.annotation_id, [0])[0],
+                "tacit",
+                extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
+                "_threads",
+                replace_none=2,
+            ),
+            2,
+        )
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 20, 20480)
     log:
