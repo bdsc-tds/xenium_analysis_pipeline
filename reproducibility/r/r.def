@@ -94,3 +94,6 @@ Stage: main
 
 # Install R packages with specific versions recorded by "renv"
     R -e "renv::restore(lockfile = '/opt/_renv/renv.lock')"
+
+# Install python packages through reticulate
+    R --slave -e "library('reticulate'); py_install('python-igraph'); py_install('leidenalg', forge = TRUE)"
