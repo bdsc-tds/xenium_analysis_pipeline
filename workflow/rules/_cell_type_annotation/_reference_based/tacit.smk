@@ -2,7 +2,7 @@
 #              Functions              #
 #######################################
 
-def get_rctd_results4tacit(wildcards) -> str:
+def get_rctd_results4runReferenceBasedTACIT(wildcards) -> str:
     prefix = f'{config["output_path"]}/cell_type_annotation/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}'
     rctd_id = re.sub(
         "(?<=/)tacit(?=/)",
@@ -20,7 +20,7 @@ rule runReferenceBasedTACIT:
     input:
         query=get_path2query4annotation,
         reference=get_path2reference4reference_based_annotation,
-        rctd=get_rctd_results4tacit
+        rctd=get_rctd_results4runReferenceBasedTACIT
     output:
         tacit_output=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
         labels=protected(f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
@@ -55,7 +55,7 @@ rule runReferenceBasedTACIT:
             replace_none=25,
         )
     wildcard_constraints:
-        annotation_id=r"reference_based/.+/tacit"
+        annotation_id=r"reference_based/.+/tacit/.+"
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 20, 20480)
     log:
@@ -72,7 +72,7 @@ rule runReferenceBasedTACIT:
 #             is_post_correction=True,
 #         ),
 #         reference=get_path2reference4reference_based_annotation,
-#         rctd=get_rctd_results4tacit
+#         rctd=get_rctd_results4runReferenceBasedTACIT
 #     output:
 #         tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
 #         labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
@@ -90,7 +90,7 @@ use rule runReferenceBasedTACIT as runPostCountCorrectionByOvrlpyReferenceBasedT
             is_post_correction=True,
         ),
         reference=get_path2reference4reference_based_annotation,
-        rctd=get_rctd_results4tacit
+        rctd=get_rctd_results4runReferenceBasedTACIT
     output:
         tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
         labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
@@ -108,7 +108,7 @@ use rule runReferenceBasedTACIT as runPostCountCorrectionByResolviUnsupervisedRe
             is_post_correction=True,
         ),
         reference=get_path2reference4reference_based_annotation,
-        rctd=get_rctd_results4tacit
+        rctd=get_rctd_results4runReferenceBasedTACIT
     output:
         tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
         labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
@@ -126,7 +126,7 @@ use rule runReferenceBasedTACIT as runPostCountCorrectionByResolviSupervisedRefe
             is_post_correction=True,
         ),
         reference=get_path2reference4reference_based_annotation,
-        rctd=get_rctd_results4tacit
+        rctd=get_rctd_results4runReferenceBasedTACIT
     output:
         tacit_output=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'),
         labels=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}/labels.parquet'),
