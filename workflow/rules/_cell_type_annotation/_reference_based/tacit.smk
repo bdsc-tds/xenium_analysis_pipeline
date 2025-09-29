@@ -34,9 +34,9 @@ rule runReferenceBasedTACIT:
             extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
             "mode",
         ),
-        N_binary_markers_per_cell_type = 10,
-        N_PCs = 50,
-        r = 10, # minicluster size in TACIT
+        N_binary_markers_per_cell_type=10,
+        N_PCs=50,
+        r=10, # minicluster size in TACIT
         future_globals_maxSize=lambda wildcards, resources: min(10**10 * resources[1], 10**11),
         annotation_id=lambda wildcards: wildcards.annotation_id,
         ref_assay=lambda wildcards: get_assay_name4annotation(wildcards, True),
@@ -70,7 +70,7 @@ rule runReferenceBasedTACIT:
             2,
         )
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 20, 20480)
+        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 40, 20480)
     log:
         f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedTACIT.log'
     container:
