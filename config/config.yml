@@ -192,6 +192,7 @@ cell_type_annotation:
       # "binary" or "continuous"
       mode: "binary"
 
+      _threads: 1
       _other_options:
 
 count_correction:

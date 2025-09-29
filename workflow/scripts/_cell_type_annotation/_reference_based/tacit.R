@@ -10,6 +10,7 @@ library(dplyr)
 library(spacexr)
 library(arrow)
 library(data.table)
+library(future)
 
 if (!requireNamespace("TACIT", quietly = TRUE)) {
   devtools::install_github("huynhkl953/TACIT@v1.0.0")
