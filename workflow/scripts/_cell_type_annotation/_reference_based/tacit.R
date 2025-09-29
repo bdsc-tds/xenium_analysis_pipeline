@@ -42,7 +42,7 @@ xe_chrom_common_genes <- intersect(rownames(xe), rownames(chrom))
 if(ref_mode == "binary"){
   # Generate reference object
   snakemake@source("../../../scripts/_cell_type_annotation/_reference_based/_generate_reference_obj.R")
-  xe_chrom_common_genes <- intersect(rownames(xe), colnames(ref))
+  xe_chrom_common_genes <- intersect(rownames(xe), colnames(chrom))
   ref <- generate_marker_binary_matrix(chrom[xe_chrom_common_genes,], celltypes = chrom[[annotation_level]] %>% pull, top_n = N_top, min_padj = 0.05) 
 } else if(ref_mode == "continuous"){
   rctd <- readRDS(rctd_path)
