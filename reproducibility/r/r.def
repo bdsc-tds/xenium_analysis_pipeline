@@ -96,4 +96,4 @@ Stage: main
     R -e "renv::restore(lockfile = '/opt/_renv/renv.lock')"
 
 # Install python packages through reticulate
-    R --slave -e "library('reticulate'); py_install('python-igraph'); py_install('leidenalg', forge = TRUE)"
+    R --slave -e "library('reticulate'); py_install('python-igraph'); py_install('leidenalg', forge = TRUE); py_install('numpy', forge = TRUE); py_install('pandas', forge = TRUE)"
