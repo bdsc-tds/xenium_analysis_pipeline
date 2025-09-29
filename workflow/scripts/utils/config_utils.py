@@ -826,6 +826,8 @@ def _process_cell_type_annotation(
                         "Error! 'rctd_class_aware' must be used in celltype annotation if 'tacit' is used."
                     )
 
+                continue
+
             updated_method: dict = {}
 
             for k_3, v_3 in v_2.items():
