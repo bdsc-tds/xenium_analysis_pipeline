@@ -1075,8 +1075,8 @@
       "RemoteHost": "api.github.com",
       "RemoteUsername": "senbaikang",
       "RemoteRepo": "TACIT",
-      "RemoteRef": "2d640bb49fbb86da97e316601d4e7fb0624b3fa6",
-      "RemoteSha": "2d640bb49fbb86da97e316601d4e7fb0624b3fa6",
+      "RemoteRef": "8a0ced2d638f2515be5220b01484fff904352052",
+      "RemoteSha": "8a0ced2d638f2515be5220b01484fff904352052",
       "Requirements": [
         "Matrix",
         "R",
@@ -1099,7 +1099,7 @@
         "segmented",
         "uwot"
       ],
-      "Hash": "396b072fb62978cc641117d14c9a173a"
+      "Hash": "de8f8814a595103b5ca17cb55d9c15bc"
     },
     "UCSC.utils": {
       "Package": "UCSC.utils",
