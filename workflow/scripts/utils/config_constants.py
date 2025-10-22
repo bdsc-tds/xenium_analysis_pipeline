@@ -12,6 +12,8 @@ WILDCARDS_GENE_PANELS_NAME: str = "_gene_panels"
 WILDCARDS_DONORS_NAME: str = "_donors"
 # Child of `WILDCARDS_NAME` (second level); a list of values for samples.
 WILDCARDS_SAMPLES_NAME: str = "_samples"
+# Child of `WILDCARDS_NAME` (second level); a list of values for gene panels to wrap.
+WILDCARDS_WRAP_GENE_PANELS_NAME: str = "_wrap_gene_panels"
 # Child of `WILDCARDS_NAME` (second level); a list of values for samples to wrap.
 WILDCARDS_WRAP_SAMPLES_NAME: str = "_wrap_samples"
 # Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods. They should be used in the tasks downstream to the segmentation.
