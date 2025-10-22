@@ -974,7 +974,21 @@ def process_config(
                 cc.WILDCARDS_SAMPLES_NAME,
             ),
             [0, 1, 2, 3],
-            sep_out="+",
+            sep_out="-",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_WRAP_GENE_PANELS_NAME,
+        value=extract_layers_from_experiments(
+            get_dict_value(
+                _experiments[0],
+                cc.WILDCARDS_GENE_PANELS_NAME,
+            ),
+            [0, 1],
+            sep_out="-",
         ),
     )
 

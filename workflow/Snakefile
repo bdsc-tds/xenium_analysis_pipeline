@@ -44,7 +44,8 @@ Explanation of wildcards:
 - condition_id: The name of a condition to be processed with a format of "condition".
 - gene_panel_id: The name of a gene panel to be processed with a format of "condition/gene_panel".
 - sample_id: The name of an sample to be processed with a format of "condition/gene_panel/donor/sample".
-- wrap_sample_id: The name of an sample to be wrapped with a format of "condition+gene_panel+donor+sample".
+- wrap_gene_panel_id: The name of a gene panel whose samples to be wrapped with a format of "condition-gene_panel".
+- wrap_sample_id: The name of an sample to be wrapped with a format of "condition-gene_panel-donor-sample".
 - compact_segmentation_id: The name of a segmentation method to only be used in segementation tasks.
 - segmentation_id: The name of a segmentation method to be used in the tasks downstream to the segmentation, except for count correction.
 - coexpression_id: The name of a coexpression method and target counts to be used in a format of "method_counts".
@@ -69,6 +70,11 @@ SAMPLE_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_SAMPLES_NAME,
+)
+WRAP_GENE_PANEL_ID = get_dict_value(
+    config,
+    cc.WILDCARDS_NAME,
+    cc.WILDCARDS_WRAP_GENE_PANELS_NAME,
 )
 WRAP_SAMPLE_ID = get_dict_value(
     config,
@@ -130,6 +136,7 @@ wildcard_constraints:
     condition_id='|'.join([re.escape(i) for i in CONDITION_ID]),
     gene_panel_id='|'.join([re.escape(i) for i in GENE_PANEL_ID]),
     sample_id='|'.join([re.escape(i) for i in SAMPLE_ID]),
+    wrap_gene_panel_id='|'.join([re.escape(i) for i in WRAP_GENE_PANEL_ID]),
     wrap_sample_id='|'.join([re.escape(i) for i in WRAP_SAMPLE_ID]),
     compact_segmentation_id='|'.join([re.escape(i) for i in COMPACT_SEGMENTATION_ID]),
     segmentation_id='|'.join([re.escape(i) for i in SEGMENTATION_ID]),
@@ -1066,11 +1073,19 @@ def get_output4post_count_correction_cell_type_annotation(
     return ret
 
 
-def get_output4wrap() -> list[str]:
-    return [
-        f'{config["output_path"]}/wraps/raw_data/{i}.tgz'
-        for i in WRAP_SAMPLE_ID
-    ]
+def get_output4wrap(level: str) -> list[str]:
+    if level == "gene_panel":
+        return [
+            f'{config["output_path"]}/wraps/raw_data/per_gene_panel/{i}.csv'
+            for i in WRAP_GENE_PANEL_ID
+        ]
+    elif level == "sample":
+        return [
+            f'{config["output_path"]}/wraps/raw_data/per_sample/{i}.csv'
+            for i in WRAP_SAMPLE_ID
+        ]
+    else:
+        raise RuntimeError(f'Error! Unsupported level "{level}" for data wrapping. Please choose among: ["gene_panel", "sample"]')
 
 
 def get_output4post_count_correction_neighbirhood_analysis() -> list[str]:
@@ -1281,7 +1296,7 @@ def get_input2all(
     post_count_correction_cell_type_annotation: bool = True,
     post_count_correction_neighbirhood_analysis: bool = False,
     cleanup: bool = False,
-    wrap: bool = False,
+    wrap: str | None = None,
 ) -> list[str]:
     ret: list[str] = []
 
@@ -1324,8 +1339,8 @@ def get_input2all(
     if cleanup:
         ret.extend(get_output4cleanup())
 
-    if wrap:
-        ret.extend(get_output4wrap())
+    if wrap is not None:
+        ret.extend(get_output4wrap(wrap))
 
     return ret
 
@@ -1348,5 +1363,5 @@ rule all:
             post_count_correction_cell_type_annotation=True,
             post_count_correction_neighbirhood_analysis=False,
             cleanup=False,
-            wrap=False,
+            wrap=None,
         )
