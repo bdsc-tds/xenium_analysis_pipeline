@@ -17,7 +17,7 @@ Stage: main
 
 %post
 # Set up build time environment variables, such as versions
-    export XENIUM_RANGER_DOWNLOAD_LINK="https://cf.10xgenomics.com/releases/xeniumranger/xeniumranger-3.0.1.tar.xz?Expires=1728419201&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=gBvl8ETDXoFuaTHUu3vOWkNkKGMmNldXLhRD~jrOgi3vnlxvOTHyLe9STOb3UBuASBIwUATGAn5JlhMDjp6OMH2lSFHLjAi~gwTQpn0Dy2muVWk5T~S5PxIY27C9yFWifgzT5f~EeT~8IY1kcLO~K2j0w2HzEnoSAOS6AXc5q3zdvoTV7MYO0hduCxeCYwx~odAgY20BeOqv8N3Ck8VlBm7USniA9p7ifQEloQ-7yag6-OqSH9TNRPMiOnFhxIrHNJpOlkw4KRFA8K4jRIOUMBuxDNwYFd6LMs5X-6zzoglP2CF8JYdwam2~BXghKDxiwOfvcJS9Exf18vk0Ag388g__"
+    export XENIUM_RANGER_DOWNLOAD_LINK="https://cf.10xgenomics.com/releases/xeniumranger/xeniumranger-4.0.0.tar.gz?Expires=1761794968&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=N4cAr9K8jt-5U2qcYdzXQEbzWfYhzU-tT~EPhhJwBqNkwoaOAFOlf8rSQ~TiUZ-bl4X6qy258Vt0xDfOvb~Ogz2S3dSXCLkDwjQm5XCMyuFyjycxgSsc1ZNPLrHwczUbbiXdUkMD5mmZqTIWanJpvQehIuw-RXsEDsl7HQHvVupy5Dq0OD22Qqiohu7lAD6W9hFUtTs9dit1cNBOdYHKcqb-Hzi9GIFTVDTPzoUJkGWwh6DmDKq93ho9bnHtqVurZF2Vlq-vGnjh3TVEYi3EO-LEh0-Ve83UA21jisxNCA5FrBplOUNrabnvq9YqzNhh2voX0rL5ZBFNCyzboiQFgQ__"
 
 # Configure tzdata to prevent asking for input
     export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
