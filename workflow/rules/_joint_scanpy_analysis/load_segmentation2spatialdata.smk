@@ -13,7 +13,15 @@ def get_input2loadSegmentation2SpatialData(wildcards) -> dict[str, str]:
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret["mapping"] = f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/mapped_cell_ids/mapped_cell_ids.parquet'
+        is_xr_v4, path2mapping = get_mapped_cell_ids(
+            wildcards.sample_id,
+            "proseg",
+            ret["data_dir"],
+            True,
+        )
+
+        if not is_xr_v4:
+            ret["mapping"] = path2mapping
 
     return ret
 
@@ -65,15 +73,29 @@ def get_cmd_args4loadSegmentation2SpatialData(wildcards, input) -> dict[str, str
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        assert "mapping" in input.keys(), "Mapping file is required for proseg segmentation"
+        if "mapping" in input.keys():
+            path2mapping = input.mapping
+        else:
+            is_xr_v4, path2mapping = get_mapped_cell_ids(
+                wildcards.sample_id,
+                "proseg",
+                ret["data_dir"],
+                False,
+            )
+            assert is_xr_v4 and path2mapping != ""
+
         args.extend(
             [
                 "--in_mapping",
-                input.mapping,
+                path2mapping,
                 "--cell_id_col_name",
-                "xr_cell_id" if use_mode_counts4loadProseg2Seurat(
+                get_xenium_cell_id4mapping(
                     wildcards,
-                ) else "proseg_cell_id",
+                ) if use_mode_counts4loadProseg2Seurat(
+                    wildcards,
+                ) else get_imported_cell_id4mapping(
+                    wildcards,
+                ),
             ]
         )
 

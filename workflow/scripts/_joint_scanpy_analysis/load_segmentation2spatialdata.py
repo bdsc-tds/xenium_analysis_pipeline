@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 import argparse
 
 import pandas as pd
@@ -17,7 +18,9 @@ from utils import readwrite
 
 # Set up argument parser
 def parse_args():
-    parser = argparse.ArgumentParser(description="Compute ovrlpy correction.")
+    parser = argparse.ArgumentParser(
+        description="Load segmentation results into SpatialData."
+    )
     parser.add_argument(
         "-l",
         type=str,
@@ -149,9 +152,33 @@ if __name__ == "__main__":
             args.in_mapping,
         )
 
-        mapping = pd.read_parquet(
-            args.in_mapping,
-        )
+        if (
+            re.fullmatch(
+                r".+\.parquet$",
+                args.in_mapping,
+                flags=re.IGNORECASE,
+            )
+            is not None
+        ):
+            mapping = pd.read_parquet(
+                args.in_mapping,
+            )
+        elif (
+            re.fullmatch(
+                r".+\.csv.*",
+                args.in_mapping,
+                flags=re.IGNORECASE,
+            )
+            is not None
+        ):
+            mapping = pd.read_csv(
+                args.in_mapping,
+                index_col=False,
+            )
+        else:
+            raise RuntimeError(
+                "Unsupported mapping file format. Supported formats are: '.parquet', '.csv.gz' or 'csv'.",
+            )
 
         data = data[
             mapping[args.cell_id_col_name],

@@ -17,6 +17,26 @@ def get_gene_panel4reprocessRawData(wildcards) -> str:
 
     return ret
 
+def validate_xr_version(
+    sample_id: str,
+    is_system_xr: bool,
+    level: str | int,
+    comp: callable[int, bool],
+) -> bool:
+    if isinstance(level, int):
+        level = str(level)
+    
+    with open(checkpoints.check10xVersions.get(sample_id=sample_id).output[0], "r", encoding="utf-8") as fh:
+        versions: dict[str, Any] = json.load(fh)
+
+    return comp(
+        get_dict_value(
+            versions,
+            "system_software_version" if is_system_xr else "raw_data_version",
+            level,
+        )
+    )
+
 def get_raw_data_dir(sample_id) -> tuple[bool, str]:
     gene_panel_file: str | None = get_gene_panel_file(sample_id, config)
 
