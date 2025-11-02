@@ -144,6 +144,10 @@ if __name__ == "__main__":
                 .astype(str)
                 .replace({str(coordinate_df["cell_id"].max()): "UNASSIGNED"})
             )
+
+        coordinate_df["cell_id"] = coordinate_df["cell_id"].apply(
+            lambda x: "UNASSIGNED" if x == "UNASSIGNED" else f"proseg-{x}"
+        )
     else:
         coordinate_df = (
             pd.read_parquet(args.sample_transcripts_path)
