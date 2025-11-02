@@ -130,12 +130,20 @@ if __name__ == "__main__":
                 "|".join(["BLANK_", "UnassignedCodeword", "NegControl"])
             )
         ]
+
         # recode unassigned transcripts cell_id to UNASSIGNED
-        coordinate_df["cell_id"] = (
-            coordinate_df["cell_id"]
-            .astype(str)
-            .replace({str(coordinate_df["cell_id"].max()): "UNASSIGNED"})
-        )
+        if coordinate_df["cell_id"].isnull().any():
+            # Proseg v3.x
+            coordinate_df["cell_id"] = coordinate_df["cell_id"].apply(
+                lambda x: "UNASSIGNED" if pd.isna(x) else str(int(x))
+            )
+        else:
+            # Proseg v2.x
+            coordinate_df["cell_id"] = (
+                coordinate_df["cell_id"]
+                .astype(str)
+                .replace({str(coordinate_df["cell_id"].max()): "UNASSIGNED"})
+            )
     else:
         coordinate_df = (
             pd.read_parquet(args.sample_transcripts_path)
