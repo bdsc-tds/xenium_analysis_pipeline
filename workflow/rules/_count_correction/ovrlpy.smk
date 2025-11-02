@@ -146,7 +146,7 @@ rule getCorrectedCountsFromOvrlpy:
                         for_input=False,
                     ).values()
                 ]
-            ) * 1e-6 * attempt,
+            ) * 1e-6 * attempt**2 * 100,
             512000
         )
     shell:
