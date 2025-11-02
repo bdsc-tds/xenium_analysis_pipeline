@@ -175,6 +175,17 @@ if __name__ == "__main__":
                 args.in_mapping,
                 index_col=False,
             )
+
+            if args.cell_id_col_name == "Imported cell ID":
+                mapping["Imported cell ID bak"] = mapping["Imported cell ID"]
+                mapping["Imported cell ID"] = (
+                    mapping["Imported cell ID"]
+                    .str.replace(
+                        r"^cell-",
+                        "",
+                    )
+                    .astype(int)
+                )
         else:
             raise RuntimeError(
                 "Unsupported mapping file format. Supported formats are: '.parquet', '.csv.gz' or 'csv'.",

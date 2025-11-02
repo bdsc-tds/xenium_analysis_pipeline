@@ -101,7 +101,7 @@ def get_imported_cell_id4mapping(wildcards) -> str:
         lambda x: x >= 4,
     )
 
-    return "Imported cell ID" if is_xr_v4 else "imported_cell_id"
+    return "\"Imported cell ID\"" if is_xr_v4 else "imported_cell_id"
 
 def get_xenium_cell_id4mapping(wildcards) -> str:
     seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
@@ -113,7 +113,7 @@ def get_xenium_cell_id4mapping(wildcards) -> str:
         lambda x: x >= 4,
     )
 
-    return "Xenium Ranger new cell ID" if is_xr_v4 else "xr_cell_id"
+    return "\"Xenium Ranger new cell ID\"" if is_xr_v4 else "xr_cell_id"
 
 
 #######################################
