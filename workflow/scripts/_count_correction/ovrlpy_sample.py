@@ -72,15 +72,16 @@ if __name__ == "__main__":
 
     # load transcripts
     if args.proseg_format:
-        coordinate_df = (
-            pd.read_csv(args.sample_transcripts_path, engine="pyarrow")
-            .rename(
-                columns={
-                    "assignment": "cell_id",
-                }
-            )
-            .query("qv >= 20")
+        coordinate_df = pd.read_csv(
+            args.sample_transcripts_path, engine="pyarrow"
+        ).rename(
+            columns={
+                "assignment": "cell_id",
+            }
         )
+
+        if "qv" in coordinate_df.columns:
+            coordinate_df = coordinate_df.query("qv >= 20")
 
         # remove dummy molecules
         coordinate_df = coordinate_df[
@@ -106,9 +107,9 @@ if __name__ == "__main__":
                 }
             )
             .query("is_gene")  # remove dummy molecules
+            .query("qv >= 20")  # remove low qv molecules
         )
 
-    coordinate_df = coordinate_df.query("qv >= 20")  # remove low qv molecules
     coordinate_df["gene"] = coordinate_df["gene"].astype("category")
 
     # run ovrlpy

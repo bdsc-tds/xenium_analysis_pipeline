@@ -36,12 +36,12 @@ use rule runPostprocessRCTD as runPostCountCorrectionBySplitPostprocessRCTD with
 
 use rule runPostprocessRCTD as runPostCountCorrectionByOvrlpyPostprocessRCTD with:
     input:
-        rctd_result=f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'
+        rctd_result=f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output.rds'
     output:
-        post_processed_rctd=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/post_processed_output.rds'),
-        post_processed_rctd_df=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output/post_processed_results_df.parquet')
+        post_processed_rctd=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/post_processed_output.rds'),
+        post_processed_rctd_df=protected(f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/output/post_processed_results_df.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByOvrlpyPostprocessRCTD.log'
+        f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByOvrlpyPostprocessRCTD.log'
     wildcard_constraints:
         count_correction_id=r"ovrlpy",
         annotation_id=r".+/rctd_.+"
