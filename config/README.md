@@ -9,7 +9,7 @@ Experiment data are expected to be organised in the following manner on disk, wh
 - Layer 3: donors
 - Layer 4: samples
 
-There is no specific naming convention for each layer, except that they should not start with underscores, as character strings with such patterns are reserved for special usage by this workflow.
+There is no specific naming convention for each layer, except that they should not contain dashes (-) or start with underscores, as character strings with such patterns are reserved for special usage by this workflow.
 
 With the data organised, they should then be specified in `experiments.yml`. The first three layers, namely conditions, gene panels and donors, should be listed as nested keys, and the final layer (samples) is a list of values corresponding to the third layer (donors). Users must ensure that these keys and values are character strings.
 
