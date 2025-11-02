@@ -15,7 +15,8 @@ xe <- LoadXenium(
 
 if (grepl(".+\\.csv.*", snakemake@params[["input_data"]][["mapping"]])) {
   mapping <- read.csv(snakemake@params[["input_data"]][["mapping"]], check.names=FALSE)
-  mapping[["proseg_cell_id_bak"]] <- mapping[[snakemake@params[["proseg_cell_id_col_name"]]]]
+  colnames(mapping) <- gsub(" ", "_", tolower(colnames(mapping)))
+  mapping[["imported_cell_id_bak"]] <- mapping[[snakemake@params[["proseg_cell_id_col_name"]]]]
   mapping[[snakemake@params[["proseg_cell_id_col_name"]]]] <- as.integer(gsub(
     "^cell-",
     "",

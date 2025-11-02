@@ -175,11 +175,14 @@ if __name__ == "__main__":
                 args.in_mapping,
                 index_col=False,
             )
+            mapping.columns = (
+                mapping.columns.str.strip().str.lower().str.replace(" ", "_")
+            )
 
-            if args.cell_id_col_name == "Imported cell ID":
-                mapping["Imported cell ID bak"] = mapping["Imported cell ID"]
-                mapping["Imported cell ID"] = (
-                    mapping["Imported cell ID"]
+            if args.cell_id_col_name == "imported_cell_id":
+                mapping["imported_cell_id_bak"] = mapping["imported_cell_id"]
+                mapping["imported_cell_id"] = (
+                    mapping["imported_cell_id"]
                     .str.replace(
                         r"^cell-",
                         "",
