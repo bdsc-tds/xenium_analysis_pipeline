@@ -56,10 +56,14 @@ rule runProseg:
     input:
         get_input2_or_params4runProseg
     output:
+        directory(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'),
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz'),
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz'),
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz')
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz')
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
     params:
@@ -105,12 +109,18 @@ rule runProseg:
         "cd {params.work_dir} && "
         "proseg --nthreads {threads} "
         "{params.other_options} "
+        "--output-counts counts.mtx.gz "
+        "--output-expected-counts expected-counts.mtx.gz "
+        "--output-cell-metadata cell-metadata.csv.gz "
+        "--output-transcript-metadata transcript-metadata.csv.gz "
+        "--output-gene-metadata gene-metadata.csv.gz "
+        "--output-cell-polygons cell-polygons.geojson.gz "
+        "--output-cell-polygon-layers cell-polygons-layers.geojson.gz "
         "--xenium {params.abs_input} &> {params.abs_log}"
 
 rule runProseg2Baysor:
     input:
-        segmentation=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz',
-        polygons=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz'
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'
     output:
         segmentation=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-transcript-metadata.csv'),
         polygons=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson')
@@ -122,10 +132,32 @@ rule runProseg2Baysor:
         config["containers"]["proseg"]
     shell:
         "proseg-to-baysor "
-        "{input.segmentation} "
-        "{input.polygons} "
+        "{input} "
         "--output-transcript-metadata {output.segmentation} "
         "--output-cell-polygons {output.polygons} &> {log}"
+
+rule convertProsegCountsFormat:
+    input:
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'
+    output:
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz'),
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz')
+    log:
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
+    threads:
+        1
+    conda:
+        "../../envs/coexpression.yml"
+    shell:
+        "python3 workflow/scripts/_segmentation/proseg_mtx_to_csv.py "
+        "--counts {input[0]} "
+        "--expected_counts {input[1]} "
+        "--gene {input[2]} "
+        "--out_counts {output[0]} "
+        "--out_expected_counts {output[1]} "
+        "-l {log}"
 
 rule normaliseProseg:
     input:

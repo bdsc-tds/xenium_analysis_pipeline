@@ -15,8 +15,55 @@ def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = Tr
         candidate_paths=("outs",),
         pat_flags=re.IGNORECASE,
         return_dir=True,
-        check_exist=False
+        check_exist=False,
     )
+
+def get_mapped_cell_ids(
+    sample_id: str,
+    segmentation_id: str,
+    normalised_path: str,
+) -> tuple[bool, str]:
+    is_xr_v4: bool = validate_xr_version(
+        sample_id,
+        True,
+        "0",
+        lambda x: x >= 4,
+    )
+
+    if is_xr_v4:
+        ret:str = normalise_path(
+            normalised_path,
+            candidate_paths=(".",),
+            pat_anchor_file="cell_id_map.csv.gz",
+            pat_flags=re.IGNORECASE,
+            return_dir=False,
+            check_exist=False,
+        )
+    else:
+        ret = f'{config["output_path"]}/segmentation/{segmentation_id}/{sample_id}/mapped_cell_ids/mapped_cell_ids.parquet'
+    
+    return is_xr_v4, ret
+
+def get_input2_or_params4loadProseg2Seurat(wildcards, for_input: bool = True) -> dict[str, str]:
+    ret: dict[str, str] = {
+        "cell_metadata": f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz',
+        "expected_counts": f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/expected-counts.csv.gz',
+        "dir": get_input2_or_params4loadSegmentation2Seurat(
+            wildcards,
+            for_input=for_input,
+        ),
+    }
+
+    is_xr_v4, path2mapping = get_mapped_cell_ids(
+        wildcards.sample_id,
+        "proseg",
+        ret["dir"],
+    )
+
+    if not (is_xr_v4 and for_input):
+        ret["mapping"] = path2mapping
+
+    return ret
 
 def use_mode_counts4loadProseg2Seurat(wildcards) -> bool:
     matched = re.match(
@@ -43,6 +90,30 @@ def get_mapping_param4loadProseg2Seurat(wildcards) -> bool:
         "mode" if use_mode_counts else "expected",
         "use_mapping",
     )
+
+def get_imported_cell_id4mapping(wildcards) -> str:
+    seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
+
+    is_xr_v4: bool = validate_xr_version(
+        wildcards.sample_id,
+        True,
+        "0",
+        lambda x: x >= 4,
+    )
+
+    return "imported_cell_id" if is_xr_v4 else "imported_cell_id"
+
+def get_xenium_cell_id4mapping(wildcards) -> str:
+    seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
+
+    is_xr_v4: bool = validate_xr_version(
+        wildcards.sample_id,
+        True,
+        "0",
+        lambda x: x >= 4,
+    )
+
+    return "xenium_ranger_new_cell_id" if is_xr_v4 else "xr_cell_id"
 
 
 #######################################
@@ -96,16 +167,13 @@ rule loadSegmentation2Seurat:
 
 rule loadProseg2Seurat:
     input:
-        dir=get_input2_or_params4loadSegmentation2Seurat,
-        mapping=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet',
-        cell_metadata=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz',
-        expected_counts=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz'
+        unpack(get_input2_or_params4loadProseg2Seurat)
     output:
         protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds')
     params:
-        data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(
+        input_data=lambda wildcards: get_input2_or_params4loadProseg2Seurat(
             wildcards,
-            for_input=False
+            for_input=False,
         ),
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         sample_id=lambda wildcards: wildcards.sample_id,
@@ -132,8 +200,8 @@ rule loadProseg2Seurat:
             0,
             sep_in="_",
         )[0],
-        xr_cell_id_col_name="xr_cell_id",
-        proseg_cell_id_col_name="proseg_cell_id",
+        xr_cell_id_col_name=get_xenium_cell_id4mapping,
+        proseg_cell_id_col_name=get_imported_cell_id4mapping,
         use_mode_counts=use_mode_counts4loadProseg2Seurat,
         use_mapping=get_mapping_param4loadProseg2Seurat
     log:

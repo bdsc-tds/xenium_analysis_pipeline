@@ -131,13 +131,13 @@ if __name__ == "__main__":
         xr_cells,
         proseg_cells,
         "xr_cell_id",
-        "proseg_cell_id",
+        "imported_cell_id",
     )
 
     xr2proseg: pd.DataFrame = get_nearest_neighbors(
         proseg_cells,
         xr_cells,
-        "proseg_cell_id",
+        "imported_cell_id",
         "xr_cell_id",
     )
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         proseg2xr,
         xr2proseg,
         how="inner",
-        on=["xr_cell_id", "proseg_cell_id"],
+        on=["xr_cell_id", "imported_cell_id"],
         suffixes=("_proseg2xr", "_xr2proseg"),
     )
 

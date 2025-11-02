@@ -8,7 +8,15 @@ import sys
 
 import coexpression as ce
 
-from ..utils import readwrite
+sys.path.append(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",
+        ),
+    ),
+)
+from utils import readwrite
 
 
 def parse_args():
