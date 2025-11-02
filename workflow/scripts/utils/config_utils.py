@@ -851,7 +851,7 @@ def _process_count_correction(
         is not None
         for i in segmentation_methods
     ):
-        seg_methods4ovrlpy.append("_proseg")
+        seg_methods4ovrlpy.append("proseg")
 
     if any(
         re.match(
@@ -862,7 +862,7 @@ def _process_count_correction(
         is not None
         for i in segmentation_methods
     ):
-        seg_methods4ovrlpy.append("_general")
+        seg_methods4ovrlpy.append("raw")
 
     _methods: list[str] = [
         i

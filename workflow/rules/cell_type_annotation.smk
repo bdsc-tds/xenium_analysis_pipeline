@@ -20,15 +20,16 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 suffix,
             )
 
-        prefix: str = f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}'
-
         if re.match(
             r"^ovrlpy$",
             wildcards.count_correction_id,
             flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
-                prefix,
+                config["output_path"],
+                "post_count_correction_std_seurat_analysis",
+                wildcards.segmentation_id4ovrlpy,
+                wildcards.sample_id,
                 "ovrlpy",
                 f'signal_integrity_threshold={get_dict_value(
                     config,
@@ -39,13 +40,17 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 wildcards.normalisation_id,
                 suffix,
             )
-        elif re.match(
+
+
+        _prefix: str = f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}'
+
+        if re.match(
             r"^resolvi_unsupervised$",
             wildcards.count_correction_id,
             flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
-                prefix,
+                _prefix,
                 "resolvi_unsupervised",
                 f'mixture_k={get_dict_value(
                     config,
@@ -70,7 +75,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
             flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
-                prefix,
+                _prefix,
                 wildcards.normalisation_id,
                 wildcards.annotation_id,
                 "resolvi_supervised",
@@ -93,7 +98,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
             )
         else:
             return os.path.join(
-                prefix,
+                _prefix,
                 wildcards.normalisation_id,
                 wildcards.annotation_id,
                 wildcards.count_correction_id,

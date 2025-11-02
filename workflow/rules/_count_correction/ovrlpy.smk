@@ -3,15 +3,15 @@
 #######################################
 
 def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
-    if re.match(
-        r"^_proseg$",
+    if re.fullmatch(
+        r"^proseg$",
         wildcards.segmentation_id4ovrlpy,
         flags=re.IGNORECASE,
     ) is not None:
         return f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz'
     
-    if re.match(
-        r"^_general$",
+    if re.fullmatch(
+        r"^raw$",
         wildcards.segmentation_id4ovrlpy,
         flags=re.IGNORECASE,
     ) is not None:
@@ -42,58 +42,29 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
 
 
 def get_input2_or_params4getCorrectedCountsFromOvrlpy(wildcards, for_input: bool = True) -> dict[str, str]:
-    prefix_ovrlpy: str = f'{config["output_path"]}/count_correction'
+    _prefix: str = f'{config["output_path"]}/count_correction'
 
     ret: dict[str, str] = {}
 
-    segmentation_id4ovrlpy: str = ""
-
-    if re.match(
-        r"^proseg_expected$",
-        wildcards.segmentation_id,
-        flags=re.IGNORECASE,
-    ) is not None:
-        segmentation_id4ovrlpy = "_proseg"
-
-        ret["transcripts"] = f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/transcript-metadata.csv.gz'
-    else:
-        segmentation_id4ovrlpy = "_general"
-
-        use_raw_data, _ret = get_raw_data_dir(wildcards.sample_id)
-
-        if for_input:
-            ret["transcripts"] = _ret
-        else:
-            if use_raw_data:
-                ret["transcripts"] = normalise_path(
-                    _ret,
-                    pat_anchor_file=r"transcripts.parquet",
-                    pat_flags=re.IGNORECASE,
-                    return_dir=False,
-                    check_exist=True,
-                )
-            else:
-                ret["transcripts"] = normalise_path(
-                    _ret,
-                    candidate_paths=("outs",),
-                    pat_anchor_file=r"transcripts.parquet",
-                    pat_flags=re.IGNORECASE,
-                    return_dir=False,
-                    check_exist=False,
-                )
+    ret["transcripts"] = get_input2_or_params4runOvrlpy(
+        wildcards,
+        for_input=for_input,
+    )
 
     ret["signal_integrity"] = os.path.join(
-        prefix_ovrlpy,
-        segmentation_id4ovrlpy,
+        _prefix,
+        wildcards.segmentation_id4ovrlpy,
         wildcards.sample_id,
-        "ovrlpy/signal_integrity.parquet",
+        "ovrlpy",
+        "signal_integrity.parquet",
     )
 
     ret["transcript_info"] = os.path.join(
-        prefix_ovrlpy,
-        segmentation_id4ovrlpy,
+        _prefix,
+        wildcards.segmentation_id4ovrlpy,
         wildcards.sample_id,
-        "ovrlpy/transcript_info.parquet",
+        "ovrlpy",
+        "transcript_info.parquet",
     )
 
     return ret
@@ -115,7 +86,7 @@ rule runOvrlpy:
             wildcards,
             for_input=False,
         ),
-        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id4ovrlpy == '_proseg' else ''
+        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id4ovrlpy == 'proseg' else ''
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/logs/runOvrlpy.log'
     container:
@@ -127,7 +98,7 @@ rule runOvrlpy:
                     wildcards,
                     for_input=False,
                 )
-            ) * 1e-6 * attempt**2 * 80,
+            ) * 1e-6 * attempt**2 * 150,
             1024000
         )
     shell:
@@ -143,8 +114,8 @@ rule getCorrectedCountsFromOvrlpy:
     input:
         unpack(get_input2_or_params4getCorrectedCountsFromOvrlpy)
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
-        cells_mean_integrity_unfiltered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
+        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
+        cells_mean_integrity_unfiltered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
     params:
         input_transcripts=lambda wildcards: get_dict_value(
             get_input2_or_params4getCorrectedCountsFromOvrlpy(
@@ -160,9 +131,9 @@ rule getCorrectedCountsFromOvrlpy:
             "signal_integrity_threshold",
             replace_none=0.5,
         ),
-        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id == 'proseg_expected' else ''
+        proseg_format=lambda wildcards: '--proseg_format' if wildcards.segmentation_id4ovrlpy == 'proseg' else ''
     log:
-        f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/getCorrectedCountsFromOvrlpy.log'
+        f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/getCorrectedCountsFromOvrlpy.log'
     container:
         config["containers"]["python_cuda"]
     resources:

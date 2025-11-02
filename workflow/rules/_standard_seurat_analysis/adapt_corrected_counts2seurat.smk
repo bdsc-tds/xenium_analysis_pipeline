@@ -3,18 +3,18 @@
 #######################################
 
 def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
-    prefix: str = f'{config["output_path"]}/count_correction/{wildcards.segmentation_id}/{wildcards.sample_id}'
     suffix: str = "corrected_counts.h5"
-
-    ret: str = ""
 
     if re.match(
         r"^ovrlpy$",
         wildcards.count_correction_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret = os.path.join(
-            prefix,
+        return os.path.join(
+            config["output_path"],
+            "count_correction",
+            wildcards.segmentation_id4ovrlpy,
+            wildcards.sample_id,
             "ovrlpy",
             f'signal_integrity_threshold={get_dict_value(
                 config,
@@ -24,13 +24,16 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
             )}',
             suffix,
         )
-    elif re.match(
+
+    _prefix: str = f'{config["output_path"]}/count_correction/{wildcards.segmentation_id}/{wildcards.sample_id}'
+
+    if re.match(
         r"^resolvi_unsupervised$",
         wildcards.count_correction_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret = os.path.join(
-            prefix,
+        return os.path.join(
+            _prefix,
             "resolvi_unsupervised",
             f'mixture_k={get_dict_value(
                 config,
@@ -53,8 +56,8 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
         wildcards.count_correction_id,
         flags=re.IGNORECASE,
     ) is not None:
-        ret = os.path.join(
-            prefix,
+        return os.path.join(
+            _prefix,
             wildcards.normalisation_id,
             wildcards.annotation_id,
             "resolvi_supervised",
@@ -75,14 +78,49 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
             suffix,
         )
     else:
-        ret = os.path.join(
-            prefix,
+        return os.path.join(
+            _prefix,
             wildcards.normalisation_id,
             wildcards.annotation_id,
             wildcards.count_correction_id,
             suffix,
         )
 
+def get_inpu2adaptCorrectedCountsByOvrlpy2Seurat(wildcards) -> dict[str, str]:
+    ret: dict[str, str] = {
+        "corrected_counts": get_corrected_counts4adaptCorrectedCounts2Seurat(
+            wildcards,
+        ),
+    }
+
+    if re.fullmatch(
+        r"^raw$",
+        wildcards.segmentation_id4ovrlpy,
+        flags=re.IGNORECASE,
+    ) is not None:
+        ret["raw_obj"] = f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id4ovrlpy}/{wildcards.sample_id}/raw_seurat.rds'
+    elif re.fullmatch(
+        r"^proseg$",
+        wildcards.segmentation_id4ovrlpy,
+        flags=re.IGNORECASE,
+    ) is not None:
+        avail_proseg_id: list[str] = sorted(
+            [
+                i
+                for i in SEGMENTATION_ID
+                if re.fullmatch(
+                    r"^proseg_.+$",
+                    i,
+                    flags=re.IGNORECASE,
+                ) is not None
+            ]
+        )
+        assert len(avail_proseg_id) > 0, "Error! No available proseg segmentation id found."
+
+        ret["raw_obj"] = f'{config["output_path"]}/std_seurat_analysis/{avail_proseg_id[0]}/{wildcards.sample_id}/raw_seurat.rds'
+    else:
+        raise RuntimeError(f'Error! Unknown segmentation id: {wildcards.segmentation_id4ovrlpy}.')
+    
     return ret
 
 
@@ -156,16 +194,14 @@ rule adaptCorrectedCountsBySplit2Seurat:
         "../../scripts/_standard_seurat_analysis/adapt_corrected_counts2seurat.R"
 
 use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with:
+    input:
+        unpack(get_inpu2adaptCorrectedCountsByOvrlpy2Seurat)
     output:
-        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds')
+        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds')
     params:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
-        segmentation_id=lambda wildcards: wildcards.segmentation_id,
-        segmentation_method=lambda wildcards: extract_layers_from_experiments(
-            wildcards.segmentation_id,
-            0,
-            sep_in="_",
-        )[0],
+        segmentation_id=lambda wildcards: wildcards.segmentation_id4ovrlpy,
+        segmentation_method=lambda wildcards: wildcards.segmentation_id4ovrlpy,
         sample_id=lambda wildcards: wildcards.sample_id,
         condition=lambda wildcards: extract_layers_from_experiments(
             wildcards.sample_id,
@@ -192,7 +228,7 @@ use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByOvrlpy2Seur
         annotation_mode=None,
         count_correction_id=lambda wildcards: wildcards.count_correction_id
     log:
-        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/adaptCorrectedCountsByOvrlpy2Seurat.log'
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/logs/adaptCorrectedCountsByOvrlpy2Seurat.log'
     wildcard_constraints:
         count_correction_id=r"ovrlpy"
 
