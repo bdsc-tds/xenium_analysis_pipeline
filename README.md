@@ -6,6 +6,8 @@
 
 This workflow is developed with reproducibility bearing in mind. Please refer to the following section for more details.
 
+> **_Note_**: The pipeline we used in the [paper](https://www.biorxiv.org/content/10.1101/2025.04.23.649965v1) is available with tag v1.0.
+
 ## Installation
 
 ### Snakemake
@@ -36,7 +38,7 @@ singularity build --fakeroot --force /path/to/the/built/container r.def
 
 #### 10X Xenium Ranger
 
-The 10X Xenium Ranger version we use here is 3.0.1 (Sep. 19th, 2024). A link is used to download the software from the [10X website](https://www.10xgenomics.com/support/software/xenium-ranger/downloads). Since 10X regularly updates this link, users should replace it with the most recent one if the container fails to be built:
+The 10X Xenium Ranger version we use here is 4.0.0. A link is used to download the software from the [10X website](https://www.10xgenomics.com/support/software/xenium-ranger/downloads). Since 10X regularly updates this link, users should replace it with the most recent one if the container fails to be built:
 
 ```bash
 # the current working directory is the root of this repo
@@ -54,7 +56,7 @@ singularity build --fakeroot --force /path/to/the/built/container reproducibilit
 
 #### Proseg
 
-The [Proseg](https://https://github.com/dcjones/proseg) version we use here is 2.0.0.
+The [Proseg](https://https://github.com/dcjones/proseg) version we use here is 3.0.10.
 
 ```bash
 # the current working directory is the root of this repo
@@ -141,4 +143,5 @@ There are some other files related to Xenium data analysis, residing in `noteboo
    10X xeniumranger copies files from raw data during processing. This error could be because the user, as the owner of the raw data, deprives him-/herself of write permission to it. When 10X xeniumranger conducts copy operation, it also copies the modes of files, and hence this error when it needs to write to the copied files. Although it is a safe behaviour to prevent from accidental change of the raw data, users have to have write permission to the raw data when they are also the owner.
 
 ## Original manuscript analyses
+
 Code to reproduce analyses from the original manuscript can be found at https://github.com/bdsc-tds/Bilous2025
