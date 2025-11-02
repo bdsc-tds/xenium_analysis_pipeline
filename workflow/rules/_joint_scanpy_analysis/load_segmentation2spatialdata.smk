@@ -13,15 +13,19 @@ def get_input2loadSegmentation2SpatialData(wildcards) -> dict[str, str]:
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) is not None:
-        is_xr_v4, path2mapping = get_mapped_cell_ids(
+        is_xr_v4: bool = validate_xr_version(
             wildcards.sample_id,
-            "proseg",
-            ret["data_dir"],
             True,
+            "0",
+            lambda x: x >= 4,
         )
 
         if not is_xr_v4:
-            ret["mapping"] = path2mapping
+            ret["mapping"] = get_mapped_cell_ids(
+                wildcards.sample_id,
+                "proseg",
+                None,
+            )[1]
 
     return ret
 
@@ -79,8 +83,7 @@ def get_cmd_args4loadSegmentation2SpatialData(wildcards, input) -> dict[str, str
             is_xr_v4, path2mapping = get_mapped_cell_ids(
                 wildcards.sample_id,
                 "proseg",
-                ret["data_dir"],
-                False,
+                data_dir["data_dir"],
             )
             assert is_xr_v4 and path2mapping != ""
 

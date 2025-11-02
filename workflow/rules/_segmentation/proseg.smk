@@ -56,13 +56,12 @@ rule runProseg:
     input:
         get_input2_or_params4runProseg
     output:
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'),
+        directory(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/rates.csv.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz'),
         protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz')
     log:
@@ -115,7 +114,6 @@ rule runProseg:
         "--output-cell-metadata cell-metadata.csv.gz "
         "--output-transcript-metadata transcript-metadata.csv.gz "
         "--output-gene-metadata gene-metadata.csv.gz "
-        "--output-rates rates.csv.gz "
         "--output-cell-polygons cell-polygons.geojson.gz "
         "--output-cell-polygon-layers cell-polygons-layers.geojson.gz "
         "--xenium {params.abs_input} &> {params.abs_log}"
@@ -144,8 +142,8 @@ rule convertProsegCountsFormat:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'
     output:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz'
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz'),
+        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz')
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
     threads:

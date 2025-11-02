@@ -14,7 +14,13 @@ xe <- LoadXenium(
 )
 
 if (grepl(".+\\.csv.*", snakemake@params[["input_data"]][["mapping"]])) {
-  mapping <- read.csv(snakemake@params[["input_data"]][["mapping"]])
+  mapping <- read.csv(snakemake@params[["input_data"]][["mapping"]], check.names=FALSE)
+  mapping[["proseg_cell_id_bak"]] <- mapping[[snakemake@params[["proseg_cell_id_col_name"]]]]
+  mapping[[snakemake@params[["proseg_cell_id_col_name"]]]] <- as.integer(gsub(
+    "^cell-",
+    "",
+    mapping[[snakemake@params[["proseg_cell_id_col_name"]]]]
+  ))
 } else if (grepl(".+\\.parquet$", snakemake@params[["input_data"]][["mapping"]])) {
   mapping <- read_parquet(snakemake@params[["input_data"]][["mapping"]])
 } else {

@@ -22,7 +22,6 @@ def get_mapped_cell_ids(
     sample_id: str,
     segmentation_id: str,
     normalised_path: str,
-    for_input: bool = True,
 ) -> tuple[bool, str]:
     is_xr_v4: bool = validate_xr_version(
         sample_id,
@@ -31,18 +30,17 @@ def get_mapped_cell_ids(
         lambda x: x >= 4,
     )
 
-    ret: str = ""
-    if not is_xr_v4:
-        ret = f'{config["output_path"]}/segmentation/{segmentation_id}/{sample_id}/mapped_cell_ids/mapped_cell_ids.parquet'
-    elif not for_input:
-        ret = normalise_path(
+    if is_xr_v4:
+        ret:str = normalise_path(
             normalised_path,
             candidate_paths=(".",),
-            pat_anchor_file=r"^cell_id_map\.csv\.gz$",
+            pat_anchor_file="cell_id_map.csv.gz",
             pat_flags=re.IGNORECASE,
             return_dir=False,
-            check_exist=True,
+            check_exist=False,
         )
+    else:
+        ret = f'{config["output_path"]}/segmentation/{segmentation_id}/{sample_id}/mapped_cell_ids/mapped_cell_ids.parquet'
     
     return is_xr_v4, ret
 
@@ -60,7 +58,6 @@ def get_input2_or_params4loadProseg2Seurat(wildcards, for_input: bool = True) ->
         wildcards.sample_id,
         "proseg",
         ret["dir"],
-        for_input,
     )
 
     if not (is_xr_v4 and for_input):

@@ -62,14 +62,14 @@ def parse_args():
 
 
 def _convert(
-    genes,
+    gene_info,
     mtx_file: str,
     out_file: str,
 ) -> None:
     print("Reading matrix")
     X = mmread(mtx_file).toarray()
 
-    df = pd.DataFrame(X, columns=genes)
+    df = pd.DataFrame(X, columns=gene_info)
 
     print("writing csv")
     df.to_csv(out_file, compression="gzip", index=False)
