@@ -40,12 +40,12 @@ use rule runTranscriptomicNeighborhoodAnalysis as runPostCountCorrectionBySplitT
 
 use rule runTranscriptomicNeighborhoodAnalysis as runPostCountCorrectionByOvrlpyTranscriptomicNeighborhoodAnalysis with:
     input:
-        xe=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds',
-        post_processed_rctd=f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/post_processed_output.rds'
+        xe=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds',
+        post_processed_rctd=f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/post_processed_output.rds'
     output:
-        transcriptomic_neighborhood_scores=protected(f'{config["output_path"]}/post_count_correction_neighborhood_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet')
+        transcriptomic_neighborhood_scores=protected(f'{config["output_path"]}/post_count_correction_neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet')
     log:
-        f'{config["output_path"]}/post_count_correction_neighborhood_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByOvrlpyTranscriptomicNeighborhoodAnalysis.log'
+        f'{config["output_path"]}/post_count_correction_neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}/logs/runPostCountCorrectionByOvrlpyTranscriptomicNeighborhoodAnalysis.log'
     wildcard_constraints:
         count_correction_id=r"ovrlpy",
         annotation_id=r".+/rctd_.+"

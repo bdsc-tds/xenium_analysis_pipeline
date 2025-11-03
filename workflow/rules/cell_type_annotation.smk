@@ -19,17 +19,16 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 f'{config["output_path"]}/std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}/{wildcards.normalisation_id}',
                 suffix,
             )
+        
+        _prefix: str = f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}'
 
-        if re.match(
+        if re.fullmatch(
             r"^ovrlpy$",
             wildcards.count_correction_id,
             flags=re.IGNORECASE,
         ) is not None:
             return os.path.join(
-                config["output_path"],
-                "post_count_correction_std_seurat_analysis",
-                wildcards.segmentation_id4ovrlpy,
-                wildcards.sample_id,
+                _prefix,
                 "ovrlpy",
                 f'signal_integrity_threshold={get_dict_value(
                     config,
@@ -40,11 +39,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 wildcards.normalisation_id,
                 suffix,
             )
-
-
-        _prefix: str = f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{wildcards.segmentation_id}/{wildcards.sample_id}'
-
-        if re.match(
+        elif re.fullmatch(
             r"^resolvi_unsupervised$",
             wildcards.count_correction_id,
             flags=re.IGNORECASE,
@@ -69,7 +64,7 @@ def get_path2query4annotation(wildcards, is_post_correction: bool = False) -> st
                 wildcards.normalisation_id,
                 suffix,
             )
-        elif re.match(
+        elif re.fullmatch(
             r"^resolvi_supervised$",
             wildcards.count_correction_id,
             flags=re.IGNORECASE,

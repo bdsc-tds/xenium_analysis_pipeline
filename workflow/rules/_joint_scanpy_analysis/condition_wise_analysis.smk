@@ -23,7 +23,6 @@ rule gatherConditionWiseSegmentedSamples:
     script:
         "../../scripts/_joint_scanpy_analysis/gather_segmented_samples.py"
 
-#TODO
 rule runConditionWiseAnalysis:
     input:
         f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/condition_wise_samples.json'
@@ -42,7 +41,7 @@ rule runConditionWiseAnalysis:
                 wildcards,
                 attempt,
                 level=0,
-                multiplier=80,
+                multiplier=150,
             ),
             102400,
         ),

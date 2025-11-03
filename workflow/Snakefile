@@ -256,7 +256,7 @@ def get_output4reports(
                         k,
                         "standard_seurat_analysis.html",
                     )
-                    for i in SEGMENTATION_ID4OVRLPY
+                    for i in SEGMENTATION_ID
                     for j in SAMPLE_ID
                     for k in NORMALISATION_ID
                 ]
@@ -711,7 +711,7 @@ def get_output4count_correction(
                     )}',
                     "corrected_counts.h5",
                 )
-                for i in SEGMENTATION_ID4OVRLPY
+                for i in SEGMENTATION_ID
                 for j in SAMPLE_ID
             ]
         )
@@ -918,7 +918,7 @@ def get_output4post_count_correction_cell_type_annotation(
                     j[1],
                     m,
                 )
-                for i in SEGMENTATION_ID4OVRLPY
+                for i in SEGMENTATION_ID
                 for j in samples_annotations
                 for k in NORMALISATION_ID
                 for m in filenames
@@ -1134,7 +1134,7 @@ def get_output4post_count_correction_neighbirhood_analysis() -> list[str]:
                     j[1],
                     m,
                 )
-                for i in SEGMENTATION_ID4OVRLPY
+                for i in SEGMENTATION_ID
                 for j in samples_annotations
                 for k in NORMALISATION_ID
                 for m in filenames
