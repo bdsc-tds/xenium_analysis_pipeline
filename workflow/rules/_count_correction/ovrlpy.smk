@@ -41,35 +41,6 @@ def get_input2_or_params4runOvrlpy(wildcards, for_input: bool = True) -> str:
     raise RuntimeError(f'Error! Unknown segmentation id: {wildcards.segmentation_id4ovrlpy}.')
 
 
-def get_input2_or_params4getCorrectedCountsFromOvrlpy(wildcards, for_input: bool = True) -> dict[str, str]:
-    _prefix: str = f'{config["output_path"]}/count_correction'
-
-    ret: dict[str, str] = {}
-
-    ret["transcripts"] = get_input2_or_params4runOvrlpy(
-        wildcards,
-        for_input=for_input,
-    )
-
-    ret["signal_integrity"] = os.path.join(
-        _prefix,
-        wildcards.segmentation_id4ovrlpy,
-        wildcards.sample_id,
-        "ovrlpy",
-        "signal_integrity.parquet",
-    )
-
-    ret["transcript_info"] = os.path.join(
-        _prefix,
-        wildcards.segmentation_id4ovrlpy,
-        wildcards.sample_id,
-        "ovrlpy",
-        "transcript_info.parquet",
-    )
-
-    return ret
-
-
 #######################################
 #                Rules                #
 #######################################
@@ -112,17 +83,16 @@ rule runOvrlpy:
 
 rule getCorrectedCountsFromOvrlpy:
     input:
-        unpack(get_input2_or_params4getCorrectedCountsFromOvrlpy)
+        transcripts=get_input2_or_params4runOvrlpy,
+        signal_integrity=f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity.parquet',
+        transcript_info=f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/transcript_info.parquet'
     output:
         corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
         cells_mean_integrity_unfiltered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
     params:
-        input_transcripts=lambda wildcards: get_dict_value(
-            get_input2_or_params4getCorrectedCountsFromOvrlpy(
-                wildcards,
-                for_input=False,
-            ),
-            "transcripts",
+        input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
+            wildcards,
+            for_input=False,
         ),
         signal_integrity_threshold=get_dict_value(
             config,
@@ -137,16 +107,8 @@ rule getCorrectedCountsFromOvrlpy:
     container:
         config["containers"]["python_cuda"]
     resources:
-        mem_mb=lambda wildcards, attempt: min(
-            sum(
-                [
-                    get_size(i)
-                    for i in get_input2_or_params4getCorrectedCountsFromOvrlpy(
-                        wildcards,
-                        for_input=False,
-                    ).values()
-                ]
-            ) * 1e-6 * attempt**2 * 100,
+        mem_mb=lambda wildcards, input, attempt: min(
+            input.size_mb * 1e-6 * attempt**2 * 100,
             512000
         )
     shell:
