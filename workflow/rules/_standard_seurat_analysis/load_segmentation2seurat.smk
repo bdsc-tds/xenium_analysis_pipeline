@@ -2,26 +2,6 @@
 #              Functions              #
 #######################################
 
-def get_input2_or_params4loadRawData2Seurat(wildcards, for_input: bool = True) -> str:
-    use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
-
-    if for_input:
-        return ret
-
-    if use_raw_data:
-        return normalise_path(
-            ret,
-            return_dir=True,
-            check_exist=True,
-        )
-
-    return normalise_path(
-        ret,
-        candidate_paths=("outs",),
-        return_dir=True,
-        check_exist=False,
-    )
-
 def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = True) -> str:
     seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
 
@@ -139,47 +119,6 @@ def get_xenium_cell_id4mapping(wildcards) -> str:
 #######################################
 #                Rules                #
 #######################################
-
-rule loadRawData2Seurat:
-    input:
-        get_input2_or_params4loadRawData2Seurat
-    output:
-        protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/raw_seurat.rds')
-    params:
-        data_dir=lambda wildcards: get_input2_or_params4loadRawData2Seurat(
-            wildcards,
-            for_input=False
-        ),
-        spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
-        sample_id=lambda wildcards: wildcards.sample_id,
-        segmentation_id=lambda wildcards: wildcards.segmentation_id4ovrlpy,
-        condition=lambda wildcards: extract_layers_from_experiments(
-            wildcards.sample_id,
-            0,
-        )[0],
-        gene_panel=lambda wildcards: extract_layers_from_experiments(
-            wildcards.sample_id,
-            1,
-        )[0],
-        donor=lambda wildcards: extract_layers_from_experiments(
-            wildcards.sample_id,
-            2,
-        )[0],
-        sample=lambda wildcards: extract_layers_from_experiments(
-            wildcards.sample_id,
-            3,
-        )[0],
-        segmentation_method=lambda wildcards: wildcards.segmentation_id4ovrlpy
-    log:
-        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id4ovrlpy}}/{{sample_id}}/logs/loadSegmentation2Seurat.log'
-    container:
-        config["containers"]["r"]
-    wildcard_constraints:
-        segmentation_id4ovrlpy=r"raw"
-    resources:
-        mem_mb=lambda wildcards, attempt: min(attempt**2 * 2048, 512000)
-    script:
-        "../../scripts/_standard_seurat_analysis/load_segmentation2seurat.R"
 
 rule loadSegmentation2Seurat:
     input:
