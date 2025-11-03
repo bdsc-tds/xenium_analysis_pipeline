@@ -13,7 +13,7 @@ def get_corrected_counts4adaptCorrectedCounts2Seurat(wildcards) -> str:
         flags=re.IGNORECASE,
     ) is not None:
         ret = os.path.join(
-            prefix,
+            _prefix,
             "ovrlpy",
             f'signal_integrity_threshold={get_dict_value(
                 config,
