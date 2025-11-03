@@ -23,7 +23,6 @@ rule gatherGenePanelWiseSegmentedSamples:
     script:
         "../../scripts/_joint_scanpy_analysis/gather_segmented_samples.py"
 
-#TODO
 rule runGenePanelWiseAnalysis:
     input:
         f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{gene_panel_id}}/gene_panel_wise_samples.json'
@@ -42,7 +41,7 @@ rule runGenePanelWiseAnalysis:
                 wildcards,
                 attempt,
                 level=1,
-                multiplier=80,
+                multiplier=100,
             ),
             102400,
         ),
