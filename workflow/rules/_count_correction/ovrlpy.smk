@@ -185,9 +185,10 @@ rule getCorrectedCountsFromOvrlpy:
                     for i in get_input2_or_params4getCorrectedCountsFromOvrlpy(
                         wildcards,
                         for_input=False,
-                    ).values()
+                    )
                 ]
             ) * 1e-6 * attempt**2 * 100,
+            512000,
         )
     shell:
         "mamba run -n general_cuda python3 workflow/scripts/_count_correction/ovrlpy_sample_correction.py "
