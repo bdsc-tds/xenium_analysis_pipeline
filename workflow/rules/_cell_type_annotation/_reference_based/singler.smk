@@ -77,7 +77,7 @@ rule runReferenceBasedSingleR:
     wildcard_constraints:
         annotation_id=r"reference_based/.+/singler/.+"
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 10240)
+        mem_mb=lambda wildcards, input, attempt: min(input.size_mb * attempt**2 * 50, 1000000)
     log:
         f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedSingleR.log'
     container:
