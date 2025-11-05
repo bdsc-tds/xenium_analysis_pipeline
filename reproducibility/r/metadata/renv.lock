@@ -39,6 +39,44 @@
       "Repository": "CRAN",
       "Hash": "a8235afbcd6316e6e91433ea47661013"
     },
+    "BPCells": {
+      "Package": "BPCells",
+      "Version": "0.3.1",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "bnprks",
+      "RemoteRepo": "BPCells",
+      "RemoteSubdir": "r",
+      "RemoteRef": "v0.3.1",
+      "RemoteSha": "841559adcdc7df764d825f4fde364f65911779b9",
+      "Requirements": [
+        "Matrix",
+        "R",
+        "RColorBrewer",
+        "Rcpp",
+        "RcppEigen",
+        "dplyr",
+        "ggplot2",
+        "ggrepel",
+        "grDevices",
+        "hexbin",
+        "lifecycle",
+        "magrittr",
+        "methods",
+        "patchwork",
+        "readr",
+        "rlang",
+        "scales",
+        "scattermore",
+        "stringr",
+        "tibble",
+        "tidyr",
+        "tools",
+        "vctrs"
+      ],
+      "Hash": "b52e2cb2017488d43027efc06e93eead"
+    },
     "Biobase": {
       "Package": "Biobase",
       "Version": "2.66.0",
@@ -2624,6 +2662,23 @@
         "rprojroot"
       ],
       "Hash": "24b224366f9c2e7534d2344d10d59211"
+    },
+    "hexbin": {
+      "Package": "hexbin",
+      "Version": "1.28.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "grid",
+        "lattice",
+        "methods",
+        "stats",
+        "utils"
+      ],
+      "Hash": "10a44851f04ff2d0e26b1c84c38d914a"
     },
     "highr": {
       "Package": "highr",
