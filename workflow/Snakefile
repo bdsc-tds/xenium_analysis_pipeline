@@ -1357,7 +1357,7 @@ def get_input2all(
         ret.extend(get_output4wrap(wrap))
     
     if geo_sub:
-        ret.extend(get_output4geo_sub())
+        ret.append(get_output4geo_sub())
 
     return ret
 

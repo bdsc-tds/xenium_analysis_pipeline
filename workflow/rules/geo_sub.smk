@@ -6,7 +6,8 @@ def get_input2gatherFilesPerSampleForGeoSub(wildcards):
     sample_id = extract_layers_from_experiments(
         wildcards.geo_sub_sample_id,
         [0, 1, 2, 3],
-        sep_out="_",
+        sep_in="_",
+        sep_out="/",
         maxsplit=3,
     )[0]
     root_dir = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{sample_id}'
@@ -71,8 +72,7 @@ rule computeMd5ForGeoSub:
     threads:
         4
     resources:
-        runtime=60,
-        mem_mb=1024
+        mem_mb=lambda wildcards, input, attempt: min(2048 * attempt * 2, 40960)
     shell:
         "mamba run -n utilnest python workflow/scripts/_data_wrapping/compute_checksum.py "
         "--batch_file {input} "
