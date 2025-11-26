@@ -96,12 +96,13 @@ rule computeChecksum:
         1
     resources:
         runtime=60,
-        mem_mb=1024
+        mem_mb=lambda wildcards, input, attempt: min(2048 * attempt, 40960)
     shell:
         "mamba run -n utilnest python workflow/scripts/_data_wrapping/compute_checksum.py "
-        "-i {input} "
+        "--single_file {input} "
         "-o {output} "
         "--algo sha512 "
+        "--mark_algo "
         "-l {log}"
 
 rule collectWrapsAndChecksumsPerPanel:

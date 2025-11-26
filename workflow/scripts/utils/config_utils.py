@@ -16,6 +16,7 @@ def extract_layers_from_experiments(
     layers: list[int] | int,
     sep_in: str = os.path.sep,
     sep_out: str | None = os.path.sep,
+    maxsplit: int = -1,
 ) -> list[Any]:
     """Extract layers from experiments.
 
@@ -24,6 +25,7 @@ def extract_layers_from_experiments(
         layers (list[int] | int): Layers to be extracted.
         sep_in (str, optional): Separator used in the input experiments. Defaults to os.path.sep.
         sep_out (str | None, optional): Separator to be used for the extracted layers. Defaults to os.path.sep.
+        maxsplit (int, optional): Maximum number of splits. Defaults to -1.
 
     Returns:
         list[Any]: A list of extracted layers.
@@ -34,7 +36,10 @@ def extract_layers_from_experiments(
     layers = sorted(_convert2list(layers, match_length=False))
 
     for i in experiments:
-        j = i.split(sep_in)
+        j = i.split(
+            sep_in,
+            maxsplit=maxsplit,
+        )
         assert max(layers) < len(j)
 
         vals: list[str] = [j[k] for k in layers]
@@ -989,6 +994,20 @@ def process_config(
             ),
             [0, 1],
             sep_out="-",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_GEO_SUB_SAMPLES_NAME,
+        value=extract_layers_from_experiments(
+            get_dict_value(
+                _experiments[0],
+                cc.WILDCARDS_SAMPLES_NAME,
+            ),
+            [0, 1, 2, 3],
+            sep_out="_",
         ),
     )
 
