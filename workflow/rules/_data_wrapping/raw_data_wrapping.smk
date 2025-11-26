@@ -99,9 +99,10 @@ rule computeChecksum:
         mem_mb=1024
     shell:
         "mamba run -n utilnest python workflow/scripts/_data_wrapping/compute_checksum.py "
-        "-i {input} "
+        "--single_file {input} "
         "-o {output} "
         "--algo sha512 "
+        "--mark_algo "
         "-l {log}"
 
 rule collectWrapsAndChecksumsPerPanel:

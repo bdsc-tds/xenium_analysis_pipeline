@@ -16,6 +16,8 @@ WILDCARDS_SAMPLES_NAME: str = "_samples"
 WILDCARDS_WRAP_GENE_PANELS_NAME: str = "_wrap_gene_panels"
 # Child of `WILDCARDS_NAME` (second level); a list of values for samples to wrap.
 WILDCARDS_WRAP_SAMPLES_NAME: str = "_wrap_samples"
+# Child of `WILDCARDS_NAME` (second level); a list of values samples for GEO submission.
+WILDCARDS_GEO_SUB_SAMPLES_NAME: str = "_geo_sub_samples"
 # Child of `WILDCARDS_NAME` (second level); a list of values for segmentation methods. They should be used in the tasks downstream to the segmentation.
 WILDCARDS_SEGMENTATION_NAME: str = "_segmentation"
 # Child of `WILDCARDS_NAME` (second level); a list of compact values for segmentation methods. They should only be used in segementation tasks.
