@@ -38,6 +38,8 @@ rule gatherFilesPerSampleForGeoSub:
         p_nuc_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet'
     log:
         f'{config["output_path"]}/geo_sub/logs/gatherFilesPerSampleForGeoSub_{{geo_sub_sample_id}}.log'
+    resources:
+        runtime=60
     shell:
         "cp {input.r_img} {output.r_img} && "
         "cp {input.r_ts} {output.r_ts} && "
@@ -56,6 +58,8 @@ rule gatherFilesForGeoSub:
         expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID)
     output:
         temp(f'{config["output_path"]}/geo_sub/geo_sub/_all_files.txt')
+    resources:
+        runtime=30
     run:
         from pathlib import Path
         with open(output[0], 'w', encoding='utf-8') as fh:
