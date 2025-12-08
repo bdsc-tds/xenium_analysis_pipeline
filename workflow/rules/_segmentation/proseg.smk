@@ -127,7 +127,7 @@ rule runProseg2Baysor:
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg2Baysor.log'
     resources:
-        mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 2048)
+        mem_mb=lambda wildcards, input, attempt: min(2048 * attempt**2, 51200)
     container:
         config["containers"]["proseg"]
     shell:
