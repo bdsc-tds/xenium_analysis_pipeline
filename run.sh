@@ -77,7 +77,7 @@ done
 IFS=''
 
 # Constants.
-SINGULARITY_BIND_OPT="--bind $SINGULARITY_BIND"
+SINGULARITY_BIND_OPT="--bind \"$SINGULARITY_BIND\""
 OTHER_OPT=(--rerun-triggers mtime --rerun-incomplete --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv --env RUST_BACKTRACE=full $SINGULARITY_BIND_OPT" -kp)
 
 # Options related to $CONDA_BIN
@@ -222,9 +222,9 @@ done
 
 # Use different arguments depending on `ENV_NAME`
 if [[ "$ENV_NAME" = /* ]]; then
-    ENV_NAME_OPT=(--prefix $ENV_NAME)
+    ENV_NAME_OPT=(--prefix "$ENV_NAME")
 else
-    ENV_NAME_OPT=(--name $ENV_NAME)
+    ENV_NAME_OPT=(--name "$ENV_NAME")
 fi
 
 # Set Snakemake runtime temporary directory
@@ -301,7 +301,7 @@ if [[ $VERBOSE -eq 1 ]]; then
 fi
 
 # Load packages on cluster.
-module load $MODULES
+module load "$MODULES"
 
 # Run snakemake command along with options.
 $CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" "${COMPLETE_CMD[@]}"
