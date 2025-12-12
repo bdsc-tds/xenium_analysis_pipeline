@@ -222,9 +222,9 @@ done
 
 # Use different arguments depending on `ENV_NAME`
 if [[ "$ENV_NAME" = /* ]]; then
-    ENV_NAME_OPT=(--prefix $ENV_NAME)
+    ENV_NAME_OPT=(--prefix "$ENV_NAME")
 else
-    ENV_NAME_OPT=(--name $ENV_NAME)
+    ENV_NAME_OPT=(--name "$ENV_NAME")
 fi
 
 # Set Snakemake runtime temporary directory
