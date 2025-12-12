@@ -587,7 +587,7 @@ def get_output4joint_analysis() -> list[str] | None:
     ]
 
 
-def get_output4neighbirhood_analysis() -> list[str]:
+def get_output4neighborhood_analysis() -> list[str]:
     prefix: str = f'{config["output_path"]}/neighborhood_analysis'
     filenames: list[str] = [
         "spatial_neighborhood_scores.parquet",
@@ -1100,7 +1100,7 @@ def get_output4geo_sub() -> str:
     return f'{config["output_path"]}/geo_sub/geo_sub/MD5.txt'
 
 
-def get_output4post_count_correction_neighbirhood_analysis() -> list[str]:
+def get_output4post_count_correction_neighborhood_analysis() -> list[str]:
     prefix: str = f'{config["output_path"]}/post_count_correction_neighborhood_analysis'
     filenames: list[str] = [
         "spatial_neighborhood_scores.parquet",
@@ -1304,10 +1304,10 @@ def get_input2all(
     cell_type_annotation: bool = True,
     doublet_finding: bool = False,
     joint_analysis: bool = True,
-    neighbirhood_analysis: bool = False,
+    neighborhood_analysis: bool = False,
     count_correction: bool = True,
     post_count_correction_cell_type_annotation: bool = True,
-    post_count_correction_neighbirhood_analysis: bool = False,
+    post_count_correction_neighborhood_analysis: bool = False,
     cleanup: bool = False,
     wrap: str | None = None,
     geo_sub: bool = False,
@@ -1320,8 +1320,8 @@ def get_input2all(
     if cell_type_annotation:
         ret.extend(get_output4cell_type_annotation())
 
-        if neighbirhood_analysis:
-            ret.extend(get_output4neighbirhood_analysis())
+        if neighborhood_analysis:
+            ret.extend(get_output4neighborhood_analysis())
 
         if doublet_finding:
             ret.extend(get_output4doublet_finding())
@@ -1336,8 +1336,8 @@ def get_input2all(
                 cell_type_annotation,
             ))
 
-            if post_count_correction_neighbirhood_analysis:
-                ret.extend(get_output4post_count_correction_neighbirhood_analysis())
+            if post_count_correction_neighborhood_analysis:
+                ret.extend(get_output4post_count_correction_neighborhood_analysis())
 
     if reports:
         ret.extend(get_output4reports(
@@ -1375,10 +1375,10 @@ rule all:
             cell_type_annotation=True,
             doublet_finding=True,
             joint_analysis=True,
-            neighbirhood_analysis=False,
+            neighborhood_analysis=False,
             count_correction=True,
             post_count_correction_cell_type_annotation=True,
-            post_count_correction_neighbirhood_analysis=False,
+            post_count_correction_neighborhood_analysis=False,
             cleanup=False,
             wrap=None,
             geo_sub=False,
