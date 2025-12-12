@@ -220,6 +220,13 @@ do
     esac
 done
 
+# Use different arguments depending on `ENV_NAME`
+if [[ "$ENV_NAME" = /* ]]; then
+    ENV_NAME_OPT=(--prefix $ENV_NAME)
+else
+    ENV_NAME_OPT=(--name $ENV_NAME)
+fi
+
 # Set Snakemake runtime temporary directory
 if [[ -n "$SNAKEMAKE_CACHE_DIR" ]]; then
     export XDG_CACHE_HOME="$SNAKEMAKE_CACHE_DIR"
@@ -228,14 +235,14 @@ fi
 # Draw dag and save to disk.
 # Priority: 1 (highest; other options will be ommitted)
 if [[ -v DAG_OPT && -n $DAG_OPT ]]; then
-    $CONDA_BIN run $CONDA_OPT -n $ENV_NAME snakemake --dag | dot -Tpdf > $DAG_OPT.pdf
+    $CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" snakemake --dag | dot -Tpdf > $DAG_OPT.pdf
     exit 0
 fi
 
 # Unlock the working directory.
 # Priority: 2 (2nd highest; other options will be ommitted)
 if [[ $UNLOCK -eq 1 ]]; then
-    $CONDA_BIN run $CONDA_OPT -n $ENV_NAME snakemake --unlock
+    $CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" snakemake --unlock
     exit 0
 fi
 
@@ -297,4 +304,4 @@ fi
 module load $MODULES
 
 # Run snakemake command along with options.
-$CONDA_BIN run $CONDA_OPT -n $ENV_NAME "${COMPLETE_CMD[@]}"
+$CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" "${COMPLETE_CMD[@]}"
