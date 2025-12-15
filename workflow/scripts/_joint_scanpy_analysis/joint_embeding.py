@@ -146,9 +146,17 @@ if __name__ == "__main__":
 
     # save
     df_umap = pd.DataFrame(
-        merged_ad.obsm["X_umap"],
+        {
+            "UMAP1": merged_ad.obsm["X_umap"][:, 0],
+            "UMAP2": merged_ad.obsm["X_umap"][:, 1],
+            "cell_id": merged_ad.obs["cell_id"],
+            "sample_id": merged_ad.obs["sample_id"],
+            "condition": merged_ad.obs["condition"],
+            "gene_panel": merged_ad.obs["gene_panel"],
+            "donor": merged_ad.obs["donor"],
+            "sample": merged_ad.obs["sample"],
+        },
         index=merged_ad.obs_names,
-        columns=["UMAP1", "UMAP2"],
     )
     # df_umap[xenium_levels] = merged_ad.obs[xenium_levels]
 
