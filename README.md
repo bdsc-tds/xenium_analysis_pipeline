@@ -23,6 +23,8 @@ Using `reproducibility/environment.yml`, we can create an environment for Snakem
 mamba env create --use-uv -y -f reproducibility/environment.yml
 ```
 
+> **_Note_**: If you are using mamba < 2.3.3 or conda, please drop `--use-uv`.
+
 ### Singularity containers
 
 We use multiple singularity containers for different methods and / or environments. To ensure reproducibility, please build these containers before executing the workflow.
