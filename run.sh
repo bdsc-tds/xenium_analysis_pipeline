@@ -77,8 +77,6 @@ done
 unset IFS
 
 # Constants.
-# Get output path from config.yml.
-OUTPUT_PATH=$(grep '^output_path:' config/config.yml | sed 's/output_path:[[:space:]]*//')
 SINGULARITY_BIND_OPT="--bind \"$SINGULARITY_BIND\""
 OTHER_OPT=(--rerun-triggers mtime --rerun-incomplete --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv --env RUST_BACKTRACE=full $SINGULARITY_BIND_OPT" -kp)
 
@@ -228,6 +226,13 @@ if [[ "$ENV_NAME" = /* ]]; then
     ENV_NAME_OPT=(--prefix "$ENV_NAME")
 else
     ENV_NAME_OPT=(--name "$ENV_NAME")
+fi
+
+# Get output path from config.yml.
+OUTPUT_PATH=$($CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" python -c "import yaml; print(yaml.safe_load(open('config/config.yml'))['output_path'])" 2>/dev/null)
+if [[ -z "$OUTPUT_PATH" ]]; then
+    echo "Error: Failed to extract output_path from config/config.yml"
+    exit 1
 fi
 
 # Set Snakemake runtime temporary directory
