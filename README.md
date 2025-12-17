@@ -1,4 +1,4 @@
-[![Snakemake](https://img.shields.io/badge/snakemake-≥8.0.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
+[![Snakemake](https://img.shields.io/badge/snakemake-≥9.0.0-brightgreen.svg?style=flat)](https://snakemake.readthedocs.io)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/bdsc-tds/xenium_analysis_pipeline?utm_source=oss&utm_medium=github&utm_campaign=bdsc-tds%2Fxenium_analysis_pipeline&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 # xenium_analysis_pipeline
@@ -13,14 +13,14 @@ This workflow is developed with reproducibility bearing in mind. Please refer to
 
 ### Snakemake
 
-We use [Snakemake (v8+)](https://snakemake.github.io) as the backend to this workflow. Thus, a conda environment for Snakemake must be created in the first step. We recommend [mamba](https://mamba.readthedocs.io/en/latest/index.html) as a replacement to conda for environment management.
+We use [Snakemake (v9+)](https://snakemake.github.io) as the backend to this workflow. Thus, a conda environment for Snakemake must be created in the first step. We recommend [mamba](https://mamba.readthedocs.io/en/latest/index.html) as a replacement to conda for environment management.
 
 Using `reproducibility/environment.yml`, we can create an environment for Snakemake:
 
 ```bash
 # the current working directory is the root of this repo
 # Alternative: `conda`
-mamba env create -f reproducibility/environment.yml
+mamba env create --use-uv -y -f reproducibility/environment.yml
 ```
 
 ### Singularity containers
@@ -113,7 +113,7 @@ The workflow should be executed from the root directory of this repo. To get a s
 which prints
 
 ```
-Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -j | --jobs JOBS ] [ --retries RETRIES ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -j,--jobs JOBS: the number of jobs submitted to the cluster at the same time when -m,--mode is 'cluster'. (default: 500).
@@ -125,6 +125,44 @@ Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --for
         --unlock: unlock the working directory.
         -v,--verbose: print more information.
         -h,--help: print this message.
+```
+
+> **_Note_**: Execution logging via [snkmt](https://github.com/cademirch/snakemake-logger-plugin-snkmt) is always enabled. The log database is stored at `${output_path}/snkmt.db` (where `output_path` is read from `config/config.yml`). To monitor the pipeline execution, run:
+>
+> ```bash
+> mamba run -n xenium_analysis_pipeline snkmt console --db-path ${output_path}/snkmt.db
+> ```
+
+### Typical commands
+
+- Draw the DAG
+
+```bash
+./run.sh --dag dag
+```
+
+- Dry-run
+
+```bash
+./run.sh -n
+```
+
+- Run on cluster
+
+```bash
+./run.sh -m cluster
+```
+
+- Run until a specific rule
+
+```bash
+./run.sh -m cluster -U rule_name
+```
+
+- Run on cluster with retries
+
+```bash
+./run.sh -m cluster --retries 2
 ```
 
 ## Other files included in this repo
@@ -145,4 +183,4 @@ There are some other files related to Xenium data analysis, residing in `noteboo
 
 ## Original manuscript analyses
 
-Code to reproduce analyses from the original manuscript can be found at https://github.com/bdsc-tds/Bilous2025
+Code to reproduce analyses from the original manuscript can be found at <https://github.com/bdsc-tds/Bilous2025>

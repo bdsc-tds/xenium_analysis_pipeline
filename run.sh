@@ -37,7 +37,7 @@ SNAKEMAKE_CACHE_DIR=
 # Help message.
 help()
 {
-    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
+    echo "Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -j | --jobs JOBS ] [ --retries RETRIES ] [ -n | --dry-run ] [ -R | --forcerun RULE ] [ -U | --until RULE ] [ --dag OUTPUT ] [ --unlock ] [ -v | --verbose ] [ -h | --help ]
         -m,--mode MODE: the pipeline will be run on 'local' (default) or on 'cluster'.
         -c,--core CORE: the number of cores to be used when -m,--mode is unset or 'local' (default: 1); ignored when -m,--mode is 'cluster'.
         -j,--jobs JOBS: the number of jobs submitted to the cluster at the same time when -m,--mode is 'cluster'. (default: 500).
@@ -74,9 +74,11 @@ do
         fi
     fi
 done
-IFS=''
+unset IFS
 
 # Constants.
+# Get output path from config.yml.
+OUTPUT_PATH=$(grep '^output_path:' config/config.yml | sed 's/output_path:[[:space:]]*//')
 SINGULARITY_BIND_OPT="--bind \"$SINGULARITY_BIND\""
 OTHER_OPT=(--rerun-triggers mtime --rerun-incomplete --software-deployment-method conda apptainer --apptainer-args "--nv --no-home --cleanenv --env RUST_BACKTRACE=full $SINGULARITY_BIND_OPT" -kp)
 
@@ -154,6 +156,7 @@ do
             fi
             shift 2
             ;;
+
 
         -n | --dry-run)
             DRY_RUN_OPT=-n
@@ -234,7 +237,7 @@ fi
 
 # Draw dag and save to disk.
 # Priority: 1 (highest; other options will be ommitted)
-if [[ -v DAG_OPT && -n $DAG_OPT ]]; then
+if [[ -n "$DAG_OPT" ]]; then
     $CONDA_BIN run $CONDA_OPT "${ENV_NAME_OPT[@]}" snakemake --dag | dot -Tpdf > $DAG_OPT.pdf
     exit 0
 fi
@@ -246,8 +249,13 @@ if [[ $UNLOCK -eq 1 ]]; then
     exit 0
 fi
 
+# Set up logger for Snakemake.
+LOGGER_OPT=(--logger snkmt --logger-snkmt-db "${OUTPUT_PATH}/snkmt.db")
+mkdir -p "$(dirname "${LOGGER_OPT[3]}")"
+echo "Logger for executing the pipeline is available with: \`snkmt console --db-path ${LOGGER_OPT[3]}\`"
+
 # Command for snakemake.
-COMPLETE_CMD=(snakemake "${OTHER_OPT[@]}")
+COMPLETE_CMD=(snakemake "${LOGGER_OPT[@]}" "${OTHER_OPT[@]}")
 
 # Verbose for snakemake.
 if [[ $VERBOSE -eq 1 ]]; then
@@ -295,6 +303,7 @@ if [[ -z "$DRY_RUN_OPT" ]]; then
     COMPLETE_CMD=("${COMPLETE_CMD[@]}" "${RETRIES_OPT[@]}")
 fi
 
+# Print the command used to run snakemake.
 if [[ $VERBOSE -eq 1 ]]; then
     printf "> Command used to run snakemake:\n  >> "
     echo "${COMPLETE_CMD[@]}"

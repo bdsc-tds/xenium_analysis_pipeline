@@ -3,7 +3,12 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - python=3.12.7
-  - snakemake=8.20.6
+  - python=3.13
+  - snakemake=9.14.5
   - snakemake-executor-plugin-cluster-generic=1.0.9
-  - snakemake-executor-plugin-slurm=0.11.0
+  - snakemake-executor-plugin-slurm=2.0.3
+  - snakemake-interface-logger-plugins=1.2.4  # to be migrated to 2.0.0
+  - git
+  - uv
+  - pip:
+    - git+https://github.com/cademirch/snakemake-logger-plugin-snkmt.git@v0.1.5
