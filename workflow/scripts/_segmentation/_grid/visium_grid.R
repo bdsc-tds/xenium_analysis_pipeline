@@ -1,7 +1,7 @@
 library(arrow)
 library(dplyr)
 
-snakemake@source("../../../scripts/_custom_segmentation/grid/grid_utils.R")
+snakemake@source("../../../scripts/segmentation/_grid/grid_utils.R")
 
 cellb_path <- file.path(snakemake@input[["xenium_bundle"]], "cell_boundaries.parquet")  # adjust if nested
 

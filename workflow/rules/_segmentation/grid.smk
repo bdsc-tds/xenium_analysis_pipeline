@@ -6,8 +6,8 @@
 # - grid_binned_8um - for visiumHD-like 
 # - grid_registered_binned_8um - for registered visiumHD if any 
 
-# the grids like grid_visium_55um and grid_binned_8um are generated automatically with the `custom_segmentation` rules, 
-# while the registered one are provided manually, but all of them are stored in `/custom_segmentation/{grid_id == segmentation_id}/{sample_id}/cell_boundaries.geojson`
+# the grids like grid_visium_55um and grid_binned_8um are generated with the `_segmentation/_grid/` rules, 
+# while the registered one are provided manually, but all of them are stored in `/segmentation/{grid_id == segmentation_id}/{sample_id}/cell_boundaries.geojson`
 
 #######################################
 #              Functions              #
@@ -37,6 +37,8 @@ rule importGrid:
         abs_log=lambda wc: os.path.abspath(
             f'{config["output_path"]}/segmentation/{wc.compact_segmentation_id}/{wc.sample_id}/logs/import-segmentation.log'
         )
+    wildcard_constraints:
+        compact_segmentation_id=r"grid_(?:[a-zA-Z]+_)+\d+um" # can be grid_visium_55um or grid_registered_visium_55um or grid_binned_8um
     threads:
         lambda wc: get_dict_value(config, "segmentation", wc.compact_segmentation_id, "localcores")
     resources:
