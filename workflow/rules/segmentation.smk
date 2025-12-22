@@ -30,6 +30,7 @@ include: '_segmentation/10x.smk'
 include: '_segmentation/baysor.smk'
 include: '_segmentation/proseg.smk'
 include: '_segmentation/segger.smk'
+#include: '_segmentation/_grid/visium_grid.smk'
 include: '_segmentation/grid.smk'
 
 

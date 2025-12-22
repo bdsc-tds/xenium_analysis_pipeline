@@ -8,8 +8,31 @@ def get_generated_cells_geojson(wildcards) -> str:
     Convention:
       {output_path}/custom_segmentation/{compact_segmentation_id}/{sample_id}/cells.geojson
     """
-    p = f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/cell_boundaries.geojson'
-    return normalise_path(p, return_dir=False, check_exist=True)
+    p = f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/processed_results/cell_boundaries.geojson'
+    return p
+
+
+def get_input2_or_params4generateVisiumGrid(wildcards, for_input: bool = True) -> str:
+    use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
+
+    if for_input:
+        return ret
+
+    if use_raw_data:
+        return normalise_path(
+            ret,
+            pat_flags=re.IGNORECASE,
+            return_dir=True,
+            check_exist=True,
+        )
+
+    return normalise_path(
+        ret,
+        candidate_paths=("outs",),
+        pat_flags=re.IGNORECASE,
+        return_dir=True,
+        check_exist=False,
+    )
 
 
 #######################################
@@ -18,9 +41,9 @@ def get_generated_cells_geojson(wildcards) -> str:
 
 rule generateVisiumGrid:
     input:
-        xenium_bundle=get_input2_or_params4run10x,
+        xenium_bundle=get_input2_or_params4generateVisiumGrid
     output:
-        cells=get_generated_cells_geojson
+        cells=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/processed_results/cell_boundaries.geojson'
     log:
         f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/generateVisiumGrid.log'
     params:
