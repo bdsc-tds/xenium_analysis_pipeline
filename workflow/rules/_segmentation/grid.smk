@@ -62,6 +62,7 @@ rule importGrid:
         xeniumranger import-segmentation --id=normalised_results \
           --xenium-bundle={params.abs_bundle} \
           --cells={params.abs_cells} \
+          --units=microns \
           --localcores={threads} \
           --localmem={params.localmem} \
           {params.other_options} &> {params.abs_log}
