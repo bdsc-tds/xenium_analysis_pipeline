@@ -7,7 +7,7 @@ make_visium_grid_sf <- function(
     crs = NA
 ){
   stopifnot(is.numeric(bbox), length(bbox) == 4)
-  names(bbox) <- names(bbox) %||% c("xmin","ymin","xmax","ymax")
+  names(bbox) <- names(bbox) #%||% c("xmin","ymin","xmax","ymax")
   xmin <- bbox[["xmin"]]; ymin <- bbox[["ymin"]]; xmax <- bbox[["xmax"]]; ymax <- bbox[["ymax"]]
   if (xmin > xmax) { tmp <- xmin; xmin <- xmax; xmax <- tmp }
   if (ymin > ymax) { tmp <- ymin; ymin <- ymax; ymax <- tmp }
@@ -119,7 +119,6 @@ write_xenium_cells_geojson <- function(g, out_geojson,
   })
   
   fc <- list(type = "FeatureCollection", features = features)
-  
   jsonlite::write_json(fc, out_geojson, auto_unbox = TRUE, pretty = FALSE)
   invisible(out_geojson)
 }
