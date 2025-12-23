@@ -1,9 +1,19 @@
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type = "output")
+sink(log, type = "message")
+
 library(arrow)
 library(dplyr)
 
 snakemake@source(file.path(snakemake@scriptdir, "grid_utils.R"))
 
 cellb_path <- file.path(snakemake@input[["xenium_bundle"]], "cell_boundaries.parquet")  # adjust if nested
+
+message("Xenium bundle path:", cellb_path)
+
+if(!file.exists(cellb_path)){
+  stop("Xenium bundle", cellb_path, "does not exist! \n")
+}
 
 message("Computing bbox from xenium bundle...\n")
 
@@ -21,10 +31,12 @@ message("Computing bbox from xenium bundle... Done\n")
 
 message("Making Visium grid over the bbox...\n")
 
+print(snakemake@params[["diameter"]])
+
 visium_grid <- make_visium_grid_sf(
     bbox,
     pitch_um = 100,
-    spot_diameter_um = snakemake@input[["diameter"]],
+    spot_diameter_um = snakemake@params[["diameter"]],
     crs = NA
 )
 message("Making Visium grid over the bbox... Done\n")
