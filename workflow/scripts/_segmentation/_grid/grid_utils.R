@@ -123,3 +123,151 @@ write_xenium_cells_geojson <- function(g, out_geojson,
   invisible(out_geojson)
 }
 
+
+#' Create a Visium HD square-bin grid as `sf` objects
+#'
+#' Generates a square (axis-aligned) grid of Visium HD-style bins covering a
+#' bounding box in micron units. Returns both bin centers (POINT) and bin
+#' geometries (POLYGON), suitable for spatial joins (e.g., mapping Xenium cells
+#' to bins with `sf::st_join()`).
+#'
+#' The grid is defined by a bin size (`bin_size_um`) and an anchor `origin` that
+#' controls how bin edges align to the bounding box. Optionally, the bounding
+#' box can be expanded by one bin to ensure edge bins intersect the bbox.
+#'
+#' @param bbox Numeric vector of length 4 with names `xmin`, `ymin`, `xmax`,
+#'   `ymax` defining the bounding box (in microns).
+#' @param bin_size_um Positive numeric scalar. Side length of each square bin
+#'   in microns.
+#' @param crs Coordinate reference system passed to `sf::st_as_sf()`. Use `NA`
+#'   for planar (unitless) coordinates; for real-world CRS supply an EPSG code
+#'   or `sf::st_crs()` object.
+#' @param origin Character scalar controlling the anchor of bin edges. Either
+#'   `"xmin"` (default) or `"xmax"` for the x-axis, and `"ymin"` (default) or
+#'   `"ymax"` for the y-axis. Values are combined as `c("xmin", "ymin")`,
+#'   `c("xmax", "ymin")`, etc. Internally only `"xmin"`/`"xmax"` and
+#'   `"ymin"`/`"ymax"` are used; the default aligns bins from the lower-left.
+#' @param expand Logical. If `TRUE` (default), expands the bbox by one bin in
+#'   all directions before generating the grid to improve edge coverage.
+#'
+#' @return A named list with two `sf` objects:
+#' \describe{
+#'   \item{centers}{`sf` POINT features with columns `spot_id` and center
+#'     coordinates.}
+#'   \item{spots}{`sf` POLYGON features (square bins) with column `spot_id`.}
+#' }
+#'
+#' @details
+#' Filtering is performed to keep only bins whose squares intersect the original
+#' bbox. This is approximated by retaining centers within the bbox expanded by
+#' half a bin in each direction.
+#'
+#' @examples
+#' bbox <- c(xmin = 0, ymin = 0, xmax = 5000, ymax = 4000)
+#'
+#' g8 <- make_visiumhd_grid_sf(bbox, bin_size_um = 8)
+#' g16 <- make_visiumhd_grid_sf(bbox, bin_size_um = 16)
+#'
+#' # Plot polygons
+#' if (requireNamespace("sf", quietly = TRUE)) {
+#'   plot(sf::st_geometry(g8$spots), border = "grey70")
+#'   plot(sf::st_geometry(g8$centers), add = TRUE, pch = 16, cex = 0.3)
+#' }
+#'
+make_visiumhd_grid_sf <- function(
+    bbox,
+    bin_size_um = 8,
+    crs = NA,
+    origin = c("xmin", "ymin"),
+    expand = TRUE
+) {
+  stopifnot(is.numeric(bbox), length(bbox) == 4)
+  names(bbox) <- names(bbox)
+  xmin <- bbox[["xmin"]]; ymin <- bbox[["ymin"]]
+  xmax <- bbox[["xmax"]]; ymax <- bbox[["ymax"]]
+  
+  if (xmin > xmax) { tmp <- xmin; xmin <- xmax; xmax <- tmp }
+  if (ymin > ymax) { tmp <- ymin; ymin <- ymax; ymax <- tmp }
+  
+  stopifnot(is.numeric(bin_size_um), length(bin_size_um) == 1, bin_size_um > 0)
+  
+  # Optionally expand bbox by one bin so edge bins still cover bbox boundary
+  if (expand) {
+    xmin2 <- xmin - bin_size_um
+    xmax2 <- xmax + bin_size_um
+    ymin2 <- ymin - bin_size_um
+    ymax2 <- ymax + bin_size_um
+  } else {
+    xmin2 <- xmin
+    xmax2 <- xmax
+    ymin2 <- ymin
+    ymax2 <- ymax
+  }
+  
+  # Define anchor/origin for the grid
+  origin <- match.arg(origin)
+  x_anchor <- if (origin == "xmin") xmin2 else xmax2
+  y_anchor <- if (origin == "ymin") ymin2 else ymax2
+  
+  # Create sequences of BIN EDGES, then derive centers
+  # We build the grid so that bin edges are aligned to the anchor.
+  if (origin == "xmin") {
+    x_edges <- seq(x_anchor, xmax2 + bin_size_um, by = bin_size_um)
+  } else {
+    x_edges <- seq(x_anchor, xmin2 - bin_size_um, by = -bin_size_um)
+    x_edges <- sort(x_edges)
+  }
+  
+  if (origin == "ymin") {
+    y_edges <- seq(y_anchor, ymax2 + bin_size_um, by = bin_size_um)
+  } else {
+    y_edges <- seq(y_anchor, ymin2 - bin_size_um, by = -bin_size_um)
+    y_edges <- sort(y_edges)
+  }
+  
+  # Centers are midpoints between edges
+  x_centers <- (x_edges[-length(x_edges)] + x_edges[-1]) / 2
+  y_centers <- (y_edges[-length(y_edges)] + y_edges[-1]) / 2
+  
+  centers <- as.matrix(expand.grid(x = x_centers, y = y_centers))
+  
+  # Keep only bins whose SQUARE intersects bbox:
+  # Quick filter using center within bbox expanded by half-bin
+  half <- bin_size_um / 2
+  keep <- centers[, "x"] >= (xmin - half) & centers[, "x"] <= (xmax + half) &
+    centers[, "y"] >= (ymin - half) & centers[, "y"] <= (ymax + half)
+  centers <- centers[keep, , drop = FALSE]
+  
+  # sf points (centers)
+  pts <- sf::st_as_sf(
+    data.frame(spot_id = seq_len(nrow(centers)), centers),
+    coords = c("x", "y"),
+    crs = crs
+  )
+  
+  # Build square polygons from centers (axis-aligned)
+  # Each square: (x±half, y±half)
+  sq <- lapply(seq_len(nrow(centers)), function(i) {
+    x <- centers[i, "x"]
+    y <- centers[i, "y"]
+    ring <- matrix(
+      c(
+        x - half, y - half,
+        x + half, y - half,
+        x + half, y + half,
+        x - half, y + half,
+        x - half, y - half
+      ),
+      ncol = 2,
+      byrow = TRUE
+    )
+    sf::st_polygon(list(ring))
+  })
+  
+  spots <- sf::st_sf(
+    spot_id = pts$spot_id,
+    geometry = sf::st_sfc(sq, crs = sf::st_crs(pts))
+  )
+  
+  list(centers = pts, spots = spots)
+}

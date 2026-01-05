@@ -19,7 +19,7 @@
 #######################################
 
 include: '_grid/visium_grid.smk'
-
+include: '_grid/square_grid.smk'
 
 #######################################
 #                Rules                #
@@ -48,7 +48,7 @@ rule importGrid:
         ),
         other_options=get_other_options4run10x
     wildcard_constraints:
-        compact_segmentation_id=r"grid_(?:[a-zA-Z]+_)+\d+um" # can be grid_visium_55um or grid_registered_visium_55um or grid_binned_8um
+        compact_segmentation_id=r"grid_(?:[a-zA-Z]+_)+\d+um" # can be grid_visium_55um or grid_registered_visium_55um or grid_visiumhd_8um
     threads:
         lambda wc: get_dict_value(config, "segmentation", wc.compact_segmentation_id, "localcores")
     resources:
