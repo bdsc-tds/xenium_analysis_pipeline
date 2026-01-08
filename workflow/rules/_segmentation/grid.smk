@@ -20,6 +20,7 @@
 
 include: '_grid/visium_grid.smk'
 include: '_grid/square_grid.smk'
+include: '_grid/registered_grid.smk'
 
 #######################################
 #                Rules                #

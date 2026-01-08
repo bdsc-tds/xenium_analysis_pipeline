@@ -4,7 +4,7 @@
 
 def get_generated_cells_geojson(wildcards) -> str:
     """
-    Cells GeoJSON generated upstream by the pipeline.
+    Cells or grid units GeoJSON generated upstream by the pipeline.
     Convention:
       {output_path}/custom_segmentation/{compact_segmentation_id}/{sample_id}/cells.geojson
     """
