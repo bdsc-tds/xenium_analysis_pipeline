@@ -37,7 +37,7 @@ rule importGrid:
     params:
         work_dir=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}',
         abs_log=lambda wc: os.path.abspath(
-            f'{config["output_path"]}/segmentation/{wc.compact_segmentation_id}/{wc.sample_id}/logs/import-segmentation.log'
+            f'{config["output_path"]}/segmentation/{wc.compact_segmentation_id}/{wc.sample_id}/logs/importGrid.log'
             ),
         abs_bundle=lambda wc: os.path.abspath(get_input2_or_params4run10x(wc, for_input=False)),
         abs_cells=lambda wc: os.path.abspath(get_generated_cells_geojson(wc)),
