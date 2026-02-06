@@ -1,4 +1,6 @@
 library(sf)
+library(jsonlite)
+library(dplyr)
 
 make_visium_grid_sf <- function(
     bbox,
@@ -7,7 +9,7 @@ make_visium_grid_sf <- function(
     crs = NA
 ){
   stopifnot(is.numeric(bbox), length(bbox) == 4)
-  names(bbox) <- names(bbox) #%||% c("xmin","ymin","xmax","ymax")
+  
   xmin <- bbox[["xmin"]]; ymin <- bbox[["ymin"]]; xmax <- bbox[["xmax"]]; ymax <- bbox[["ymax"]]
   if (xmin > xmax) { tmp <- xmin; xmin <- xmax; xmax <- tmp }
   if (ymin > ymax) { tmp <- ymin; ymin <- ymax; ymax <- tmp }
@@ -66,6 +68,8 @@ map_cells_to_spots <- function(
     join = st_within,
     left = TRUE
   )
+
+  return(cell_to_spot)
 }
 
 
@@ -75,11 +79,7 @@ write_xenium_cells_geojson <- function(g, out_geojson,
                                        ensure_valid = TRUE) {
   stopifnot(is.list(g), "spots" %in% names(g))
   stopifnot(inherits(g$spots, "sf"))
-  
-  suppressPackageStartupMessages({
-    library(sf)
-    library(jsonlite)
-  })
+
   
   cells <- g$spots
   
@@ -182,7 +182,7 @@ make_visiumhd_grid_sf <- function(
     expand = TRUE
 ) {
   stopifnot(is.numeric(bbox), length(bbox) == 4)
-  names(bbox) <- names(bbox)
+
   xmin <- bbox[["xmin"]]; ymin <- bbox[["ymin"]]
   xmax <- bbox[["xmax"]]; ymax <- bbox[["ymax"]]
   
@@ -205,20 +205,23 @@ make_visiumhd_grid_sf <- function(
   }
   
   # Define anchor/origin for the grid
-  origin <- match.arg(origin)
-  x_anchor <- if (origin == "xmin") xmin2 else xmax2
-  y_anchor <- if (origin == "ymin") ymin2 else ymax2
-  
+   stopifnot(length(origin) == 2)
+   
+   x_origin <- match.arg(origin[1], choices = c("xmin", "xmax"))
+   y_origin <- match.arg(origin[2], choices = c("ymin", "ymax"))
+   x_anchor <- if (x_origin == "xmin") xmin2 else xmax2
+   y_anchor <- if (y_origin == "ymin") ymin2 else ymax2
+
   # Create sequences of BIN EDGES, then derive centers
   # We build the grid so that bin edges are aligned to the anchor.
-  if (origin == "xmin") {
+  if (x_origin == "xmin") {
     x_edges <- seq(x_anchor, xmax2 + bin_size_um, by = bin_size_um)
   } else {
     x_edges <- seq(x_anchor, xmin2 - bin_size_um, by = -bin_size_um)
     x_edges <- sort(x_edges)
   }
   
-  if (origin == "ymin") {
+  if (y_origin == "ymin") {
     y_edges <- seq(y_anchor, ymax2 + bin_size_um, by = bin_size_um)
   } else {
     y_edges <- seq(y_anchor, ymin2 - bin_size_um, by = -bin_size_um)

@@ -9,10 +9,10 @@ snakemake@source(file.path(snakemake@scriptdir, "grid_utils.R"))
 
 cellb_path <- file.path(snakemake@input[["xenium_bundle"]], "cell_boundaries.parquet")  # adjust if nested
 
-message("Xenium bundle path:", cellb_path)
+message("Xenium bundle path: ", cellb_path)
 
 if(!file.exists(cellb_path)){
-  stop("Xenium bundle", cellb_path, "does not exist! \n")
+  stop("Xenium bundle ", cellb_path, "does not exist! \n")
 }
 
 message("Computing bbox from xenium bundle...\n")

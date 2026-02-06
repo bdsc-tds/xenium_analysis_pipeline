@@ -6,7 +6,7 @@ def get_generated_cells_geojson(wildcards) -> str:
     """
     Cells or grid units GeoJSON generated upstream by the pipeline.
     Convention:
-      {output_path}/custom_segmentation/{compact_segmentation_id}/{sample_id}/cells.geojson
+      {output_path}/segmentation/{compact_segmentation_id}/{sample_id}/cells.geojson
     """
     p = f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/processed_results/cell_boundaries.geojson'
     return p
@@ -51,8 +51,9 @@ rule generateVisiumGrid:
             config,
             "segmentation",
             wildcards.compact_segmentation_id,
-            "diameter"
-        ), # 55 by default and in most cases
+            "diameter",
+            replace_none = 55
+        ), 
     wildcard_constraints:
         compact_segmentation_id=r"grid_visium_\w+um" # should be grid_visium_55um
     resources: # not demanding reads cell_boundaries.geojson from the xenium bundles and create another one. 
