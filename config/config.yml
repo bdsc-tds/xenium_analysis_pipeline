@@ -110,6 +110,12 @@ standard_seurat_analysis:
 
   clustering:
     resolution: 0.8
+    
+  sketching:
+    enable_sketching: True
+    sketch_threshold: 200000  
+    sketch_ncells: 100000
+    sketch_method: "LeverageScore"
 
 joint_scanpy_analysis:
   methods:
