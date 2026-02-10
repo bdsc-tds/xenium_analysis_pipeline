@@ -112,6 +112,6 @@ ElbowPlot(xe, ndims = st_analysis_params$n_dims) + geom_vline(xintercept = st_an
 ## UMAP and clustering
 
 ```{r, fig.height=8}
-UMAPPlot(xe, group.by = "SCT_seurat_clusters", label = T, repel = T) & theme_void() & theme(aspect.ratio = 1)
-DimPlot(xe, reduction = "spatial", group.by = "SCT_seurat_clusters") & theme_void() & coord_fixed()
+UMAPPlot(xe, group.by = "clusters", label = T, repel = T) & theme_void() & theme(aspect.ratio = 1)
+DimPlot(xe, reduction = "spatial", group.by = "clusters") & theme_void() & coord_fixed()
 ```

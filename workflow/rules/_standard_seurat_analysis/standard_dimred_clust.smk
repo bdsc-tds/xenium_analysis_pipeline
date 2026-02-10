@@ -26,6 +26,28 @@ rule runStandardDimRedClust:
             "clustering",
             "resolution",
             replace_none=0.8,
+        ),
+        enable_sketching=True,
+        sketch_threshold=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "sketching",
+            "sketch_threshold",
+            replace_none=500000,
+        ),
+        sketch_ncells=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "sketching",
+            "sketch_ncells",
+            replace_none=100000,
+        ),
+        sketch_method=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "sketching",
+            "sketch_method",
+            replace_none="LeverageScore",
         )
     resources:
         mem_mb=lambda wildcards, input, attempt: max(input.size_mb * attempt * 10, 20480),
