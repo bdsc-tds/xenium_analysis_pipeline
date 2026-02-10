@@ -27,7 +27,13 @@ rule runStandardDimRedClust:
             "resolution",
             replace_none=0.8,
         ),
-        enable_sketching=True,
+        enable_sketching=lambda wildcards: get_dict_value(
+            config,
+            "standard_seurat_analysis",
+            "sketching",
+            "enable_sketching",
+            replace_none=True,
+        ),
         sketch_threshold=lambda wildcards: get_dict_value(
             config,
             "standard_seurat_analysis",
