@@ -95,7 +95,7 @@ if (enable_sketching & ncells > sketch_threshold) {
   )
   
 } else {
-  message("Object size (", ncells, " cells) <=", sketch_threshold, "or sketching is disabled. Running standard workflow.")
+  message("Object size (", ncells, " cells) <= ", sketch_threshold, " or sketching is disabled. Running standard workflow.")
   
   xe <- xe |>
     RunPCA(npcs = n_dims) |>
