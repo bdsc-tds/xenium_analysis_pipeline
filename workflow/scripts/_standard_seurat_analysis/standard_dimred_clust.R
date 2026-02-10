@@ -85,13 +85,19 @@ if (enable_sketching & ncells > sketch_threshold) {
   xe@reductions[["umap"]]@key <- "umap_"
   
   xe@reductions[["pca"]]@stdev <- xe@reductions[["sketching_pca"]]@stdev
+  xe@reductions[["pca"]]@feature.loadings <- xe@reductions[["sketching_pca"]]@feature.loadings
   
+  # clean up
+  xe[["sketch"]] <- NULL
+  xe@reductions[["sketching_pca"]] <- NULL
+  xe@reductions[["sketching_umap"]] <- NULL
+  xe@reductions[["full.sketching_umap"]] <- NULL
   
   # Save some sketch-specific metadata too (useful for debugging)
   xe@misc$sketch_meta <- list(
     sketch_ncells = sketch_ncells,
     sketch_method = sketch_method,
-    sketch_cells = length(sketch_cells)
+    sketch_cells = sketch_cells
   )
   
 } else {
