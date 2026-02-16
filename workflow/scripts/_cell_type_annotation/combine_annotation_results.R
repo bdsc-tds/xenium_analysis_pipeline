@@ -12,10 +12,15 @@ input_dir <- snakemake@input[["root_dir"]]
 # Find all labels.parquet files under input_dir
 label_files <- list.files(
   path = input_dir,
-  pattern = "labels\\.parquet$",
+  pattern = "^labels\\.parquet$",
   full.names = TRUE,
   recursive = TRUE
 )
+
+if (length(label_files) == 0) {
+  stop("No labels.parquet files found under: ", input_dir)
+}
+
 
 read_and_annotate <- function(path) {
   df <- read_parquet(path)
