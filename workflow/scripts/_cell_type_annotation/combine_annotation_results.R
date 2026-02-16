@@ -1,29 +1,21 @@
-#!/usr/bin/env Rscript
+log <- file(snakemake@log[[1]], open = "wt")
+sink(log, type = "output")
+sink(log, type = "message")
 
-library(optparse)
 library(dplyr)
 library(arrow)
 library(stringr)
 library(purrr)
 
-# Argument parser
-option_list <- list(
-  make_option(c("--input_dir"), type="character", help="Input root directory"),
-  make_option(c("--output_file"), type="character", help="Output file path")
-)
-opt <- parse_args(OptionParser(option_list=option_list))
+input_dir <- snakemake@input[["root_dir"]]
 
 # Find all labels.parquet files under input_dir
 label_files <- list.files(
-  path = opt$input_dir,
+  path = input_dir,
   pattern = "labels\\.parquet$",
   full.names = TRUE,
   recursive = TRUE
 )
-
-if (length(label_files) == 0) {
-  stop("No labels.parquet files found.")
-}
 
 read_and_annotate <- function(path) {
   df <- read_parquet(path)
@@ -46,4 +38,4 @@ merged <- label_files %>%
   map(read_and_annotate) %>%
   reduce(full_join, by = "cell_id")
 
-write_parquet(merged, opt$output_file)
+write_parquet(merged, snakemake@output[["combined"]])
