@@ -28,6 +28,11 @@ read_and_annotate <- function(path) {
   # Extract tool/level/mode from path
   parts <- str_split(path, .Platform$file.sep)[[1]]
   n <- length(parts)
+  
+  if (n < 4) {
+    stop("Unexpected path structure (too few components): ", path)
+  }
+  
   mode <- parts[n - 1]
   level <- parts[n - 2]
   tool  <- parts[n - 3]
