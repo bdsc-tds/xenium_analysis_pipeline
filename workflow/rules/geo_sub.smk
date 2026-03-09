@@ -77,8 +77,10 @@ rule computeMd5ForGeoSub:
         4
     resources:
         mem_mb=lambda wildcards, input, attempt: min(2048 * attempt * 2, 40960)
+    conda:
+        "../envs/geo_sub.yml"
     shell:
-        "mamba run -n utilnest python workflow/scripts/_data_wrapping/compute_checksum.py "
+        "python3 workflow/scripts/_data_wrapping/compute_checksum.py "
         "--batch_file {input} "
         "-o {output} "
         "--algo md5 "
