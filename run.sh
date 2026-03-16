@@ -55,10 +55,8 @@ help()
 }
 
 # Allowed command line arguments.
-SHORT_OPTS=m:,c:,j:,n,R:,-U:,v,h
-LONG_OPTS=mode:,core:,jobs:,retries:,dry-run,forcerun:,until:,dag:,unlock,verbose,help
-OPTS=$(getopt -n xenium_analysis_pipeline --options $SHORT_OPTS --longoptions $LONG_OPTS -- "$@")
-eval set -- "$OPTS"
+# Note: Using manual parsing instead of getopt for better portability
+# No modification to arguments needed - we'll parse them directly
 
 # Bind directories, if they are present.
 IFS=':'

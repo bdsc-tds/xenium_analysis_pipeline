@@ -32,7 +32,8 @@ for d in found_dirs:
     for brcode in sorted_brcodes:
         if brcode in final_id:
             final_id = final_id.replace(brcode, brcode_to_ptcode[brcode])
-            
+            break
+
     target_id_to_path[final_id] = rel_path
 
 # final list of wildcards
