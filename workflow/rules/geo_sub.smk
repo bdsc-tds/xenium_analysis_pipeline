@@ -4,10 +4,10 @@ import pandas as pd
 import config_constants as cc
 
 # optional mapping CSV
-mapping_file = config['name_mapping_csv']
+mapping_file = config.get('name_mapping_csv')
 brcode_to_ptcode = {}
 
-if os.path.exists(mapping_file):
+if mapping_file and os.path.exists(mapping_file):
     try:
         df_mapping = pd.read_csv(mapping_file, dtype=str)
         brcode_to_ptcode = dict(zip(df_mapping.iloc[:,0], df_mapping.iloc[:,1]))
@@ -35,9 +35,8 @@ for d in found_dirs:
             
     target_id_to_path[final_id] = rel_path
 
-# 4. Create the final list of wildcards
+# final list of wildcards
 TARGET_GEO_IDS = list(target_id_to_path.keys())
-
 
 
 #######################################
