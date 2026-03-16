@@ -65,7 +65,7 @@ def process_outputs(path: str):
 
         if len(subdirs) > 1:
             print(
-                f"Warning! Expecting one subdirectory in {path} but finding {len(subdirs)}: {",".join(subdirs)}. Taking the most recently modified one."
+                f"Warning! Expecting one subdirectory in {path} but finding {len(subdirs)}: {','.join(subdirs)}. Taking the most recently modified one."
             )
             for i in subdirs:
                 if subdir == "":

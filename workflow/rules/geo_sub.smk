@@ -25,7 +25,7 @@ found_dirs = glob.glob(search_pattern)
 
 target_id_to_path = {}
 
-for d in found_dirs:
+for d in sorted(found_dirs):
     rel_path = os.path.relpath(d, base_path).replace("\\", "/")
     final_id = rel_path.replace("/", "_")
 
@@ -42,7 +42,7 @@ for d in found_dirs:
     target_id_to_path[final_id] = rel_path
 
 # final list of wildcards
-TARGET_GEO_IDS = list(target_id_to_path.keys())
+TARGET_GEO_IDS = sorted(target_id_to_path.keys())
 
 
 #######################################
