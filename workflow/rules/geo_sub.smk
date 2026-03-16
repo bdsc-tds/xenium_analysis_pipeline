@@ -28,12 +28,17 @@ target_id_to_path = {}
 for d in found_dirs:
     rel_path = os.path.relpath(d, base_path).replace("\\", "/")
     final_id = rel_path.replace("/", "_")
-    
+
     for brcode in sorted_brcodes:
         if brcode in final_id:
             final_id = final_id.replace(brcode, brcode_to_ptcode[brcode])
             break
 
+    if final_id in target_id_to_path:
+        raise ValueError(
+            f"ID collision detected: '{final_id}' already maps to "
+            f"'{target_id_to_path[final_id]}' but would now map to '{rel_path}'"
+        )
     target_id_to_path[final_id] = rel_path
 
 # final list of wildcards
