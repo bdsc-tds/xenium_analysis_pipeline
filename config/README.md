@@ -226,3 +226,7 @@ This section for now only supports reference based approach (specified with key 
      - `nrounds`: #TODO
      - `eta`: #TODO
      - `_other_options`: Same as above.
+
+## name_mapping_csv
+Used to replace donor and sample names with specified str (when creating geo_sub folder). 
+Path to csv file with first column containing donor/sample names and second column new names.

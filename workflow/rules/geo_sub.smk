@@ -1,16 +1,53 @@
+import os
+import glob
+import pandas as pd
+import config_constants as cc
+
+# optional mapping CSV
+mapping_file = config['name_mapping_csv']
+brcode_to_ptcode = {}
+
+if os.path.exists(mapping_file):
+    try:
+        df_mapping = pd.read_csv(mapping_file, dtype=str)
+        brcode_to_ptcode = dict(zip(df_mapping.iloc[:,0], df_mapping.iloc[:,1]))
+    except Exception as e:
+        print(f"Warning: Could not load mapping file {mapping_file}: {e}")
+
+# longest-substring matching
+# e.g. ensures "0WJ3_big" is replaced before "0WJ3"
+sorted_brcodes = sorted(brcode_to_ptcode.keys(), key=len, reverse=True)
+
+# map renamed flattened IDs -> original paths
+base_path = config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]
+search_pattern = os.path.join(base_path, "*", "*", "*", "*") # condition/panel/donor/sample
+found_dirs = glob.glob(search_pattern)
+
+target_id_to_path = {}
+
+for d in found_dirs:
+    rel_path = os.path.relpath(d, base_path).replace("\\", "/")
+    final_id = rel_path.replace("/", "_")
+    
+    for brcode in sorted_brcodes:
+        if brcode in final_id:
+            final_id = final_id.replace(brcode, brcode_to_ptcode[brcode])
+            
+    target_id_to_path[final_id] = rel_path
+
+# 4. Create the final list of wildcards
+TARGET_GEO_IDS = list(target_id_to_path.keys())
+
+
+
 #######################################
 #              Functions              #
 #######################################
 
 def get_input2gatherFilesPerSampleForGeoSub(wildcards):
-    sample_id = extract_layers_from_experiments(
-        wildcards.geo_sub_sample_id,
-        [0, 1, 2, 3],
-        sep_in="_",
-        sep_out="/",
-        maxsplit=3,
-    )[0]
-    root_dir = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{sample_id}'
+    original_path = target_id_to_path[wildcards.geo_sub_id]
+    
+    root_dir = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{original_path}'
 
     return {
         "r_img": f'{root_dir}/morphology.ome.tif',
@@ -30,14 +67,14 @@ rule gatherFilesPerSampleForGeoSub:
     input:
         unpack(get_input2gatherFilesPerSampleForGeoSub)
     output:
-        r_img=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_morphology.ome.tif',
-        r_ts=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_transcripts.parquet',
-        p_cnt=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_feature_matrix.h5',
-        p_cells=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cells.parquet',
-        p_cell_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_boundaries.parquet',
-        p_nuc_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet'
+        r_img=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_morphology.ome.tif',
+        r_ts=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_transcripts.parquet',
+        p_cnt=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cell_feature_matrix.h5',
+        p_cells=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cells.parquet',
+        p_cell_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cell_boundaries.parquet',
+        p_nuc_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_nucleus_boundaries.parquet'
     log:
-        f'{config["output_path"]}/geo_sub/logs/gatherFilesPerSampleForGeoSub_{{geo_sub_sample_id}}.log'
+        f'{config["output_path"]}/geo_sub/logs/gatherFilesPerSampleForGeoSub_{{geo_sub_id}}.log'
     resources:
         runtime=60
     shell:
@@ -50,12 +87,12 @@ rule gatherFilesPerSampleForGeoSub:
 
 rule gatherFilesForGeoSub:
     input:
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_morphology.ome.tif', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_transcripts.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_feature_matrix.h5', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cells.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_boundaries.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID)
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_morphology.ome.tif', geo_sub_id=TARGET_GEO_IDS),
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_transcripts.parquet', geo_sub_id=TARGET_GEO_IDS),
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cell_feature_matrix.h5', geo_sub_id=TARGET_GEO_IDS),
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cells.parquet', geo_sub_id=TARGET_GEO_IDS),
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_cell_boundaries.parquet', geo_sub_id=TARGET_GEO_IDS),
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_id}}_nucleus_boundaries.parquet', geo_sub_id=TARGET_GEO_IDS)
     output:
         temp(f'{config["output_path"]}/geo_sub/geo_sub/_all_files.txt')
     resources:
