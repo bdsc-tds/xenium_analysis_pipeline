@@ -34,6 +34,7 @@ Stage: main
 %files
     segger_cuda.yml /opt/_env
     general_cuda.yml /opt/_env
+    cell2location.yml /opt/_env
 
 %environment
     export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
@@ -96,5 +97,8 @@ Stage: main
     git checkout ${SCVI_VERSION}
     
     mamba run -n general_cuda pip install "."
+
+# Create a new environment: cell2location
+    mamba env create -q -y -f /opt/_env/cell2location.yml
 
     cd /

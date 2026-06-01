@@ -553,6 +553,57 @@ def get_output4cell_type_annotation() -> list[str]:
         for j in samples_annotations
         for k in NORMALISATION_ID
         for m in filenames
+        if re.search(r"/cell2location/", j[1]) is None
+    ]
+
+
+def get_output4cell2location() -> list[str]:
+    prefix: str = f'{config["output_path"]}/cell2location'
+    filenames: list[str] = [
+        "output.h5ad",
+        "labels.parquet",
+        "scores.parquet",
+        "cell_abundance.parquet",
+    ]
+
+    samples_by_conditions: dict[str, list[str]] = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_COLLECTIONS_NAME,
+        cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
+    )
+
+    annotations_by_conditions: dict[str, list[str]] = {
+        cond: [
+            i
+            for i in anno
+            if re.search(r"/cell2location/", i) is not None
+        ]
+        for cond, anno in get_dict_value(
+            config,
+            cc.WILDCARDS_NAME,
+            cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+        ).items()
+    }
+
+    samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+        samples_by_conditions,
+        annotations_by_conditions,
+    )
+
+    return [
+        os.path.join(
+            prefix,
+            i,
+            j[0],
+            k,
+            j[1],
+            m,
+        )
+        for i in SEGMENTATION_ID
+        for j in samples_annotations
+        for k in NORMALISATION_ID
+        for m in filenames
     ]
 
 
@@ -1308,6 +1359,7 @@ def get_input2all(
     count_correction: bool = True,
     post_count_correction_cell_type_annotation: bool = True,
     post_count_correction_neighborhood_analysis: bool = False,
+    cell2location: bool = False,
     cleanup: bool = False,
     wrap: str | None = None,
     geo_sub: bool = False,
@@ -1350,6 +1402,9 @@ def get_input2all(
         if res is not None and len(res) > 0:
             ret.extend(res)
 
+    if cell2location:
+        ret.extend(get_output4cell2location())
+
     if cleanup:
         ret.extend(get_output4cleanup())
 
@@ -1379,6 +1434,7 @@ rule all:
             count_correction=True,
             post_count_correction_cell_type_annotation=True,
             post_count_correction_neighborhood_analysis=False,
+            cell2location=True,
             cleanup=False,
             wrap=None,
             geo_sub=False,

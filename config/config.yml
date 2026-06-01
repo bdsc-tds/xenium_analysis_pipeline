@@ -154,6 +154,7 @@ cell_type_annotation:
       - singler
       - seurat
       - xgboost
+      - cell2location
 
     modes:
       - single_cell
@@ -213,6 +214,15 @@ count_correction:
     predict:
       num_samples: 30
       batch_size: 1000
+
+cell2location:
+  train:
+    max_epochs: 30000
+
+  predict:
+    max_epochs: 1000
+    N_cells_per_location: 5
+    detection_alpha: 200
 
 doublet_finding:
   methods:
