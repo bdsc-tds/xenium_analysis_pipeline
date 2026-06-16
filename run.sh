@@ -56,7 +56,6 @@ help()
 
 # Allowed command line arguments.
 # Note: Using manual parsing instead of getopt for better portability
-# No modification to arguments needed - we'll parse them directly
 
 # Bind directories, if they are present.
 IFS=':'

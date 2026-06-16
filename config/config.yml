@@ -221,3 +221,7 @@ doublet_finding:
 
   scdblfinder:
     _other_options:
+
+geo_sub:
+  name_map:
+  geo_id_map:

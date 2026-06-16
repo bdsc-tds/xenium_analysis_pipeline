@@ -227,6 +227,9 @@ This section for now only supports reference based approach (specified with key 
      - `eta`: #TODO
      - `_other_options`: Same as above.
 
-## name_mapping_csv
-Used to replace donor and sample names with specified str (when creating geo_sub folder). 
-Path to csv file with first column containing donor/sample names and second column new names.
+## Submission to GEO (key: `geo_sub`)
+
+This section is for submitting the Xenium data to [GEO](https://www.ncbi.nlm.nih.gov/geo/).
+
+   - `name_map`: A header-less table in csv format for sample enaming: first column contains old sample ids, and the second column contains the new sample ids. The format of old and new sample ids must follow: `condition/gene_panel/donor/sample`.
+   - `geo_id_map`: A header-less table in csv format to provide an extra prefix of the assigned GEO id to each sample: first column is the GEO ids, and the second column is the new sample ids if `name_map` is also available; otherwise the old sample ids should be specified.

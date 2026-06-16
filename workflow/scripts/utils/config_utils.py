@@ -7,6 +7,7 @@ from typing import Any, Callable
 import re
 import os
 import yaml
+import pandas as pd
 
 import config_constants as cc
 
@@ -929,6 +930,128 @@ def _process_doublet_finding(data: dict[str, Any]) -> list[str]:
     return _methods
 
 
+def _process_geo_sub(
+    samples: list[str],
+    data: dict[str, Any],
+) -> dict[str, str]:
+    """Build a mapping from GEO submission sample IDs to original sample IDs.
+
+    Args:
+        samples: Original sample IDs in ``condition/gene_panel/donor/sample`` format.
+        data: The ``geo_sub`` section of the config dictionary.
+
+    Returns:
+        dict mapping geo_sub_id -> original sample id (slash-separated).
+        Returns an empty dict if neither ``name_map`` nor ``geo_id_map`` is provided.
+    """
+    name_map_path: str | None = get_dict_value(data, "name_map", inexist_key_ok=True)
+    geo_id_map_path: str | None = get_dict_value(
+        data, "geo_id_map", inexist_key_ok=True
+    )
+
+    if name_map_path is None and geo_id_map_path is None:
+        return {}
+
+    samples_set: set[str] = set(samples)
+
+    # Build rename mapping: old slash-id -> new slash-id
+    name_map: dict[str, str] = {}
+    if name_map_path is not None:
+        if not os.path.isfile(name_map_path):
+            raise FileNotFoundError(
+                f"Error! name_map file does not exist: {name_map_path}"
+            )
+        df_name = pd.read_csv(name_map_path, header=None, dtype=str)
+        if df_name.shape[1] < 2:
+            raise ValueError(
+                f"Error! name_map CSV must have at least 2 columns: {name_map_path}"
+            )
+        _new_ids_seen: set[str] = set()
+        for _, row in df_name.iterrows():
+            old_id, new_id = row.iloc[0].strip(), row.iloc[1].strip()
+            if old_id in name_map:
+                raise RuntimeError(
+                    f"Error! Duplicate old sample ID in name_map: {old_id}"
+                )
+            if new_id in _new_ids_seen:
+                raise RuntimeError(
+                    f"Error! Duplicate new sample ID in name_map: {new_id}"
+                )
+            if old_id not in samples_set:
+                raise KeyError(
+                    f"Error! Old sample ID '{old_id}' in name_map is not a valid sample."
+                )
+            name_map[old_id] = new_id
+            _new_ids_seen.add(new_id)
+
+    # Reversed name_map: renamed slash-id -> original slash-id
+    renamed_to_original: dict[str, str] = {v: k for k, v in name_map.items()}
+
+    # Build geo_id_map: geo_id -> sample_id
+    # (renamed slash-id if name_map is provided, original slash-id otherwise)
+    geo_id_map: dict[str, str] = {}
+    if geo_id_map_path is not None:
+        if not os.path.isfile(geo_id_map_path):
+            raise FileNotFoundError(
+                f"Error! geo_id_map file does not exist: {geo_id_map_path}"
+            )
+        df_geo = pd.read_csv(geo_id_map_path, header=None, dtype=str)
+        if df_geo.shape[1] < 2:
+            raise ValueError(
+                f"Error! geo_id_map CSV must have at least 2 columns: {geo_id_map_path}"
+            )
+        for _, row in df_geo.iterrows():
+            geo_id, sample_id = row.iloc[0].strip(), row.iloc[1].strip()
+            if geo_id in geo_id_map:
+                raise RuntimeError(
+                    f"Error! Duplicate GEO ID in geo_id_map: {geo_id}"
+                )
+            if name_map:
+                if sample_id not in renamed_to_original:
+                    raise KeyError(
+                        f"Error! Sample ID '{sample_id}' in geo_id_map not found among renamed samples."
+                    )
+            elif sample_id not in samples_set:
+                raise KeyError(
+                    f"Error! Sample ID '{sample_id}' in geo_id_map is not a valid sample."
+                )
+            geo_id_map[geo_id] = sample_id
+
+    ret: dict[str, str] = {}
+
+    if geo_id_map:
+        for geo_id, sample_id in geo_id_map.items():
+            original = renamed_to_original.get(sample_id, sample_id)
+            geo_sub_id = f"{geo_id}_{sample_id.replace(os.path.sep, '_')}"
+            if geo_sub_id in ret:
+                raise RuntimeError(
+                    f"Error! GEO submission ID collision: {geo_sub_id}"
+                )
+            ret[geo_sub_id] = original
+    else:
+        for original, new_id in name_map.items():
+            geo_sub_id = new_id.replace(os.path.sep, "_")
+            if geo_sub_id in ret:
+                raise RuntimeError(
+                    f"Error! GEO submission ID collision: {geo_sub_id}"
+                )
+            ret[geo_sub_id] = original
+
+    # Add samples not covered by geo_id_map or name_map entries
+    covered: set[str] = set(ret.values())
+    for s in samples:
+        if s not in covered:
+            new_id = name_map.get(s, s)
+            geo_sub_id = new_id.replace(os.path.sep, "_")
+            if geo_sub_id in ret:
+                raise RuntimeError(
+                    f"Error! GEO submission ID collision: {geo_sub_id}"
+                )
+            ret[geo_sub_id] = s
+
+    return ret
+
+
 def process_config(
     data: dict[str | int | float | tuple, Any], *, root_path: str
 ) -> None:
@@ -994,20 +1117,6 @@ def process_config(
             ),
             [0, 1],
             sep_out="-",
-        ),
-    )
-
-    set_dict_value(
-        data,
-        cc.WILDCARDS_NAME,
-        cc.WILDCARDS_GEO_SUB_SAMPLES_NAME,
-        value=extract_layers_from_experiments(
-            get_dict_value(
-                _experiments[0],
-                cc.WILDCARDS_SAMPLES_NAME,
-            ),
-            [0, 1, 2, 3],
-            sep_out="_",
         ),
     )
 
@@ -1176,6 +1285,25 @@ def process_config(
         cc.WILDCARDS_NAME,
         cc.WILDCARDS_DOUBLET_FINDING_NAME,
         value=_doublet_finding,
+    )
+
+    # Process `geo_sub` section.
+    _geo_sub = _process_geo_sub(
+        get_dict_value(
+            _experiments[0],
+            cc.WILDCARDS_SAMPLES_NAME,
+        ),
+        get_dict_value(
+            data,
+            "geo_sub",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_GEO_SUB_SAMPLES_NAME,
+        value=_geo_sub,
     )
 
     return None
