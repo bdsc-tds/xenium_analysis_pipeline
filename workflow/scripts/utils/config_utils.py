@@ -933,6 +933,7 @@ def _process_doublet_finding(data: dict[str, Any]) -> list[str]:
 def _process_geo_sub(
     samples: list[str],
     data: dict[str, Any],
+    root_path: str,
 ) -> dict[str, str]:
     """Build a mapping from GEO submission sample IDs to original sample IDs.
 
@@ -957,6 +958,9 @@ def _process_geo_sub(
     # Build rename mapping: old slash-id -> new slash-id
     name_map: dict[str, str] = {}
     if name_map_path is not None:
+        if not os.path.isabs(name_map_path):
+            name_map_path = os.path.join(root_path, name_map_path)
+            
         if not os.path.isfile(name_map_path):
             raise FileNotFoundError(
                 f"Error! name_map file does not exist: {name_map_path}"
@@ -991,6 +995,9 @@ def _process_geo_sub(
     # (renamed slash-id if name_map is provided, original slash-id otherwise)
     geo_id_map: dict[str, str] = {}
     if geo_id_map_path is not None:
+        if not os.path.isabs(geo_id_map_path):
+            geo_id_map_path = os.path.join(root_path, geo_id_map_path)
+            
         if not os.path.isfile(geo_id_map_path):
             raise FileNotFoundError(
                 f"Error! geo_id_map file does not exist: {geo_id_map_path}"
@@ -1311,6 +1318,7 @@ def process_config(
             data,
             "geo_sub",
         ),
+        root_path,
     )
 
     set_dict_value(
