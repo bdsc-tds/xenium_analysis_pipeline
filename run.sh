@@ -113,6 +113,10 @@ while :
 do
     case "$1" in
 
+        "")
+            break
+            ;;
+
         -m | --mode)
             case "$2" in
 

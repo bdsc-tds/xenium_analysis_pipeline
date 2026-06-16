@@ -942,7 +942,7 @@ def _process_geo_sub(
 
     Returns:
         dict mapping geo_sub_id -> original sample id (slash-separated).
-        Returns an empty dict if neither ``name_map`` nor ``geo_id_map`` is provided.
+        Returns a default identity mapping (slash→underscore) if neither ``name_map`` nor ``geo_id_map`` is provided.
     """
     name_map_path: str | None = get_dict_value(data, "name_map", inexist_key_ok=True)
     geo_id_map_path: str | None = get_dict_value(
@@ -950,7 +950,7 @@ def _process_geo_sub(
     )
 
     if name_map_path is None and geo_id_map_path is None:
-        return {}
+        return {s.replace("/", "_"): s for s in samples}
 
     samples_set: set[str] = set(samples)
 
