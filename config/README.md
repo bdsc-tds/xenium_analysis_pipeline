@@ -231,5 +231,5 @@ This section for now only supports reference based approach (specified with key 
 
 This section is for submitting the Xenium data to [GEO](https://www.ncbi.nlm.nih.gov/geo/).
 
-   - `name_map`: A header-less table in csv format for sample enaming: first column contains old sample ids, and the second column contains the new sample ids. The format of old and new sample ids must follow: `condition/gene_panel/donor/sample`.
-   - `geo_id_map`: A header-less table in csv format to provide an extra prefix of the assigned GEO id to each sample: first column is the GEO ids, and the second column is the new sample ids if `name_map` is also available; otherwise the old sample ids should be specified.
+   - `name_map`: A header-less table in csv format for sample enaming: first column contains old sample IDs, and the second column contains the new sample IDs. The format of old and new sample IDs must follow: `condition/gene_panel/donor/sample`.
+   - `geo_id_map`: A header-less table in csv format to provide an extra prefix of the assigned GEO ID to each sample: first column is the GEO IDs, and the second column is the new sample IDs if `name_map` is also available; otherwise the old sample IDs should be specified. Sample IDs should follow the same naming convention as specified above.

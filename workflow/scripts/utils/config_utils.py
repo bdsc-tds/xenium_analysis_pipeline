@@ -1030,7 +1030,7 @@ def _process_geo_sub(
             ret[geo_sub_id] = original
     else:
         for original, new_id in name_map.items():
-            geo_sub_id = new_id.replace(os.path.sep, "_")
+            geo_sub_id = new_id.replace("/", "_")
             if geo_sub_id in ret:
                 raise RuntimeError(
                     f"Error! GEO submission ID collision: {geo_sub_id}"
@@ -1039,15 +1039,22 @@ def _process_geo_sub(
 
     # Add samples not covered by geo_id_map or name_map entries
     covered: set[str] = set(ret.values())
-    for s in samples:
-        if s not in covered:
-            new_id = name_map.get(s, s)
-            geo_sub_id = new_id.replace(os.path.sep, "_")
-            if geo_sub_id in ret:
-                raise RuntimeError(
-                    f"Error! GEO submission ID collision: {geo_sub_id}"
-                )
-            ret[geo_sub_id] = s
+    uncovered = [s for s in samples if s not in covered]
+    if uncovered and geo_id_map:
+        import warnings
+        warnings.warn(
+            f"geo_id_map does not cover all samples; adding uncovered samples with default IDs: {uncovered}",
+            UserWarning,
+            stacklevel=2,
+        )
+    for s in uncovered:
+        new_id = name_map.get(s, s)
+        geo_sub_id = new_id.replace("/", "_")
+        if geo_sub_id in ret:
+            raise RuntimeError(
+                f"Error! GEO submission ID collision: {geo_sub_id}"
+            )
+        ret[geo_sub_id] = s
 
     return ret
 

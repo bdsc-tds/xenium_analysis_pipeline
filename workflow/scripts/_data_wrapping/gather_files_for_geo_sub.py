@@ -15,6 +15,7 @@ import re
 import sys
 import os
 import argparse
+import contextlib
 import json
 import shutil
 from pathlib import Path
@@ -130,19 +131,16 @@ def parse_args() -> argparse.Namespace:
     return args
 
 
-if __name__ == "__main__":
-    args = parse_args()
-
-    if args.l is not None:
-        old_stdout, old_stderr = sys.stdout, sys.stderr
-        _log = open(args.l, "w", encoding="utf-8")
-        sys.stdout = _log
-        sys.stderr = _log
-
+def _main(args: argparse.Namespace) -> None:
     with open(args.versions, "r", encoding="utf-8") as fh:
         versions: dict = json.load(fh)
 
-    major_version: int = int(versions["raw_data_version"]["0"])
+    try:
+        major_version: int = int(versions["raw_data_version"]["0"])
+    except (KeyError, ValueError) as exc:
+        raise RuntimeError(
+            f"Could not read XeniumRanger major version from {args.versions}: {exc}"
+        ) from exc
 
     root = Path(args.i)
     out_dir = Path(args.o)
@@ -161,7 +159,18 @@ if __name__ == "__main__":
 
     print("\nDone.")
 
-    if args.l is not None:
-        _log.close()
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    log_cm = open(args.l, "w", encoding="utf-8") if args.l else contextlib.nullcontext()
+    with log_cm as _log:
+        if args.l:
+            old_stdout, old_stderr = sys.stdout, sys.stderr
+            sys.stdout = sys.stderr = _log
+        try:
+            _main(args)
+        finally:
+            if args.l:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr
