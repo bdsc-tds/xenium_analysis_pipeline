@@ -65,7 +65,7 @@ def process_outputs(path: str):
 
         if len(subdirs) > 1:
             print(
-                f"Warning! Expecting one subdirectory in {path} but finding {len(subdirs)}: {",".join(subdirs)}. Taking the most recently modified one."
+                f"Warning! Expecting one subdirectory in {path} but finding {len(subdirs)}: {', '.join(subdirs)}. Taking the most recently modified one."
             )
             for i in subdirs:
                 if subdir == "":
@@ -123,9 +123,9 @@ def compress_parquet_files(dir_path: str, dir_name: str) -> str:
     output_file_path: str = os.path.join(
         dir_path,
         (
-            COMPRESSED_PARQUET_PREFIX + dir_name + ""
+            COMPRESSED_PARQUET_PREFIX + dir_name
             if dir_name.endswith(".parquet")
-            else ".parquet"
+            else COMPRESSED_PARQUET_PREFIX + dir_name + ".parquet"
         ),
     )
     pq.write_table(table, output_file_path)
@@ -135,20 +135,18 @@ def compress_parquet_files(dir_path: str, dir_name: str) -> str:
 
 
 if __name__ == "__main__":
+    import contextlib
+
     args = parse_args()
 
-    if args.l is not None:
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-
-        _log = open(args.l, "w", encoding="utf-8")
-
-        sys.stdout = _log
-        sys.stderr = _log
-
-    process_outputs(args.dir)
-
-    if args.l is not None:
-        _log.close()
-        sys.stdout = old_stdout
-        sys.stderr = old_stderr
+    log_cm = open(args.l, "w", encoding="utf-8") if args.l else contextlib.nullcontext()
+    with log_cm as _log:
+        if args.l:
+            old_stdout, old_stderr = sys.stdout, sys.stderr
+            sys.stdout = sys.stderr = _log
+        try:
+            process_outputs(args.dir)
+        finally:
+            if args.l:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr

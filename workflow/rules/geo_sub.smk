@@ -3,22 +3,19 @@
 #######################################
 
 def get_input2gatherFilesPerSampleForGeoSub(wildcards):
-    sample_id = extract_layers_from_experiments(
+    original_sample_id = get_dict_value(
+        config,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_GEO_SUB_SAMPLES_NAME,
         wildcards.geo_sub_sample_id,
-        [0, 1, 2, 3],
-        sep_in="_",
-        sep_out="/",
-        maxsplit=3,
-    )[0]
-    root_dir = f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{sample_id}'
-
+    )
+    root_dir = normalise_path(
+        f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{original_sample_id}',
+    )
+    versions_file = checkpoints.check10xVersions.get(sample_id=original_sample_id).output[0]
     return {
-        "r_img": f'{root_dir}/morphology.ome.tif',
-        "r_ts": f'{root_dir}/transcripts.parquet',
-        "p_cnt": f'{root_dir}/cell_feature_matrix.h5',
-        "p_cells": f'{root_dir}/cells.parquet',
-        "p_cell_boundaries": f'{root_dir}/cell_boundaries.parquet',
-        "p_nuc_boundaries": f'{root_dir}/nucleus_boundaries.parquet',
+        "raw_data_dir": root_dir,
+        "versions": versions_file,
     }
 
 
@@ -30,41 +27,46 @@ rule gatherFilesPerSampleForGeoSub:
     input:
         unpack(get_input2gatherFilesPerSampleForGeoSub)
     output:
-        r_img=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_morphology.ome.tif',
-        r_ts=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_transcripts.parquet',
-        p_cnt=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_feature_matrix.h5',
-        p_cells=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cells.parquet',
-        p_cell_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_boundaries.parquet',
-        p_nuc_boundaries=f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet'
+        temp(f'{config["output_path"]}/geo_sub/geo_sub/_{{geo_sub_sample_id}}.done')
+    params:
+        prefix=lambda wildcards: wildcards.geo_sub_sample_id,
+        out_dir=f'{config["output_path"]}/geo_sub/geo_sub'
     log:
         f'{config["output_path"]}/geo_sub/logs/gatherFilesPerSampleForGeoSub_{{geo_sub_sample_id}}.log'
     resources:
         runtime=60
     shell:
-        "cp {input.r_img} {output.r_img} && "
-        "cp {input.r_ts} {output.r_ts} && "
-        "cp {input.p_cnt} {output.p_cnt} && "
-        "cp {input.p_cells} {output.p_cells} && "
-        "cp {input.p_cell_boundaries} {output.p_cell_boundaries} && "
-        "cp {input.p_nuc_boundaries} {output.p_nuc_boundaries} &> {log}"
+        "python3 workflow/scripts/_data_wrapping/gather_files_for_geo_sub.py "
+        "-i {input.raw_data_dir} "
+        "-o {params.out_dir} "
+        "--prefix {params.prefix} "
+        "--versions {input.versions} "
+        "--done {output} "
+        "-l {log}"
 
 rule gatherFilesForGeoSub:
     input:
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_morphology.ome.tif', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_transcripts.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_feature_matrix.h5', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cells.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_cell_boundaries.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID),
-        expand(f'{config["output_path"]}/geo_sub/geo_sub/{{geo_sub_sample_id}}_nucleus_boundaries.parquet', geo_sub_sample_id=GEO_SUB_SAMPLE_ID)
+        expand(f'{config["output_path"]}/geo_sub/geo_sub/_{{geo_sub_sample_id}}.done', geo_sub_sample_id=GEO_SUB_SAMPLE_ID)
     output:
         temp(f'{config["output_path"]}/geo_sub/geo_sub/_all_files.txt')
     resources:
         runtime=30
     run:
         from pathlib import Path
+        seen = set()
+        all_paths = []
+        for manifest in input:
+            with open(manifest, 'r', encoding='utf-8') as fh:
+                for line in fh:
+                    p = Path(line.strip())
+                    if not p.exists():
+                        raise FileNotFoundError(f"Expected output file missing: {p}")
+                    if p not in seen:
+                        seen.add(p)
+                        all_paths.append(p)
         with open(output[0], 'w', encoding='utf-8') as fh:
-            for i in input:
-                fh.write(f'{Path(i).absolute()}\n')
+            for p in sorted(all_paths):
+                fh.write(f'{p}\n')
 
 rule computeMd5ForGeoSub:
     input:
