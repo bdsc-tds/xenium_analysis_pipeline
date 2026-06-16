@@ -74,7 +74,8 @@ def _copy_focus_dir(focus_dir: Path, pat: re.Pattern, out_dir: Path, prefix: str
     if mismatched:
         raise ValueError(
             f"Unexpected file names in {focus_dir} "
-            f"(pattern {pat.pattern!r} not matched): {mismatched}"
+            f"(pattern {pat.pattern!r} not matched): {mismatched}. "
+            "This may indicate a XeniumRanger major version mismatch."
         )
     for fname in tif_files:
         _copy(focus_dir / fname, out_dir / f"{prefix}_{fname}")
@@ -120,18 +121,16 @@ def parse_args() -> argparse.Namespace:
         help="path to the log file",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
+
+def _main(args: argparse.Namespace) -> None:
     if not os.path.isdir(args.i):
         raise NotADirectoryError(f"Input directory does not exist: {args.i}")
     if not os.path.isfile(args.versions):
         raise FileNotFoundError(f"Versions JSON does not exist: {args.versions}")
     os.makedirs(args.o, exist_ok=True)
 
-    return args
-
-
-def _main(args: argparse.Namespace) -> None:
     with open(args.versions, "r", encoding="utf-8") as fh:
         versions: dict = json.load(fh)
 
