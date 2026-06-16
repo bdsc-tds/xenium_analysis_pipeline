@@ -41,25 +41,32 @@ rule gatherFilesPerSampleForGeoSub:
         "-o {params.out_dir} "
         "--prefix {params.prefix} "
         "--versions {input.versions} "
-        "-l {log} && "
-        "touch {output}"
+        "--done {output} "
+        "-l {log}"
 
 rule gatherFilesForGeoSub:
     input:
         expand(f'{config["output_path"]}/geo_sub/geo_sub/_{{geo_sub_sample_id}}.done', geo_sub_sample_id=GEO_SUB_SAMPLE_ID)
     output:
         temp(f'{config["output_path"]}/geo_sub/geo_sub/_all_files.txt')
-    params:
-        out_dir=f'{config["output_path"]}/geo_sub/geo_sub'
     resources:
         runtime=30
     run:
         from pathlib import Path
-        out_dir = Path(params.out_dir)
+        seen = set()
+        all_paths = []
+        for manifest in input:
+            with open(manifest, 'r', encoding='utf-8') as fh:
+                for line in fh:
+                    p = Path(line.strip())
+                    if not p.exists():
+                        raise FileNotFoundError(f"Expected output file missing: {p}")
+                    if p not in seen:
+                        seen.add(p)
+                        all_paths.append(p)
         with open(output[0], 'w', encoding='utf-8') as fh:
-            for p in sorted(out_dir.iterdir()):
-                if p.is_file() and not p.name.startswith('_') and not p.name.endswith('.done'):
-                    fh.write(f'{p.absolute()}\n')
+            for p in sorted(all_paths):
+                fh.write(f'{p}\n')
 
 rule computeMd5ForGeoSub:
     input:

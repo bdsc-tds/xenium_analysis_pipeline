@@ -57,14 +57,15 @@ def _tif_files_in(directory: Path) -> list[str]:
     )
 
 
-def _copy(src: Path, dst: Path) -> None:
+def _copy(src: Path, dst: Path, manifest: list[Path]) -> None:
     if not src.exists():
         raise FileNotFoundError(f"Expected source file not found: {src}")
     shutil.copy2(src, dst)
+    manifest.append(dst)
     print(f"  {src.name}  ->  {dst.name}")
 
 
-def _copy_focus_dir(focus_dir: Path, pat: re.Pattern, out_dir: Path, prefix: str) -> None:
+def _copy_focus_dir(focus_dir: Path, pat: re.Pattern, out_dir: Path, prefix: str, manifest: list[Path]) -> None:
     if not focus_dir.is_dir():
         raise FileNotFoundError(f"Focus image directory not found: {focus_dir}")
     tif_files = _tif_files_in(focus_dir)
@@ -78,16 +79,16 @@ def _copy_focus_dir(focus_dir: Path, pat: re.Pattern, out_dir: Path, prefix: str
             "This may indicate a XeniumRanger major version mismatch."
         )
     for fname in tif_files:
-        _copy(focus_dir / fname, out_dir / f"{prefix}_{fname}")
+        _copy(focus_dir / fname, out_dir / f"{prefix}_{fname}", manifest)
 
 
-def gather_focus_images(root: Path, out_dir: Path, prefix: str, major_version: int) -> None:
+def gather_focus_images(root: Path, out_dir: Path, prefix: str, major_version: int, manifest: list[Path]) -> None:
     if major_version == 1:
-        _copy(root / _FOCUS_FILE_V1, out_dir / f"{prefix}_{_FOCUS_FILE_V1}")
+        _copy(root / _FOCUS_FILE_V1, out_dir / f"{prefix}_{_FOCUS_FILE_V1}", manifest)
     elif major_version in (2, 3):
-        _copy_focus_dir(root / _FOCUS_DIR, _FOCUS_PAT_V23, out_dir, prefix)
+        _copy_focus_dir(root / _FOCUS_DIR, _FOCUS_PAT_V23, out_dir, prefix, manifest)
     elif major_version >= 4:
-        _copy_focus_dir(root / _FOCUS_DIR, _FOCUS_PAT_V4, out_dir, prefix)
+        _copy_focus_dir(root / _FOCUS_DIR, _FOCUS_PAT_V4, out_dir, prefix, manifest)
     else:
         raise ValueError(f"Unsupported XeniumRanger major version: {major_version}")
 
@@ -115,6 +116,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--versions", required=True, type=str,
         help="path to the versions JSON produced by collect_10x_versions.py",
+    )
+    parser.add_argument(
+        "--done", required=True, type=str,
+        help="path to the manifest file listing all copied output files",
     )
     parser.add_argument(
         "-l", default=None, type=str,
@@ -149,12 +154,19 @@ def _main(args: argparse.Namespace) -> None:
     print(f"Prefix          : {args.prefix}")
     print(f"XeniumRanger v  : {major_version}.x")
 
+    manifest: list[Path] = []
+
     print("\nCopying fixed files...")
     for src_name, dst_template in _FIXED_FILES:
-        _copy(root / src_name, out_dir / dst_template.format(prefix=args.prefix))
+        _copy(root / src_name, out_dir / dst_template.format(prefix=args.prefix), manifest)
 
     print("\nCopying focus images...")
-    gather_focus_images(root, out_dir, args.prefix, major_version)
+    gather_focus_images(root, out_dir, args.prefix, major_version, manifest)
+
+    print("\nWriting manifest...")
+    with open(args.done, "w", encoding="utf-8") as fh:
+        for p in sorted(manifest):
+            fh.write(f"{p.absolute()}\n")
 
     print("\nDone.")
 
