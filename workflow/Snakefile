@@ -554,6 +554,44 @@ def get_output4cell_type_annotation() -> list[str]:
         for k in NORMALISATION_ID
         for m in filenames
     ]
+    
+def get_combined_label_outputs() -> list[str]:
+    prefix: str = f'{config["output_path"]}/cell_type_annotation'
+
+    samples_by_conditions: dict[str, list[str]] = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_COLLECTIONS_NAME,
+        cc.EXPERIMENTS_COLLECTIONS_CONDITIONS_NAME,
+    )
+
+    annotations_by_conditions: dict[str, list[str]] = get_dict_value(
+        config,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_CELL_TYPE_ANNOTATION_NAME,
+    )
+
+    samples_annotations: list[tuple[str, str]] = cross_values_by_key(
+        samples_by_conditions,
+        annotations_by_conditions,
+    )
+
+    return [
+        os.path.join(
+            prefix,
+            seg,
+            sample,
+            norm,
+            annotation.split("/")[0],          # approach (e.g. reference_based)
+            annotation.split("/")[1],          # reference_name
+            "combined_labels.parquet",
+        )
+        for seg in SEGMENTATION_ID
+        for (sample, annotation) in samples_annotations
+        for norm in NORMALISATION_ID
+    ]
+
+
 
 
 def get_output4joint_analysis() -> list[str] | None:
@@ -1319,13 +1357,14 @@ def get_input2all(
 
     if cell_type_annotation:
         ret.extend(get_output4cell_type_annotation())
+        ret.extend(get_combined_label_outputs()) 
 
         if neighborhood_analysis:
             ret.extend(get_output4neighborhood_analysis())
 
         if doublet_finding:
             ret.extend(get_output4doublet_finding())
-        
+    
     if count_correction:
         ret.extend(get_output4count_correction(
             cell_type_annotation,
