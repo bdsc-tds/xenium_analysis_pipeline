@@ -122,6 +122,41 @@ ANNOTATION_ID = uniquify_elements_in_list(
         ).values()
     ]
 )
+
+def _collect_reference_rds_paths() -> list[str]:
+    """
+    All unique .rds reference paths configured across conditions/reference
+    names under experiments.<_cell_type_annotation>.<reference_files>.
+    """
+    mapping = {}
+    reference_files_by_condition = get_dict_value(
+        config,
+        "experiments",
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+        cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_REFERENCE_FILES_NAME,
+        replace_none={},
+    )
+    for condition_id, references in reference_files_by_condition.items():
+        for reference_name, path in references.items():
+            if path:
+                mapping[f"{condition_id}/{reference_name}"] = path
+    return mapping
+
+REFERENCE_PATH_TO_RDS = _collect_reference_rds_paths()
+
+# reference_stem is the .rds path with the extension stripped — the
+# conversion rule writes <reference_stem>_counts.h5 and
+# <reference_stem>_metadata.parquet right next to the source .rds.
+REFERENCE_STEM = uniquify_elements_in_list(
+    [
+        path[: -len(".rds")]
+        for path in REFERENCE_PATH_TO_RDS.values()
+        if path.endswith(".rds")
+    ]
+)
+
+print(f"[DEBUG] REFERENCE_STEM: {REFERENCE_STEM}", file=sys.stderr)
+
 COUNT_CORRECTION_ID=get_dict_value(
     config,
     cc.WILDCARDS_NAME,
@@ -150,6 +185,7 @@ wildcard_constraints:
     coexpression_id='|'.join([re.escape(i) for i in COEXPRESSION_ID]),
     normalisation_id='|'.join([re.escape(i) for i in NORMALISATION_ID]),
     annotation_id='|'.join([re.escape(i) for i in ANNOTATION_ID]),
+    reference_stem='|'.join([re.escape(i) for i in REFERENCE_STEM]),
     count_correction_id="|".join([re.escape(i) for i in COUNT_CORRECTION_ID]),
     segmentation_id4ovrlpy="|".join([re.escape(i) for i in SEGMENTATION_ID4OVRLPY]),
     doublet_id="|".join([re.escape(i) for i in DOUBLET_ID]),
@@ -166,6 +202,7 @@ include: 'rules/standard_seurat_analysis.smk'
 include: 'rules/joint_scanpy_analysis.smk'
 include: 'rules/coexpression.smk'
 include: 'rules/neighborhood_analysis.smk'
+include: 'rules/reference_preprocessing.smk'
 include: 'rules/cell_type_annotation.smk'
 include: 'rules/segmentation_qc.smk'
 include: 'rules/doublet_finding.smk'
@@ -1370,14 +1407,14 @@ rule all:
     input:
         lambda wildcards: get_input2all(
             wildcards,
-            reports=True,
-            coexpression=True,
+            reports=False,
+            coexpression=False,
             cell_type_annotation=True,
             doublet_finding=True,
-            joint_analysis=True,
+            joint_analysis=False,
             neighborhood_analysis=False,
-            count_correction=True,
-            post_count_correction_cell_type_annotation=True,
+            count_correction=False,
+            post_count_correction_cell_type_annotation=False,
             post_count_correction_neighborhood_analysis=False,
             cleanup=False,
             wrap=None,
