@@ -82,11 +82,11 @@ WRAP_SAMPLE_ID = get_dict_value(
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_WRAP_SAMPLES_NAME,
 )
-GEO_SUB_SAMPLE_ID = get_dict_value(
+GEO_SUB_SAMPLE_ID = list(get_dict_value(
     config,
     cc.WILDCARDS_NAME,
     cc.WILDCARDS_GEO_SUB_SAMPLES_NAME,
-)
+).keys())
 COMPACT_SEGMENTATION_ID = get_dict_value(
     config,
     cc.WILDCARDS_NAME,

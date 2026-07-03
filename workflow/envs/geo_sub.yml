@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - git
+  - pip:
+    - git+https://github.com/senbaikang/utilnest.git@3c3f32cfca2dacf151162e5cccc389052bf8c890

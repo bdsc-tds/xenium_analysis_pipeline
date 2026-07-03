@@ -3,6 +3,14 @@
 
 # xenium_analysis_pipeline
 
+## Resources
+
+Supplementary materials for Xenium data analysis outside of the main pipeline
+are available in `resources/`.
+
+See `resources/README.md` for an overview, including links to standalone
+notebooks in `resources/notebooks/` and utility scripts in `resources/scripts/`.
+
 ## Reproducibility
 
 This workflow is developed with reproducibility bearing in mind. Please refer to the following section for more details.
@@ -167,10 +175,6 @@ Usage: [ -m | --mode MODE ] [ -c | --core CORE ] [ -j | --jobs JOBS ] [ --retrie
 ./run.sh -m cluster --retries 2
 ```
 
-## Other files included in this repo
-
-There are some other files related to Xenium data analysis, residing in `notebooks`. Please refer to the documentation inside for more details.
-
 ## Solutions to known problems
 
 1. Snakemake fails to create conda environments due to the lack of writing permission of `/tmp/conda`.
@@ -185,4 +189,4 @@ There are some other files related to Xenium data analysis, residing in `noteboo
 
 ## Original manuscript analyses
 
-Code to reproduce analyses from the original manuscript can be found at <https://github.com/bdsc-tds/Bilous2025>
+Code to reproduce analyses from the original manuscript can be found at <https://github.com/bdsc-tds/Bilous2026>

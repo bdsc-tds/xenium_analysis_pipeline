@@ -72,19 +72,20 @@ Stage: main
     export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:/usr/local/lib:$LD_LIBRARY_PATH
 
 # Install system packages
-    apt-get install -y m4 automake autoconf libtool ninja-build git vim cmake wget curl pandoc libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev libhdf5-dev libicu-dev libcairo2-dev libharfbuzz-dev libfribidi-dev
+    apt-get install -y m4 automake autoconf libtool ninja-build git vim cmake wget curl pandoc time gdal-bin libgdal-dev libgeos-dev libproj-dev libsqlite3-dev libabsl-dev python3-gdal libssl-dev libcurl4-openssl-dev libmagick++-dev bzip2 libgsl-dev libhdf5-dev libicu-dev libcairo2-dev libharfbuzz-dev libfribidi-dev libudunits2-dev
 
 # Install Clang
-    apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang
+    apt-get install -y clang-format clang-tidy clang-tools clang clangd libc++-dev libc++abi-dev libclang-dev liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang
 
 # Install apache arrow
     mkdir /pkgs
     cd /pkgs
+    apt-get update
     wget https://packages.apache.org/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-    apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-    apt update
-#    apt list -a libarrow-dev libarrow-dataset-dev
-    apt install -y -V libarrow-dev=${LIBARROW_VERSION} libarrow-glib-dev=${LIBARROW_VERSION} libarrow-dataset-dev=${LIBARROW_VERSION} libarrow-dataset-glib-dev=${LIBARROW_VERSION} libarrow-acero-dev=${LIBARROW_VERSION} libarrow-flight-dev=${LIBARROW_VERSION} libarrow-flight-glib-dev=${LIBARROW_VERSION} libarrow-flight-sql-dev=${LIBARROW_VERSION} libarrow-flight-sql-glib-dev=${LIBARROW_VERSION} libgandiva-dev=${LIBARROW_VERSION} libgandiva-glib-dev=${LIBARROW_VERSION} libparquet-dev=${LIBARROW_VERSION} libparquet-glib-dev=${LIBARROW_VERSION}
+    apt-get install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
+    apt-get update
+#    apt-get list -a libarrow-dev libarrow-dataset-dev
+    apt-get install -y -V libarrow-dev=${LIBARROW_VERSION} libarrow-glib-dev=${LIBARROW_VERSION} libarrow-dataset-dev=${LIBARROW_VERSION} libarrow-dataset-glib-dev=${LIBARROW_VERSION} libarrow-acero-dev=${LIBARROW_VERSION} libarrow-flight-dev=${LIBARROW_VERSION} libarrow-flight-glib-dev=${LIBARROW_VERSION} libarrow-flight-sql-dev=${LIBARROW_VERSION} libarrow-flight-sql-glib-dev=${LIBARROW_VERSION} libgandiva-dev=${LIBARROW_VERSION} libgandiva-glib-dev=${LIBARROW_VERSION} libparquet-dev=${LIBARROW_VERSION} libparquet-glib-dev=${LIBARROW_VERSION}
     cd ..
 
     apt-get clean

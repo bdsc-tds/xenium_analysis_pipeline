@@ -55,10 +55,7 @@ help()
 }
 
 # Allowed command line arguments.
-SHORT_OPTS=m:,c:,j:,n,R:,-U:,v,h
-LONG_OPTS=mode:,core:,jobs:,retries:,dry-run,forcerun:,until:,dag:,unlock,verbose,help
-OPTS=$(getopt -n xenium_analysis_pipeline --options $SHORT_OPTS --longoptions $LONG_OPTS -- "$@")
-eval set -- "$OPTS"
+# Note: Using manual parsing instead of getopt for better portability
 
 # Bind directories, if they are present.
 IFS=':'
@@ -100,10 +97,25 @@ DAG_OPT=
 UNLOCK=0
 VERBOSE=0
 
+# Normalize --key=value to --key value for portability.
+_norm_args=()
+for _arg in "$@"; do
+    case "$_arg" in
+        --*=*) _norm_args+=("${_arg%%=*}" "${_arg#*=}") ;;
+        *)     _norm_args+=("$_arg") ;;
+    esac
+done
+set -- "${_norm_args[@]}"
+unset _norm_args _arg
+
 # Process command line arguments.
 while :
 do
     case "$1" in
+
+        "")
+            break
+            ;;
 
         -m | --mode)
             case "$2" in
