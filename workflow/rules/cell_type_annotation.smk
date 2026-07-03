@@ -117,6 +117,25 @@ def get_path2reference4reference_based_annotation(wildcards) -> str:
         extract_layers_from_experiments(wildcards.annotation_id, [0, 1])[0],
     )
 
+def _reference_path4reference_based_annotation(wildcards) -> str:
+    condition_id = extract_layers_from_experiments(wildcards.sample_id, [0])[0]
+    approach_and_reference_name = extract_layers_from_experiments(
+        wildcards.annotation_id, [0, 1]
+    )[0]  # e.g. "reference_based/matched_reference" — keep as-is, don't strip
+    return f"{condition_id}/{approach_and_reference_name}"
+
+
+def get_h5path4reference_based_annotation(wildcards) -> str:
+    reference_path = _reference_path4reference_based_annotation(wildcards)
+    rds_path = REFERENCE_PATH_TO_RDS[reference_path]
+    return f"{rds_path[:-len('.rds')]}_counts.h5"
+
+
+def get_parquetpath4reference_based_annotation(wildcards) -> str:
+    reference_path = _reference_path4reference_based_annotation(wildcards)
+    rds_path = REFERENCE_PATH_TO_RDS[reference_path]
+    return f"{rds_path[:-len('.rds')]}_metadata.parquet"
+  
 
 def get_assay_name4annotation(wildcards, for_ref: bool) -> str:
     if wildcards.normalisation_id == "lognorm":
