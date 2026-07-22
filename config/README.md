@@ -63,7 +63,7 @@ Note that if customised gene panels are used, the results from 10X xeniumranger 
 
 ## Segmentation (key: `segmentation`)
 
-This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x_mm`, `10x`, `baysor`, `proseg_expected`, `proseg_mode`, and `segger`. Specifying either or both of `proseg_expected` and `proseg_mode` will only run `proseg` once. The only difference is that which read counts are used in the downstream analyses: for `proseg_expected`, the expected read counts are used, as recommended by the author of `proseg`; for `proseg_mode`, the read counts are computed by aggregating transcripts assigned to cells based on the mode of their posterior distribution.
+This section specifies with key `methods` a number of methods that could be used for cell segmentation, including `10x_mm`, `10x`, `baysor`, `proseg_expected`, `proseg_mode`, `segger`, and `segger_new`. Specifying either or both of `proseg_expected` and `proseg_mode` will only run `proseg` once. The only difference is that which read counts are used in the downstream analyses: for `proseg_expected`, the expected read counts are used, as recommended by the author of `proseg`; for `proseg_mode`, the read counts are computed by aggregating transcripts assigned to cells based on the mode of their posterior distribution.
 
 Command line arguments for each of the methods are configured in a separate dictionary with the method name being the key. Removing any methods inside `methods` will rule them out from the workflow.
 
@@ -135,6 +135,15 @@ Command line arguments for each of the methods are configured in a separate dict
 
      - `use_cc`: Use connected components if specified. `False` by default.
      - `_other_options`: For options not defined in the configuration except for `--batch_size`, `--knn_method`, and `--cell_id_col`, in a form similar to that mentioned above.
+
+6. `segger_new`
+   The rewritten [Segger](https://github.com/dpeerlab/segger) is used for segmentation, kept as a method separate from `segger` so that the two can be benchmarked side by side. Unlike the older fork, it exposes a single `segger segment` command that performs preprocessing, training, and prediction in one run, so its options are not split into stages. It runs from the host conda environment `workflow/envs/segger_new_cuda.yml` rather than from a container.
+
+   - `n_epochs`: Number of training epochs. `20` by default.
+   - `cells_representation`: How cells are embedded, either `pca` or `morphology`. `pca` by default.
+   - `segmentation_loss`: Loss used for the segmentation head, either `triplet` or `bce`. `triplet` by default.
+   - `_threads`: Number of workers for data loading. `4` by default.
+   - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above, e.g. `"--cells-min-counts 10 --tiling-margin-prediction 20 --prediction-mode cell"`. Everything not set here falls back to the `segger` CLI defaults.
 
 In addition, after acquiring results from Baysor, Proseg, and Segger, an extra step is performed where those results are normalised into the same format for the sake of downstream analysis. The corresponding arguments are specified under `_normalisation`, including:
 

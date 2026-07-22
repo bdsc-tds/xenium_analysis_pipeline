@@ -1,0 +1,58 @@
+# Conda env for the *new* Segger (dpeerlab/segger), used by the segger_new
+# segmentation arm via Snakemake's `conda:` directive.
+#
+# IMPORTANT — why RAPIDS is pip, not conda:
+# dpeerlab ships two recipes. The conda one (environment_cuda121.yml, with
+# `cuspatial=24.10` etc. from the rapidsai channel) NO LONGER SOLVES against
+# current conda-forge: RAPIDS 24.10 pins libjpeg-turbo 2.x, but every current
+# conda geopandas->pyogrio->libgdal needs libjpeg-turbo 3.x -> unsolvable.
+# Their *locked/working* recipe (pixi.toml / pixi.lock) instead installs RAPIDS,
+# geopandas and pyogrio as pip `-cu12` wheels from pypi.nvidia.com, which bundle
+# their own libs and sidestep the conda gdal/libjpeg conflict entirely. We mirror
+# that here: conda provides only python + pip; everything CUDA/RAPIDS/segger comes
+# via pip. Versions match pixi.lock (RAPIDS 24.10.*, torch 2.5, pyg wheels).
+#
+# The pip `-cu12` wheels are manylinux and install fine on a GPU-less login/submit
+# node (no __cuda needed to install); the GPU is only required at run time.
+#
+# The `convert_seggernew2baysor.py` converter runs in this same env; segger pulls
+# geopandas/shapely/scikit-image/polars/pyarrow, and we add `rtree` (pip wheel
+# bundles libspatialindex) for the vendored segger_boundary.py.
+#
+# Build:      mamba env create -f segger_new_cuda.yml
+# Smoke test: mamba run -n segger_new_cuda segger segment --help
+name: segger_new_cuda
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      # Emulate pixi's `index-strategy = unsafe-best-match` across the three indexes.
+      - --extra-index-url https://pypi.nvidia.com
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --find-links https://data.pyg.org/whl/torch-2.5.0+cu121.html
+
+      # PyTorch + PyG (prebuilt cu121 wheels; no compilation)
+      - torch==2.5.*
+      - torchvision==0.20.*
+      - lightning
+      - torch-geometric
+      - torch-scatter
+      - torch-sparse
+
+      # RAPIDS 24.10 as pip -cu12 wheels (matches pixi.lock; pulls geopandas/pyogrio)
+      - cuspatial-cu12==24.10.*
+      - cudf-cu12==24.10.*
+      - cuml-cu12==24.10.*
+      - cugraph-cu12==24.10.*
+      - cupy-cuda12x>=12.2,<13.0
+
+      # For the vendored boundary generator (segger_boundary.py)
+      - rtree
+
+      # The new Segger (pinned for reproducibility) + its pyproject deps
+      # (cyclopts, geopandas, shapely, scanpy, scikit-image, polars, pyarrow,
+      # numba, opencv, tifffile, ...). dpeerlab/segger HEAD as of 2026-07-07.
+      - "segger @ git+https://github.com/dpeerlab/segger@98765aaacc3e62eba8a3a9f80fc35222d1a831ba"
