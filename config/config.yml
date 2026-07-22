@@ -26,7 +26,10 @@ segmentation:
     - proseg_expected
     - proseg_mode
     - segger
-    - segger_new
+    # Opt-in: unlike the other methods, segger_new is not containerised, so
+    # enabling it makes Snakemake build workflow/envs/segger_new_cuda.yml on the
+    # first run (needs outbound network access; see README).
+    # - segger_new
 
   10x_mm:
     expansion-distance:
