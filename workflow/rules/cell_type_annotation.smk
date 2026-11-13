@@ -132,6 +132,18 @@ def get_assay_name4annotation(wildcards, for_ref: bool) -> str:
 ######################################
 
 include: "_cell_type_annotation/_reference_based/rctd.smk"
+
+# RCTD in Python (rctd-py) instead of R for the base annotation, same output files
+_RCTD_LANGUAGE: set[str] = {
+    str(v.get("language", "R"))
+    for v in (get_dict_value(config, "cell_type_annotation", "reference_based", "rctd", inexist_key_ok=True) or {}).values()
+    if isinstance(v, dict)
+}
+
+if _RCTD_LANGUAGE == {"python"}:
+    include: "_cell_type_annotation/_reference_based/rctd_py.smk"
+elif not _RCTD_LANGUAGE <= {"R"}:
+    raise RuntimeError(f"Error! cell_type_annotation.reference_based.rctd.language must be 'R' or 'python', got {_RCTD_LANGUAGE}.")
 include: "_cell_type_annotation/_reference_based/singler.smk"
 include: "_cell_type_annotation/_reference_based/seurat.smk"
 include: "_cell_type_annotation/_reference_based/xgboost.smk"

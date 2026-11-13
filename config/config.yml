@@ -6,6 +6,7 @@ containers:
   10x:
   baysor:
   proseg:
+  rctd_py:
 
 experiments: experiments.yml
 
@@ -159,6 +160,13 @@ cell_type_annotation:
       - single_cell
 
     rctd:
+      # Implementation of the base RCTD step: R (spacexr) or python (rctd-py on GPU); same output files
+      language: R
+
+      # rctd-py only: cells per GPU batch and float precision (float64 = R arithmetic)
+      _py_batch_size: 10000
+      _py_dtype: float64
+
       # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
       UMI_min_sigma:
         - 100 # low UMI in single-cell mode
