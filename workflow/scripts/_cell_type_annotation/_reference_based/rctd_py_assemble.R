@@ -120,7 +120,14 @@ dimnames(weights) <- list(fitted, cell_type_names)
 weights_doublet <- Matrix(as.matrix(py_wd[fitted, c("first_type", "second_type")]), sparse = TRUE)
 dimnames(weights_doublet) <- list(fitted, c("first_type", "second_type"))
 
-# Fill the object as run.RCTD(doublet_mode = "doublet") would (no singlet_scores / score_mat from rctd-py)
+# Per-type singlet scores: one named vector per fitted cell, in results_df order (results$singlet_scores)
+py_sc <- as.data.frame(read_parquet(snakemake@input[["singlet_scores"]]))
+py_sc$cell_id <- py_res$cell_id[py_sc$cell_index]
+py_sc <- py_sc[py_sc$cell_id %in% fitted, ]
+singlet_scores <- split(setNames(py_sc$score, py_sc$cell_type), factor(py_sc$cell_id, levels = fitted))
+names(singlet_scores) <- NULL
+
+# Fill the object as run.RCTD(doublet_mode = "doublet") would (no score_mat from rctd-py)
 RCTD@internal_vars$sigma <- run_info$sigma / 100
 RCTD@config$RCTDmode     <- "doublet"
 RCTD@results <- list(
@@ -128,7 +135,7 @@ RCTD@results <- list(
   weights         = weights,
   weights_doublet = weights_doublet,
   score_mat       = NULL,
-  singlet_scores  = NULL
+  singlet_scores  = singlet_scores
 )
 
 # From here on, the outputs of rctd.R
@@ -161,6 +168,10 @@ results_out <- results_out %>% select(cell_id, everything())
 write_parquet(results_out, snakemake@output[["out_res_df"]])
 write_parquet(as.data.frame(as.matrix(RCTD@results$weights)), snakemake@output[["out_w"]])
 write_parquet(as.data.frame(as.matrix(RCTD@results$weights_doublet)), snakemake@output[["out_wd"]])
-# rctd-py returns no per-type singlet scores or score matrices: empty tables with rctd.R's columns
-write_parquet(data.frame(cell_index = integer(), cell_type = character(), score = numeric()), snakemake@output[["out_sc"]])
+# Singlet scores in the long format of convert_singlet_scores_to_long_df (cell_index = row of results_df)
+write_parquet(
+  data.frame(cell_index = match(py_sc$cell_id, fitted), cell_type = py_sc$cell_type, score = py_sc$score),
+  snakemake@output[["out_sc"]]
+)
+# rctd-py returns no pair score matrices: an empty table with rctd.R's columns
 write_parquet(data.frame(row = character(), column = character(), value = numeric(), cell_index = integer()), snakemake@output[["out_sm"]])

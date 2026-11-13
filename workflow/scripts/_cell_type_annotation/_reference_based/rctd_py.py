@@ -16,6 +16,8 @@ import scipy.sparse as sp
 import torch
 from rctd import RCTDConfig, Reference
 from rctd._doublet import run_doublet_mode
+from rctd._irwls import solve_irwls_batch
+from rctd._likelihood import calc_log_likelihood_batch
 from rctd._rctd import RCTD
 from rctd._types import SPOT_CLASS_NAMES
 
@@ -104,6 +106,66 @@ def make_class_df(obs: pd.DataFrame, annotation_level: str, class_level: str | N
     return dict(zip(best[annotation_level], best[class_level]))
 
 
+def singlet_scores(rctd: RCTD, full_weights: np.ndarray, batch_size: int, device: str) -> pd.DataFrame:
+    """
+    Singlet score of every candidate type of every cell (spacexr's results$singlet_scores), as in
+    step 4 of rctd-py's run_doublet_mode, which does not return them. SPLIT's post-processing needs them.
+    Returns the long table of rctd.R (cell_index 1-based, cell_type, score).
+    """
+    n_cells, n_types = full_weights.shape
+
+    # Candidate types: full-mode weight above 0.01, with spacexr's fallbacks for 0 or 1 candidate
+    singles = []
+    for n in range(n_cells):
+        cands = np.where(full_weights[n] > 0.01)[0].tolist()
+        if len(cands) == 0:
+            cands = list(range(min(3, n_types)))
+        elif len(cands) == 1:
+            cands.append(1 if cands[0] == 0 else 0)
+        singles.extend((n, t) for t in cands)
+    singles = np.asarray(singles, dtype=np.int64)
+
+    # Data and model tensors on the device
+    P = torch.tensor(rctd.norm_profiles, device=device)
+    Q = torch.tensor(rctd.q_mat, device=device)
+    SQ = torch.tensor(rctd.sq_mat, device=device)
+    X = torch.tensor(rctd.x_vals, device=device)
+    Y = torch.tensor(rctd.counts, device=device)
+    nUMI = torch.tensor(rctd.nUMI, device=device)
+
+    # Fit each (cell, type) as a singlet and score it, in batches
+    scores = []
+    for start in range(0, len(singles), batch_size):
+        sg = singles[start : start + batch_size]
+        pix = torch.as_tensor(sg[:, 0], device=device)
+        typ = torch.as_tensor(sg[:, 1], device=device)
+        S = nUMI[pix][:, None, None] * P[:, typ].T.unsqueeze(-1)
+        w, _ = solve_irwls_batch(
+            S_batch=S,
+            Y_batch=Y[pix],
+            nUMI_batch=nUMI[pix],
+            Q_mat=Q,
+            SQ_mat=SQ,
+            x_vals=X,
+            max_iter=25,
+            min_change=0.001,
+            constrain=False,
+            bulk_mode=False,
+        )
+        expected = torch.clamp(torch.sum(S * w[:, None, :], dim=-1), min=1e-4)
+        scores.append(calc_log_likelihood_batch(Y[pix], expected, Q, SQ, X))
+
+    # Long table in cell order, candidates in type order
+    out = pd.DataFrame(
+        {
+            "cell_index": singles[:, 0] + 1,
+            "cell_type": np.asarray(rctd.reference.cell_type_names)[singles[:, 1]],
+            "score": torch.cat(scores).cpu().numpy().astype(float),
+        }
+    )
+    return out
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ref_counts", required=True)
@@ -125,6 +187,7 @@ def main() -> None:
     parser.add_argument("--out_results_df", required=True)
     parser.add_argument("--out_weights", required=True)
     parser.add_argument("--out_weights_doublet", required=True)
+    parser.add_argument("--out_singlet_scores", required=True)
     parser.add_argument("--out_reference_cells", required=True)
     parser.add_argument("--out_class_df", required=True)
     parser.add_argument("--out_run_info", required=True)
@@ -224,6 +287,11 @@ def main() -> None:
     weights_doublet = pd.DataFrame(np.asarray(res.weights_doublet, dtype=float), columns=["first_type", "second_type"])
     weights_doublet.insert(0, "cell_id", cell_ids)
     weights_doublet.to_parquet(args.out_weights_doublet, index=False)
+
+    # Per-type singlet scores of the candidate types (results$singlet_scores in spacexr)
+    singlet_scores(rctd, np.asarray(res.weights), args.batch_size, device).to_parquet(
+        args.out_singlet_scores, index=False
+    )
 
     # Reference cells and labels after filtering, so R builds the same reference object
     pd.DataFrame({"cell_id": ref.obs_names, "cell_type": ref.obs["cell_type"].values}).to_parquet(

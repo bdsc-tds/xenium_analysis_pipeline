@@ -110,6 +110,7 @@ rule runReferenceBasedRCTDPy:
         results_df=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/results_df.parquet',
         weights=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/weights.parquet',
         weights_doublet=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/weights_doublet.parquet',
+        singlet_scores=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/singlet_scores.parquet',
         reference_cells=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/reference_cells.parquet',
         class_df=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/class_df.parquet',
         run_info=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_py/run_info.json'
@@ -138,9 +139,10 @@ rule runReferenceBasedRCTDPy:
         annotation_id=r"reference_based/.+/rctd_.+",
         normalisation_id=r"lognorm"
     threads:
-        4
+        1
     resources:
-        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 32000) * attempt, 500000),
+        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 16000) * attempt, 500000),
+        runtime=lambda wildcards, attempt: 60 * attempt,
         slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
             wildcards,
         ) if _use_gpu() else "cpu",
@@ -170,6 +172,7 @@ rule runReferenceBasedRCTDPy:
         "--out_results_df {output.results_df} "
         "--out_weights {output.weights} "
         "--out_weights_doublet {output.weights_doublet} "
+        "--out_singlet_scores {output.singlet_scores} "
         "--out_reference_cells {output.reference_cells} "
         "--out_class_df {output.class_df} "
         "--out_run_info {output.run_info} "
@@ -184,6 +187,7 @@ rule assembleReferenceBasedRCTDPy:
         results_df=rules.runReferenceBasedRCTDPy.output.results_df,
         weights=rules.runReferenceBasedRCTDPy.output.weights,
         weights_doublet=rules.runReferenceBasedRCTDPy.output.weights_doublet,
+        singlet_scores=rules.runReferenceBasedRCTDPy.output.singlet_scores,
         reference_cells=rules.runReferenceBasedRCTDPy.output.reference_cells,
         class_df=rules.runReferenceBasedRCTDPy.output.class_df,
         run_info=rules.runReferenceBasedRCTDPy.output.run_info
@@ -216,7 +220,8 @@ rule assembleReferenceBasedRCTDPy:
         annotation_id=r"reference_based/.+/rctd_.+",
         normalisation_id=r"lognorm"
     resources:
-        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 20, 32000) * attempt, 300000)
+        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 20, 32000) * attempt, 300000),
+        runtime=lambda wildcards, attempt: 30 * attempt
     log:
         f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/assembleReferenceBasedRCTDPy.log'
     container:
