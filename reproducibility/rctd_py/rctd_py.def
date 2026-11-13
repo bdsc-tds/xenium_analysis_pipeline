@@ -1,0 +1,31 @@
+BootStrap: docker
+From: mambaorg/micromamba:1.5.10-noble
+
+%files
+    rctd_py.yml /opt/_env/rctd_py.yml
+
+%environment
+    export MAMBA_ROOT_PREFIX=/opt/conda
+    export PATH=/opt/conda/envs/rctd_py/bin:/opt/conda/bin:$PATH
+    # Precomputed likelihood tables baked into the image (compute nodes have no internet)
+    export RCTD_Q_MATRICES=/opt/rctd/q_matrices.npz
+    export TZ="Europe/Zurich"
+
+%post
+    export MAMBA_ROOT_PREFIX=/opt/conda
+
+# Create the environment: rctd_py
+    micromamba create -q -y -f /opt/_env/rctd_py.yml
+    micromamba clean -a -y
+
+# Download the rctd-py Q-matrices (data file of the rctd-py v0.1.1 release) and record its checksum
+    mkdir -p /opt/rctd
+    /opt/conda/envs/rctd_py/bin/python -c "import urllib.request; urllib.request.urlretrieve('https://github.com/p-gueguen/rctd-py/releases/download/v0.1.1/q_matrices.npz', '/opt/rctd/q_matrices.npz')"
+    sha256sum /opt/rctd/q_matrices.npz > /opt/rctd/q_matrices.npz.sha256
+
+# Check that the package imports and finds the tables
+    RCTD_Q_MATRICES=/opt/rctd/q_matrices.npz /opt/conda/envs/rctd_py/bin/python -c "import importlib.metadata as md, rctd, torch; from rctd._likelihood import load_cached_q_matrices; load_cached_q_matrices(); print('rctd-py', md.version('rctd-py'), 'torch', torch.__version__)"
+
+%labels
+    rctd_py 0.4.4
+    torch 2.5.1+cu124
