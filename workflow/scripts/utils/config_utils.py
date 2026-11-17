@@ -930,6 +930,15 @@ def _process_doublet_finding(data: dict[str, Any]) -> list[str]:
     return _methods
 
 
+def _process_marker_genes(data: dict[str, Any]) -> list[str]:
+    _methods: list[str] = _convert2list(
+        get_dict_value(data, "methods"),
+        match_length=False,
+    )
+
+    return _methods
+
+
 def _process_geo_sub(
     samples: list[str],
     data: dict[str, Any],
@@ -1306,6 +1315,21 @@ def process_config(
         cc.WILDCARDS_NAME,
         cc.WILDCARDS_DOUBLET_FINDING_NAME,
         value=_doublet_finding,
+    )
+
+    # Process `marker_genes` section.
+    _marker_genes = _process_marker_genes(
+        get_dict_value(
+            data,
+            "marker_genes",
+        ),
+    )
+
+    set_dict_value(
+        data,
+        cc.WILDCARDS_NAME,
+        cc.WILDCARDS_MARKER_GENES_NAME,
+        value=_marker_genes,
     )
 
     # Process `geo_sub` section.

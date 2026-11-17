@@ -227,6 +227,28 @@ This section for now only supports reference based approach (specified with key 
      - `eta`: #TODO
      - `_other_options`: Same as above.
 
+## Marker genes (key: `marker_genes`)
+
+This section controls the identification of marker genes per cell type. Marker genes are computed per sample for every result of cell type annotation, i.e., for all combinations of segmentation methods, normalisation methods, references, levels, and annotation methods. To switch this module on or off, set `marker_genes` (and `post_count_correction_marker_genes` for results after count correction) passed to `get_input2all` in rule `all` of `workflow/Snakefile`.
+
+Two files are generated for each combination:
+
+- `markers.parquet`: One row per cell type and gene, containing all summaries (`mean`, `min`, `median`, `max`, and `rank`) of all effect sizes (`AUC`, `logFC.cohen`, and `logFC.detected`) across pairwise comparisons between cell types.
+
+- `pseudobulk.parquet`: One row per cell type and gene, containing the sum of raw counts (`counts`), the number of cells of the cell type (`n_cells`), and the number of those cells with at least one count of the gene (`n_detected`). All labelled cell types are kept regardless of their sizes.
+
+The following keys are available:
+
+- `methods`: A list of methods for marker gene detection. For now only `scran_score_markers` is supported, which uses `scoreMarkers` from the R package scran.
+
+- `min_cells_per_type`: The minimum number of cells required per cell type to be included in marker detection (by default `25`). Cell types with fewer cells are excluded from `markers.parquet`.
+
+- `rctd_singlets_only`: Whether to only use cells classified as singlets by RCTD (by default `true`). Only applicable to annotations by `rctd_class_aware` and `rctd_class_unaware`.
+
+- `scran_score_markers`
+
+  - `_threads`: The maximum number of threads to use. `4` by default.
+
 ## Submission to GEO (key: `geo_sub`)
 
 This section is for submitting the Xenium data to [GEO](https://www.ncbi.nlm.nih.gov/geo/).
