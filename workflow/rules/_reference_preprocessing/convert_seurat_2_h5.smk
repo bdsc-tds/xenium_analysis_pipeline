@@ -17,8 +17,8 @@ rule runConvertSeuratReferenceToH5:
     input:
         rds=f"{{reference_stem}}.rds"
     output:
-        h5=protected(f"{{reference_stem}}_counts.h5"),
-        parquet=protected(f"{{reference_stem}}_metadata.parquet")
+        h5=f"{{reference_stem}}_counts.h5",
+        parquet=f"{{reference_stem}}_metadata.parquet"
     params:
         output_prefix=lambda wildcards, output: output.h5[: -len("_counts.h5")],
         assay="RNA",
