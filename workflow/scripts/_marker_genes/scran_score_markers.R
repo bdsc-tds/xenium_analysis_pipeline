@@ -41,8 +41,9 @@ xe <- readRDS(snakemake@input[["xe"]])
 labels_df <- as.data.frame(read_parquet(snakemake@input[["labels"]]))
 message("Data loaded.")
 
+# `Assays` is masked by SummarizedExperiment, hence the explicit namespace
 for (assay in unique(c(xe_assay, counts_assay))) {
-  if (!assay %in% Assays(xe)) stop("Error: Assay '", assay, "' is not found in the xenium object.")
+  if (!assay %in% as.character(Seurat::Assays(xe))) stop("Error: Assay '", assay, "' is not found in the xenium object.")
 }
 
 # RCTD stores the label in `first_type`, the other annotation methods in `label`
@@ -81,9 +82,12 @@ rm(xe)
 invisible(gc())
 
 # Control probes are not expected in these assays, but make sure they are excluded
+# Seurat replaces underscores in feature names with dashes, hence both forms are checked
 if (!is.null(control_gene_pat) && nzchar(control_gene_pat)) {
-  expr   <- expr[!grepl(control_gene_pat, rownames(expr)), , drop = FALSE]
-  counts <- counts[!grepl(control_gene_pat, rownames(counts)), , drop = FALSE]
+  is_control <- function(genes) grepl(control_gene_pat, genes) | grepl(control_gene_pat, gsub("-", "_", genes))
+
+  expr   <- expr[!is_control(rownames(expr)), , drop = FALSE]
+  counts <- counts[!is_control(rownames(counts)), , drop = FALSE]
 }
 
 expr   <- expr[, labels_df$cell_id, drop = FALSE]
