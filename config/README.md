@@ -235,11 +235,11 @@ Two files are generated for each combination:
 
 - `markers.parquet`: One row per cell type and gene, containing all summaries (`mean`, `min`, `median`, `max`, and `rank`) of all effect sizes (`AUC`, `logFC.cohen`, and `logFC.detected`) across pairwise comparisons between cell types.
 
-- `pseudobulk.parquet`: One row per cell type and gene, containing the sum of raw counts (`counts`), the number of cells of the cell type (`n_cells`), and the number of those cells with at least one count of the gene (`n_detected`). All labelled cell types are kept regardless of their sizes.
+- `pseudobulk.parquet`: One row per cell type and gene, containing the sum of unnormalised counts (`counts`), the number of cells of the cell type (`n_cells`), and the number of those cells with a positive count of the gene (`n_detected`). Counts are taken from the same object as used for marker detection: for results after count correction, they are the corrected counts rather than the original ones. Counts can be fractional, e.g., with `proseg_expected` or after count correction, in which case any count above zero is considered as detected. All labelled cell types are kept regardless of their sizes.
 
 The following keys are available:
 
-- `methods`: A list of methods for marker gene detection. For now only `scran_score_markers` is supported, which uses `scoreMarkers` from the R package scran.
+- `methods`: A list of methods for marker gene detection. For now only `scran_score_markers` is supported, which uses `scoreMarkers` from the R package scran. No marker genes are computed if this key, or the whole section, is missing or left blank.
 
 - `min_cells_per_type`: The minimum number of cells required per cell type to be included in marker detection (by default `25`). Cell types with fewer cells are excluded from `markers.parquet`.
 

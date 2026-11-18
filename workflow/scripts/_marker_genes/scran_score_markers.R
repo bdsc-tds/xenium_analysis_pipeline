@@ -2,7 +2,7 @@ log <- file(snakemake@log[[1]], open = "wt")
 sink(log, type = "output")
 sink(log, type = "message")
 
-# Identify marker genes per cell type using scran::scoreMarkers, and aggregate raw counts per cell type (pseudobulk)
+# Identify marker genes per cell type using scran::scoreMarkers, and aggregate unnormalised counts per cell type (pseudobulk)
 
 library(Seurat)
 library(scran)
@@ -14,7 +14,7 @@ library(dplyr)
 ###### snakemake params  ######
 
 xe_assay           <- snakemake@params[["xe_assay"]] # assay with log-normalised expression used for marker detection
-counts_assay       <- snakemake@params[["counts_assay"]] # assay with raw counts used for the pseudobulk table
+counts_assay       <- snakemake@params[["counts_assay"]] # assay with unnormalised counts used for the pseudobulk table (corrected counts if run after count correction)
 control_gene_pat   <- snakemake@params[["control_gene_pat"]]
 min_cells_per_type <- snakemake@params[["min_cells_per_type"]] %||% 25
 rctd_singlets_only <- snakemake@params[["rctd_singlets_only"]] %||% TRUE
@@ -101,7 +101,7 @@ print(type_sizes)
 # All the labelled cell types are kept regardless of their sizes, so that filtering can be done after gathering samples
 
 if (nrow(labels_df) > 0) {
-  message("Aggregating raw counts per cell type...")
+  message("Aggregating unnormalised counts per cell type...")
   type_indicator <- Matrix::t(Matrix::fac2sparse(factor(labels_df$cell_type))) # cells x cell types
 
   detected <- counts

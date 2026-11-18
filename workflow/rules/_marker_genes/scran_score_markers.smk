@@ -17,30 +17,21 @@ rule runScranScoreMarkers:
         xe_assay=lambda wildcards: get_assay_name4annotation(wildcards, False),
         counts_assay=sec.SEURAT_DEFAULT_ASSAY,
         control_gene_pat=sec.XENIUM_CONTROL_GENE_PAT,
-        min_cells_per_type=get_dict_value(
-            config,
-            "marker_genes",
+        min_cells_per_type=get_marker_genes_config(
             "min_cells_per_type",
-            replace_none=25,
-            inexist_key_ok=True,
+            default=25,
         ),
-        rctd_singlets_only=get_dict_value(
-            config,
-            "marker_genes",
+        rctd_singlets_only=get_marker_genes_config(
             "rctd_singlets_only",
-            replace_none=True,
-            inexist_key_ok=True,
+            default=True,
         )
     wildcard_constraints:
         marker_id=r"scran_score_markers"
     threads:
-        get_dict_value(
-            config,
-            "marker_genes",
+        get_marker_genes_config(
             "scran_score_markers",
             "_threads",
-            replace_none=4,
-            inexist_key_ok=True,
+            default=4,
         )
     resources:
         mem_mb=lambda wildcards, input, attempt: min(

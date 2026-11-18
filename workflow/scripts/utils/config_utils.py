@@ -930,13 +930,21 @@ def _process_doublet_finding(data: dict[str, Any]) -> list[str]:
     return _methods
 
 
-def _process_marker_genes(data: dict[str, Any]) -> list[str]:
-    _methods: list[str] = _convert2list(
-        get_dict_value(data, "methods"),
-        match_length=False,
+def _process_marker_genes(data: dict[str, Any] | None) -> list[str]:
+    # No methods are used if the section or its `methods` is missing or left blank.
+    _methods: Any = get_dict_value(
+        data,
+        "methods",
+        inexist_key_ok=True,
     )
 
-    return _methods
+    if _methods is None:
+        return []
+
+    return _convert2list(
+        _methods,
+        match_length=False,
+    )
 
 
 def _process_geo_sub(
@@ -1322,6 +1330,7 @@ def process_config(
         get_dict_value(
             data,
             "marker_genes",
+            inexist_key_ok=True,
         ),
     )
 
