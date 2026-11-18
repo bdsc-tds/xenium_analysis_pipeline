@@ -21,9 +21,15 @@ if ! cmp -s "$bundle_img" "$copy"; then
     exit 0
 fi
 
-# Relative target between the physical folders, so links stay valid when the output path is itself a symlink
+# Relative target between the physical folders, so links stay valid when the output path is itself a symlink;
+# absolute when the two only share the filesystem root (e.g. /scratch vs /work)
 outs_dir=$(realpath "$(dirname "$copy")")
-rel=$(realpath --relative-to="$outs_dir" "$(realpath "$bundle_img")")
+target=$(realpath "$bundle_img")
+if [ "$(cut -d/ -f2 <<< "$outs_dir")" = "$(cut -d/ -f2 <<< "$target")" ]; then
+    rel=$(realpath --relative-to="$outs_dir" "$target")
+else
+    rel="$target"
+fi
 
 # Create the link next to the copy and check it resolves to the bundle image before swapping it in
 tmp="$outs_dir/.morphology.ome.tif.tmp_link"
