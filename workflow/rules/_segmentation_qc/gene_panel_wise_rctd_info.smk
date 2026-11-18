@@ -58,7 +58,7 @@ rule combineGenePanelWiseRCTDInfo:
     input:
         get_input2combineGenePanelWiseRCTDInfo
     output:
-        protected(f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/rctd_info.parquet')
+        f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/rctd_info.parquet'
     log:
         f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/logs/combineGenePanelWiseRCTDInfo.log'
     conda:

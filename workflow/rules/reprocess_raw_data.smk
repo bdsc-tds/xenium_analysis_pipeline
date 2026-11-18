@@ -111,7 +111,7 @@ checkpoint check10xVersions:
     input:
         get_input2check10xVersions
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/check10xVersions.log'
     resources:
@@ -178,7 +178,7 @@ rule changeParquetCompressionType:
     input:
         get_input2_or_params4changeParquetCompressionType
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/changeParquetCompressionType.log'
     params:
@@ -198,7 +198,7 @@ rule zipReprocessedAuxiliary10xFiles:
     input:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/results'
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/zipReprocessedAuxiliary10xFiles.log'
     params:

@@ -57,13 +57,13 @@ rule runProseg:
         get_input2_or_params4runProseg
     output:
         directory(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz')
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz'
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
     params:
@@ -122,8 +122,8 @@ rule runProseg2Baysor:
     input:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'
     output:
-        segmentation=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-transcript-metadata.csv'),
-        polygons=protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson')
+        segmentation=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-transcript-metadata.csv',
+        polygons=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson'
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg2Baysor.log'
     resources:
@@ -142,8 +142,8 @@ rule convertProsegCountsFormat:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'
     output:
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz'),
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz')
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz',
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz'
     log:
         f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
     threads:
@@ -223,7 +223,7 @@ rule mapProsegRawAndNormalisedCells:
             for_input=True,
         )
     output:
-        protected(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet')
+        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet'
     params:
         lambda wildcards: get_input2_or_params4mapProsegRawAndNormalisedCells(
             wildcards,

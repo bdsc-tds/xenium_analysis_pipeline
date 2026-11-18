@@ -40,7 +40,7 @@ rule zipNormalisedAuxiliary10xFiles:
     input:
         f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results'
     output:
-        protected(f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results/_auxiliary_files.tar')
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results/_auxiliary_files.tar'
     log:
         f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/zipNormalisedAuxiliary10xFiles.log'
     params:

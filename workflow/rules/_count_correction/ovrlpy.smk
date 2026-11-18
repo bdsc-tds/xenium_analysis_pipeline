@@ -122,9 +122,9 @@ rule runOvrlpy:
     input:
         get_input2_or_params4runOvrlpy
     output:
-        signal_integrity=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity.parquet'),
-        signal_strength=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_strength.parquet'),
-        transcript_info=protected(f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/transcript_info.parquet')
+        signal_integrity=f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_integrity.parquet',
+        signal_strength=f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/signal_strength.parquet',
+        transcript_info=f'{config["output_path"]}/count_correction/{{segmentation_id4ovrlpy}}/{{sample_id}}/ovrlpy/transcript_info.parquet'
     params:
         input_transcripts=lambda wildcards: get_input2_or_params4runOvrlpy(
             wildcards,
@@ -158,8 +158,8 @@ rule getCorrectedCountsFromOvrlpy:
     input:
         get_input2_or_params4getCorrectedCountsFromOvrlpy,
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5'),
-        cells_mean_integrity_unfiltered=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet')
+        corrected_counts=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/corrected_counts.h5',
+        cells_mean_integrity_unfiltered=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/ovrlpy/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/cells_mean_integrity_unfiltered.parquet'
     params:
         input_transcripts=lambda wildcards: get_input2_or_params4getCorrectedCountsFromOvrlpy(
             wildcards,

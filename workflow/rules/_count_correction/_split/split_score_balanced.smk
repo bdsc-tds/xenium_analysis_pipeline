@@ -12,8 +12,8 @@ rule runSplitScoreBalanced:
         spatial_neighborhood_scores=f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/spatial_neighborhood_scores.parquet',
         transcriptomic_neighborhood_scores=f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet'
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_score_balanced/corrected_counts.h5'),
-        corrected_counts_metadata=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_score_balanced/corrected_counts_metadata.parquet')
+        corrected_counts=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_score_balanced/corrected_counts.h5',
+        corrected_counts_metadata=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_score_balanced/corrected_counts_metadata.parquet'
     params:
         score_name="neighborhood_weights_second_type",
         score_threshold=0.1

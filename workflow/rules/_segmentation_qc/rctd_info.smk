@@ -139,7 +139,7 @@ rule gatherRCTDInfo:
     input:
         get_input2gatherRCTDInfo
     output:
-        protected(f'{config["output_path"]}/segmentation_qc/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_info.parquet')
+        f'{config["output_path"]}/segmentation_qc/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/rctd_info.parquet'
     params:
         cmd=lambda wildcards, input, output: get_shell_cmd4gatherRCTDInfo(
             wildcards,

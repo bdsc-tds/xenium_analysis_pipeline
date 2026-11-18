@@ -94,7 +94,7 @@ rule adaptCorrectedCountsBySplit2Seurat:
         raw_obj=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds',
         corrected_counts=get_corrected_counts4adaptCorrectedCounts2Seurat
     output:
-        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds')
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds'
     params:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -156,7 +156,7 @@ rule adaptCorrectedCountsBySplit2Seurat:
 
 use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByOvrlpy2Seurat with:
     output:
-        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds')
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds'
     params:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -197,7 +197,7 @@ use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByOvrlpy2Seur
 
 use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviUnsupervised2Seurat with:
     output:
-        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds')
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds'
     params:
         spatial_dimname=sec.SEURAT_SPATIAL_DIM_NAME,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -238,7 +238,7 @@ use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviUnsu
 
 use rule adaptCorrectedCountsBySplit2Seurat as adaptCorrectedCountsByResolviSupervised2Seurat with:
     output:
-        protected(f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds')
+        f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/raw_seurat.rds'
     log:
         f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/logs/adaptCorrectedCountsByResolviSupervised2Seurat.log'
     wildcard_constraints:

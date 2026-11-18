@@ -6,7 +6,7 @@ rule generateGenePanelWiseRCTDReport:
     input:
         f'{config["output_path"]}/segmentation_qc/{{gene_panel_id}}/rctd_info.parquet'
     output:
-        protected(f'{config["output_path"]}/reports/{{gene_panel_id}}/segmentation_qc_rctd.html')
+        f'{config["output_path"]}/reports/{{gene_panel_id}}/segmentation_qc_rctd.html'
     params:
         gene_panel_id=lambda wildcards: wildcards.gene_panel_id,
         rmd_file="workflow/scripts/_segmentation_qc/segmentation_qc_rctd_report.Rmd",

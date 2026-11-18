@@ -97,9 +97,9 @@ rule runBaysor:
         data_file=f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet',
         xr_version=f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
     output:
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation.csv'),
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_2d.json'),
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_3d.json')
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation.csv',
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_2d.json',
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_3d.json'
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/runBaysor.log'
     params:

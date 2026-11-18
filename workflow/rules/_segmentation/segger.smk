@@ -258,10 +258,10 @@ rule cleanSeggerPredictDir:
     input:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results'
     output:
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_adata.h5ad'),
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet'),
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segmentation_log.json'),
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/compressed_transcripts_df.parquet')
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_adata.h5ad',
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet',
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segmentation_log.json',
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/compressed_transcripts_df.parquet'
     log:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/cleanSeggerPredictDir.log'
     conda:
@@ -280,9 +280,9 @@ rule runSegger2Baysor:
         data_file=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results/segger_transcripts.parquet',
         xr_version=f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
     output:
-        segmentation=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation.csv'),
-        polygons_feat=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_feat_col.json'),
-        polygons_geom=protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_geom_col.json')
+        segmentation=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation.csv',
+        polygons_feat=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_feat_col.json',
+        polygons_geom=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/processed_results/segmentation_polygons_geom_col.json'
     log:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/runSegger2Baysor.log'
     params:
@@ -363,7 +363,7 @@ rule zipSeggerPreprocessed:
         tiles=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/preprocessed_data/data',
         pred=f'{config["output_path"]}/segmentation/segger/{{sample_id}}/raw_results'
     output:
-        protected(f'{config["output_path"]}/segmentation/segger/{{sample_id}}/preprocessed_data/tiles.tgz')
+        f'{config["output_path"]}/segmentation/segger/{{sample_id}}/preprocessed_data/tiles.tgz'
     log:
         f'{config["output_path"]}/segmentation/segger/{{sample_id}}/logs/zipSeggerPreprocess.log'
     params:

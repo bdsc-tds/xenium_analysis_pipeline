@@ -120,7 +120,7 @@ rule loadSegmentation2SpatialData:
     input:
         unpack(get_input2loadSegmentation2SpatialData)
     output:
-        protected(f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{sample_id}}/raw_spatialdata.h5ad')
+        f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{sample_id}}/raw_spatialdata.h5ad'
     params:
         cmd_args=lambda wildcards, input: get_cmd_args4loadSegmentation2SpatialData(
             wildcards,
