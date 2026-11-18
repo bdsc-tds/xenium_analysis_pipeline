@@ -84,6 +84,16 @@ cd reproducibility/segger
 singularity build --fakeroot --force /path/to/the/built/container segger.def
 ```
 
+#### rctd-py
+
+The [rctd-py](https://github.com/p-gueguen/rctd-py) version we use here is 0.4.4. It is only needed when `cell_type_annotation.reference_based.rctd.language` is `python`. The build downloads the precomputed likelihood tables into the container, since compute nodes may have no internet access:
+
+```bash
+# the current working directory is the root of this repo
+cd reproducibility/rctd_py
+singularity build --fakeroot --force /path/to/the/built/container rctd_py.def
+```
+
 ## Configuration
 
 ### Configuration for the workflow
