@@ -86,6 +86,9 @@ segmentation:
     _threads: 16
     _memory: 128
 
+  # Replace the morphology.ome.tif copy in each segmentation output with a symlink to the input bundle image
+  _link_morphology: true
+
   _qc:
     _create_dummy_table: false
 

@@ -324,6 +324,7 @@ rule normaliseSegger:
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/segmentation/segger/{wildcards.sample_id}/logs/normaliseSegger.log'
         ),
+        link_morphology=get_link_morphology_cmd,
         localmem=get_dict_value(
             config,
             "segmentation",
@@ -356,7 +357,8 @@ rule normaliseSegger:
         "--viz-polygons={params.abs_input_polygons} "
         "--units=microns "
         "--localcores={threads} "
-        "--localmem={params.localmem} &> {params.abs_log}"
+        "--localmem={params.localmem} &> {params.abs_log} && "
+        "{params.link_morphology} {params.abs_input_data_dir} normalised_results/outs >> {params.abs_log} 2>&1"
 
 rule zipSeggerPreprocessed:
     input:

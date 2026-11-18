@@ -21,6 +21,17 @@ def get_slurm_gpu_partition_name(wildcards) -> str:
 def get_slurm_extra(wildcards, num_device: int = 1) -> str:
     return f"--gres=gpu:{num_device}" if _use_gpu() else ""
 
+def get_link_morphology_cmd(wildcards) -> str:
+    """
+    Command run after xeniumranger as `<cmd> <xenium bundle> normalised_results/outs`: replaces the
+    copied morphology.ome.tif with a symlink to the bundle image (`segmentation._link_morphology`,
+    default true), or does nothing.
+    """
+    if get_dict_value(config, "segmentation", "_link_morphology", replace_none=True, inexist_key_ok=True):
+        return "bash " + os.path.join(workflow.basedir, "scripts/_segmentation/link_morphology.sh")
+
+    return "true"
+
 
 ######################################
 #              Subrules              #

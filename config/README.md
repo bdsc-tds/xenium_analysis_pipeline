@@ -146,6 +146,8 @@ In addition, after acquiring results from Baysor, Proseg, and Segger, an extra s
 
 - `localmem`: The maximum amount of memory (in GB) to use.
 
+Xenium Ranger copies `morphology.ome.tif` from the input bundle into every segmentation output (`normalised_results/outs/`). With `_link_morphology: true` (the default), the copy is replaced by a relative symlink to the bundle image once Xenium Ranger has finished, if both files are byte-identical; otherwise the copy is kept. Set it to `false` to keep full copies, e.g. when an output folder will be moved or shared without the raw data.
+
 ## Standard Seurat analysis (key: `standard_seurat_analysis`)
 
 This section specifies parameters in the standard Seurat analysis workflow.
