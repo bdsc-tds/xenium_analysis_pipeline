@@ -85,6 +85,27 @@ def filter_reference(
     return ref
 
 
+# Cells kept per cell type by Reference() (n_max_cells, same default in spacexr and rctd-py)
+REF_N_MAX_CELLS = 10000
+
+
+def downsample_reference(ref: anndata.AnnData, cell_type_col: str, n_max_cells: int, seed: int = 42) -> anndata.AnnData:
+    """Keep at most n_max_cells random cells per cell type, in the original cell order."""
+    rng = np.random.default_rng(seed)
+    cell_types = ref.obs[cell_type_col].astype(str).values
+    # Sample the cells of each type above the cap
+    keep_idx = []
+    for ct in sorted(set(cell_types)):
+        idx = np.where(cell_types == ct)[0]
+        if len(idx) > n_max_cells:
+            print(f"Cell type {ct}: {len(idx)} reference cells, {n_max_cells} kept at random.")
+            idx = rng.choice(idx, n_max_cells, replace=False)
+        keep_idx.extend(idx)
+    if len(keep_idx) == ref.n_obs:
+        return ref
+    return ref[np.sort(keep_idx)].copy()
+
+
 def make_class_df(obs: pd.DataFrame, annotation_level: str, class_level: str | None) -> dict[str, str] | None:
     """generate_class_df (annotation_utils.R): most frequent class of each cell type."""
     if not class_level or class_level == annotation_level:
@@ -224,10 +245,14 @@ def main() -> None:
     common_genes = [g for g in query.var_names if g in set(ref.var_names)]
     ref = ref[:, common_genes].copy()
     ref.obs["cell_type"] = ref.obs[args.annotation_level].astype(str).values
+    # Cap each type at REF_N_MAX_CELLS here, so the exported reference cells are the ones the profiles use
+    # (Reference() in rctd-py and spacexr would each draw their own random sample)
+    ref = downsample_reference(ref, "cell_type", REF_N_MAX_CELLS)
     reference = Reference(
         ref,
         cell_type_col="cell_type",
         cell_min=args.cell_min_instance,
+        n_max_cells=REF_N_MAX_CELLS,
         min_UMI=args.ref_min_umi,
     )
     print(f"Reference: {ref.n_obs} cells, {reference.n_types} cell types, {len(common_genes)} shared genes")

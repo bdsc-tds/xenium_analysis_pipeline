@@ -23,7 +23,7 @@ Some reserved keys are listed as follows:
 
     - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition. Note that it is required for the reference dataset to have a column named "nCount", representing the number of counts per cell.
 
-      With `rctd.language: python` (see section `cell_type_annotation`), the path may be a Seurat `{stem}.rds`, which is converted once to `{stem}_counts.h5` and `{stem}_metadata.parquet` next to it (that folder must be writable), or directly `{stem}_counts.h5`, with `{stem}_metadata.parquet` (a `cell_id` column plus the level columns) next to it. The RCTD runs after count correction use the same reference.
+      With `rctd.language: python` (see section `cell_type_annotation`), the path may be a Seurat `{stem}.rds`, which is converted once to `{stem}_counts.h5` and `{stem}_metadata.parquet` next to it (that folder must be writable), or directly `{stem}_counts.h5`, with `{stem}_metadata.parquet` (a `cell_id` column plus the level columns) next to it. With `sctransform` (see section `normalisation`), the counts are the reference's `SCT` assay: a `.rds` needs an `SCT` assay (converted to `{stem}_SCT_counts.h5`), and a direct `{stem}_counts.h5` path needs `{stem}_SCT_counts.h5` (the `SCT` assay counts) next to it as well. The RCTD runs after count correction use the same reference.
 
     - `levels`: A list of level names in the reference dataset. A valid reference dataset also requires a valid list of levels.
 
