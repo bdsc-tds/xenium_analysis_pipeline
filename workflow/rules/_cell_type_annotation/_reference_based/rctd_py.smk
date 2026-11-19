@@ -4,7 +4,8 @@
 # The chain writes the same files, at the same paths, as `runReferenceBasedRCTD` (rctd.smk), so
 # post-processing and every downstream rule run unchanged:
 #   1. runConvertSeuratReferenceToH5: Seurat .rds reference -> {stem}_counts.h5 + {stem}_metadata.parquet,
-#      next to the .rds; only scheduled when the configured reference path ends in .rds.
+#      next to the .rds; only scheduled when the configured reference path ends in .rds. With sctransform,
+#      runConvertSeuratReferenceSCTToH5 also writes the SCT assay counts to {stem}_SCT_counts.h5.
 #   2. exportQuery4runReferenceBasedRCTDPy: Xenium Seurat object -> 10x h5 counts + coordinates.
 #   3. runReferenceBasedRCTDPy: rctd-py in doublet mode (GPU), same reference filtering and settings as rctd.R.
 #   4. assembleReferenceBasedRCTDPy: spacexr RCTD object + output parquets, as written by rctd.R.
@@ -29,6 +30,7 @@ def get_reference_files4runReferenceBasedRCTDPy(wildcards) -> dict[str, str]:
     """
     Reference counts and metadata: converted from the .rds when the configured path is a .rds,
     used directly when it is a `{stem}_counts.h5` (labels in `{stem}_metadata.parquet`).
+    With sctransform, the counts are the reference's SCT assay, in `{stem}_SCT_counts.h5`.
     """
     path: str = get_path2reference4reference_based_annotation(wildcards)
 
@@ -39,8 +41,11 @@ def get_reference_files4runReferenceBasedRCTDPy(wildcards) -> dict[str, str]:
     else:
         raise RuntimeError(f"Error! The reference for rctd-py must be a .rds or a {{stem}}_counts.h5 file: {path}.")
 
+    # Same reference assay as rctd.R: RNA for lognorm, SCT for sctransform
+    assay_suffix: str = "" if get_assay_name4annotation(wildcards, True) == cac.REF_SEURAT_DEFAULT_ASSAY else f"_{cac.REF_SEURAT_ALT_ASSAY}"
+
     return {
-        "ref_counts": f"{stem}_counts.h5",
+        "ref_counts": f"{stem}{assay_suffix}_counts.h5",
         "ref_metadata": f"{stem}_metadata.parquet",
     }
 
@@ -136,8 +141,7 @@ rule runReferenceBasedRCTDPy:
         dtype=lambda wildcards: get_param4runReferenceBasedRCTDPy(wildcards, "_py_dtype", "float64"),
         int_counts_flag=lambda wildcards: "--is_int_counts" if is_int_counts4runReferenceBasedRCTDPy(wildcards) else ""
     wildcard_constraints:
-        annotation_id=r"reference_based/.+/rctd_.+",
-        normalisation_id=r"lognorm"
+        annotation_id=r"reference_based/.+/rctd_.+"
     threads:
         lambda wildcards: get_param4runReferenceBasedRCTDPy(wildcards, "_py_threads", 1)
     resources:
@@ -217,8 +221,7 @@ rule assembleReferenceBasedRCTDPy:
         XE_MIN_counts=cac.XE_MIN_counts,
         is_int_counts=is_int_counts4runReferenceBasedRCTDPy
     wildcard_constraints:
-        annotation_id=r"reference_based/.+/rctd_.+",
-        normalisation_id=r"lognorm"
+        annotation_id=r"reference_based/.+/rctd_.+"
     resources:
         mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 20, 32000) * attempt, 300000),
         runtime=lambda wildcards, attempt: 30 * attempt

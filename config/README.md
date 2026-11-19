@@ -203,7 +203,7 @@ This section for now only supports reference based approach (specified with key 
    - `rctd`
      RCTD is used for annotation.
 
-     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, lognorm only, container `rctd_py`). Only the base RCTD rule switches; it writes the same output files, and the RCTD copies after count correction stay in R. Switching an existing dataset reruns RCTD and everything downstream of it.
+     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `rctd_py`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Only the base RCTD rule switches; it writes the same output files, and the RCTD copies after count correction stay in R. Switching an existing dataset reruns RCTD and everything downstream of it.
      - `_py_batch_size`: Cells per GPU batch for rctd-py. `10000` by default.
      - `_py_dtype`: Float precision for rctd-py (`float64` matches R arithmetic). `float64` by default.
      - `_py_threads`: CPU threads for rctd-py. The fit runs on the GPU, so `1` (the default) is enough; `_threads` only applies to the R version.

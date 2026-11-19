@@ -33,3 +33,16 @@ rule runConvertSeuratReferenceToH5:
         config["containers"]["r"]
     script:
         "../../scripts/_reference_preprocessing/convert_seurat_2_h5.R"
+
+
+# SCT assay counts of the same reference, for sctransform; the labels stay in {reference_stem}_metadata.parquet
+use rule runConvertSeuratReferenceToH5 as runConvertSeuratReferenceSCTToH5 with:
+    output:
+        h5=f"{{reference_stem}}_SCT_counts.h5"
+    params:
+        output_prefix=lambda wildcards, output: output.h5[: -len("_SCT_counts.h5")],
+        assay="SCT",
+        layer="counts",
+        genome="unknown"
+    log:
+        f"{{reference_stem}}_convertSeuratReferenceSCTToH5.log"

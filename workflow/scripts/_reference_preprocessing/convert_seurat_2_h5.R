@@ -54,11 +54,11 @@ seurat_to_h5_parquet <- function(seurat_obj,
   stopifnot(
     "seurat_obj must be a Seurat object" = inherits(seurat_obj, "Seurat"),
     "h5_path must be a character string" = is.character(h5_path),
-    "parquet_path must be a character string" = is.character(parquet_path),
+    "parquet_path must be a character string or NULL" = is.null(parquet_path) || is.character(parquet_path),
     "assay not found in Seurat object"   = assay %in% Assays(seurat_obj)
   )
   
-  for (out_path in c(h5_path, parquet_path)) {
+  for (out_path in c(h5_path, parquet_path)) {  # parquet_path is skipped when NULL
     out_dir <- dirname(out_path)
     if (!dir.exists(out_dir) && nzchar(out_dir) && out_dir != ".") {
       message(sprintf("Creating output directory: %s", out_dir))
@@ -107,6 +107,12 @@ seurat_to_h5_parquet <- function(seurat_obj,
     overwrite = FALSE    # already handled above
   )
   
+  # Counts only (e.g. a second assay of a reference whose metadata is already exported)
+  if (is.null(parquet_path)) {
+    message(sprintf("  Done: %s (%d genes x %d cells), no metadata written", h5_path, nrow(counts_mat), ncol(counts_mat)))
+    return(invisible(list(h5 = h5_path, parquet = NULL)))
+  }
+
   # ------------------------------------------------------------------
   # 3. Build metadata data.frame
   # ------------------------------------------------------------------
