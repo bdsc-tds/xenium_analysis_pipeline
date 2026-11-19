@@ -9,7 +9,8 @@
 #   2. exportQuery4runReferenceBasedRCTDPy: Xenium Seurat object -> 10x h5 counts + coordinates.
 #   3. runReferenceBasedRCTDPy: rctd-py in doublet mode (GPU), same reference filtering and settings as rctd.R.
 #   4. assembleReferenceBasedRCTDPy: spacexr RCTD object + output parquets, as written by rctd.R.
-# Only the base annotation rule is switched; the post-count-correction copies stay in R.
+# The RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch the same way: steps 2-4 run on the
+# corrected query, with the query export and the rctd-py outputs in the output folder of the R rule they replace.
 
 #######################################
 #              Functions              #
@@ -147,7 +148,7 @@ rule runReferenceBasedRCTDPy:
         lambda wildcards: get_param4runReferenceBasedRCTDPy(wildcards, "_py_threads", 1)
     resources:
         mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 16000) * attempt, 500000),
-        runtime=lambda wildcards, attempt: 60 * attempt,
+        runtime=lambda wildcards, attempt: 240 * attempt,
         slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
             wildcards,
         ) if _use_gpu() else "cpu",
@@ -232,3 +233,221 @@ rule assembleReferenceBasedRCTDPy:
         config["containers"]["r"]
     script:
         "../../../scripts/_cell_type_annotation/_reference_based/rctd_py_assemble.R"
+
+
+#######################################
+#   After count correction (Python)   #
+#######################################
+
+# File names of the three steps inside an output folder; the counts are not integers after count correction
+
+def _rctd_py_query_files(out_dir: str, prefix: str = "") -> dict[str, str]:
+    return {
+        f"{prefix}counts": f"{out_dir}/rctd_py_query/counts.h5",
+        f"{prefix}metadata": f"{out_dir}/rctd_py_query/metadata.parquet",
+    }
+
+
+def _rctd_py_run_files(out_dir: str) -> dict[str, str]:
+    return {
+        "results_df": f"{out_dir}/rctd_py/results_df.parquet",
+        "weights": f"{out_dir}/rctd_py/weights.parquet",
+        "weights_doublet": f"{out_dir}/rctd_py/weights_doublet.parquet",
+        "singlet_scores": f"{out_dir}/rctd_py/singlet_scores.parquet",
+        "reference_cells": f"{out_dir}/rctd_py/reference_cells.parquet",
+        "class_df": f"{out_dir}/rctd_py/class_df.parquet",
+        "run_info": f"{out_dir}/rctd_py/run_info.json",
+    }
+
+
+def _rctd_py_output_files(out_dir: str) -> dict[str, str]:
+    return {
+        "rds_output": f"{out_dir}/output.rds",
+        "labels": f"{out_dir}/labels.parquet",
+        "scores": f"{out_dir}/scores.parquet",
+        "out_res_df": f"{out_dir}/output/results_df.parquet",
+        "out_w": f"{out_dir}/output/weights.parquet",
+        "out_wd": f"{out_dir}/output/weights_doublet.parquet",
+        "out_sc": f"{out_dir}/output/singlet_score.parquet",
+        "out_sm": f"{out_dir}/output/score_mat.parquet",
+    }
+
+# Split
+_RCTD_PY_SPLIT_DIR: str = os.path.dirname(rules.runPostCountCorrectionBySplitReferenceBasedRCTD.output.rds_output)
+
+use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionBySplitReferenceBasedRCTDPy with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(wildcards, is_post_correction=True)
+    output:
+        **_rctd_py_query_files(_RCTD_PY_SPLIT_DIR)
+    log:
+        f"{_RCTD_PY_SPLIT_DIR}/logs/exportQuery4runPostCountCorrectionBySplitReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"split.+",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule runReferenceBasedRCTDPy as runPostCountCorrectionBySplitReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_SPLIT_DIR, "query_")
+    output:
+        **_rctd_py_run_files(_RCTD_PY_SPLIT_DIR)
+    params:
+        int_counts_flag=""
+    log:
+        f"{_RCTD_PY_SPLIT_DIR}/logs/runPostCountCorrectionBySplitReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"split.+",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionBySplitReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_SPLIT_DIR, "query_"),
+        **_rctd_py_run_files(_RCTD_PY_SPLIT_DIR)
+    output:
+        **_rctd_py_output_files(_RCTD_PY_SPLIT_DIR)
+    params:
+        is_int_counts=False
+    log:
+        f"{_RCTD_PY_SPLIT_DIR}/logs/assemblePostCountCorrectionBySplitReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"split.+",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+ruleorder: assemblePostCountCorrectionBySplitReferenceBasedRCTDPy > runPostCountCorrectionBySplitReferenceBasedRCTD
+
+# Ovrlpy
+_RCTD_PY_OVRLPY_DIR: str = os.path.dirname(rules.runPostCountCorrectionByOvrlpyReferenceBasedRCTD.output.rds_output)
+
+use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByOvrlpyReferenceBasedRCTDPy with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(wildcards, is_post_correction=True)
+    output:
+        **_rctd_py_query_files(_RCTD_PY_OVRLPY_DIR)
+    log:
+        f"{_RCTD_PY_OVRLPY_DIR}/logs/exportQuery4runPostCountCorrectionByOvrlpyReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule runReferenceBasedRCTDPy as runPostCountCorrectionByOvrlpyReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_OVRLPY_DIR, "query_")
+    output:
+        **_rctd_py_run_files(_RCTD_PY_OVRLPY_DIR)
+    params:
+        int_counts_flag=""
+    log:
+        f"{_RCTD_PY_OVRLPY_DIR}/logs/runPostCountCorrectionByOvrlpyReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByOvrlpyReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_OVRLPY_DIR, "query_"),
+        **_rctd_py_run_files(_RCTD_PY_OVRLPY_DIR)
+    output:
+        **_rctd_py_output_files(_RCTD_PY_OVRLPY_DIR)
+    params:
+        is_int_counts=False
+    log:
+        f"{_RCTD_PY_OVRLPY_DIR}/logs/assemblePostCountCorrectionByOvrlpyReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"ovrlpy",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+ruleorder: assemblePostCountCorrectionByOvrlpyReferenceBasedRCTDPy > runPostCountCorrectionByOvrlpyReferenceBasedRCTD
+
+# ResolviUnsupervised
+_RCTD_PY_RESOLVIUNSUPERVISED_DIR: str = os.path.dirname(rules.runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTD.output.rds_output)
+
+use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(wildcards, is_post_correction=True)
+    output:
+        **_rctd_py_query_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR)
+    log:
+        f"{_RCTD_PY_RESOLVIUNSUPERVISED_DIR}/logs/exportQuery4runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule runReferenceBasedRCTDPy as runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR, "query_")
+    output:
+        **_rctd_py_run_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR)
+    params:
+        int_counts_flag=""
+    log:
+        f"{_RCTD_PY_RESOLVIUNSUPERVISED_DIR}/logs/runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR, "query_"),
+        **_rctd_py_run_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR)
+    output:
+        **_rctd_py_output_files(_RCTD_PY_RESOLVIUNSUPERVISED_DIR)
+    params:
+        is_int_counts=False
+    log:
+        f"{_RCTD_PY_RESOLVIUNSUPERVISED_DIR}/logs/assemblePostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_unsupervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+ruleorder: assemblePostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy > runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTD
+
+# ResolviSupervised
+_RCTD_PY_RESOLVISUPERVISED_DIR: str = os.path.dirname(rules.runPostCountCorrectionByResolviSupervisedReferenceBasedRCTD.output.rds_output)
+
+use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy with:
+    input:
+        query=lambda wildcards: get_path2query4annotation(wildcards, is_post_correction=True)
+    output:
+        **_rctd_py_query_files(_RCTD_PY_RESOLVISUPERVISED_DIR)
+    log:
+        f"{_RCTD_PY_RESOLVISUPERVISED_DIR}/logs/exportQuery4runPostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_supervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule runReferenceBasedRCTDPy as runPostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_RESOLVISUPERVISED_DIR, "query_")
+    output:
+        **_rctd_py_run_files(_RCTD_PY_RESOLVISUPERVISED_DIR)
+    params:
+        int_counts_flag=""
+    log:
+        f"{_RCTD_PY_RESOLVISUPERVISED_DIR}/logs/runPostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_supervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy with:
+    input:
+        unpack(get_reference_files4runReferenceBasedRCTDPy),
+        **_rctd_py_query_files(_RCTD_PY_RESOLVISUPERVISED_DIR, "query_"),
+        **_rctd_py_run_files(_RCTD_PY_RESOLVISUPERVISED_DIR)
+    output:
+        **_rctd_py_output_files(_RCTD_PY_RESOLVISUPERVISED_DIR)
+    params:
+        is_int_counts=False
+    log:
+        f"{_RCTD_PY_RESOLVISUPERVISED_DIR}/logs/assemblePostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy.log"
+    wildcard_constraints:
+        count_correction_id=r"resolvi_supervised",
+        annotation_id=r"reference_based/.+/rctd_.+"
+
+ruleorder: assemblePostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy > runPostCountCorrectionByResolviSupervisedReferenceBasedRCTD

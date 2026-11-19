@@ -23,7 +23,7 @@ Some reserved keys are listed as follows:
 
     - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition. Note that it is required for the reference dataset to have a column named "nCount", representing the number of counts per cell.
 
-      With `rctd.language: python` (see section `cell_type_annotation`), the path may be a Seurat `{stem}.rds`, which is converted once to `{stem}_counts.h5` and `{stem}_metadata.parquet` next to it (that folder must be writable), or directly `{stem}_counts.h5`, with `{stem}_metadata.parquet` (a `cell_id` column plus the level columns) next to it. The RCTD copies after count correction always run in R and still need a `.rds` reference.
+      With `rctd.language: python` (see section `cell_type_annotation`), the path may be a Seurat `{stem}.rds`, which is converted once to `{stem}_counts.h5` and `{stem}_metadata.parquet` next to it (that folder must be writable), or directly `{stem}_counts.h5`, with `{stem}_metadata.parquet` (a `cell_id` column plus the level columns) next to it. The RCTD runs after count correction use the same reference.
 
     - `levels`: A list of level names in the reference dataset. A valid reference dataset also requires a valid list of levels.
 
@@ -203,7 +203,7 @@ This section for now only supports reference based approach (specified with key 
    - `rctd`
      RCTD is used for annotation.
 
-     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `rctd_py`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Only the base RCTD rule switches; it writes the same output files, and the RCTD copies after count correction stay in R. Switching an existing dataset reruns RCTD and everything downstream of it.
+     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `rctd_py`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Both the base RCTD rule and the RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch; they write the same output files as the R rules. Switching an existing dataset reruns RCTD and everything downstream of it.
      - `_py_batch_size`: Cells per GPU batch for rctd-py. `10000` by default.
      - `_py_dtype`: Float precision for rctd-py (`float64` matches R arithmetic). `float64` by default.
      - `_py_threads`: CPU threads for rctd-py. The fit runs on the GPU, so `1` (the default) is enough; `_threads` only applies to the R version.
