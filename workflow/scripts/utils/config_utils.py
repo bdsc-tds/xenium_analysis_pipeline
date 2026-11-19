@@ -938,13 +938,14 @@ def _process_marker_genes(data: dict[str, Any] | None) -> list[str]:
         inexist_key_ok=True,
     )
 
-    if _methods is None:
-        return []
-
-    return _convert2list(
-        _methods,
-        match_length=False,
-    )
+    return [
+        i
+        for i in _convert2list(
+            _methods,
+            match_length=False,
+        )
+        if i is not None and str(i).strip() != ""
+    ]
 
 
 def _process_geo_sub(
