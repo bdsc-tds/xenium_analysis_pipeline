@@ -222,6 +222,19 @@ doublet_finding:
   scdblfinder:
     _other_options:
 
+marker_genes:
+  methods:
+    - scran_score_markers
+
+  # Minimum number of cells required per cell type to be included in marker detection.
+  min_cells_per_type: 25
+
+  # For RCTD-based annotations, only use cells classified as singlets.
+  rctd_singlets_only: true
+
+  scran_score_markers:
+    _threads: 4
+
 geo_sub:
   name_map:
   geo_id_map:

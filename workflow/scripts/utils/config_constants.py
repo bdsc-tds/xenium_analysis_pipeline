@@ -34,6 +34,8 @@ WILDCARDS_COEXPRESSION_NAME: str = "_coexpression"
 WILDCARDS_CELL_TYPE_ANNOTATION_NAME: str = "_cell_type_annotation"
 # Child of `WILDCARDS_NAME` (second level); a list of values for doublet finding.
 WILDCARDS_DOUBLET_FINDING_NAME: str = "_doublet_finding"
+# Child of `WILDCARDS_NAME` (second level); a list of values for marker gene detection.
+WILDCARDS_MARKER_GENES_NAME: str = "_marker_genes"
 
 
 # Child of `experiments` (second level); for the path to the experiments configuration file on the disk.
