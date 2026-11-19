@@ -26,6 +26,10 @@ segmentation:
     - proseg_expected
     - proseg_mode
     - segger
+    # Opt-in: unlike the other methods, segger_new is not containerised, so
+    # enabling it makes Snakemake build workflow/envs/segger_new_cuda.yml on the
+    # first run (needs outbound network access; see README).
+    # - segger_new
 
   10x_mm:
     expansion-distance:
@@ -81,6 +85,18 @@ segmentation:
     predict:
       use_cc: False
       _other_options:
+
+  # NEW Segger (dpeerlab/segger) -- unified `segger segment` command, run from the
+  # host conda env workflow/envs/segger_new_cuda.yml. Only the benchmarking-
+  # relevant knobs are exposed; everything else uses the segger CLI defaults
+  # (see src/segger/cli/config.yaml). Add flags via _other_options, e.g.
+  # "--cells-min-counts 10 --tiling-margin-prediction 20 --prediction-mode cell".
+  segger_new:
+    n_epochs: 20
+    cells_representation: pca        # 'pca' or 'morphology'
+    segmentation_loss: triplet       # 'triplet' or 'bce'
+    _threads: 4
+    _other_options:
 
   _normalisation:
     _threads: 16

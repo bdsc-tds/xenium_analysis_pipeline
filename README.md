@@ -84,6 +84,26 @@ cd reproducibility/segger
 singularity build --fakeroot --force /path/to/the/built/container segger.def
 ```
 
+#### Segger (new)
+
+The rewritten [Segger](https://github.com/dpeerlab/segger) is available as a separate segmentation method, `segger_new`, so that it can be benchmarked against `segger` above. It is pinned to commit [`98765aa`](https://github.com/dpeerlab/segger/tree/98765aaacc3e62eba8a3a9f80fc35222d1a831ba).
+
+Unlike the other methods it is not containerised: it runs from a conda environment, `workflow/envs/segger_new_cuda.yml`, declared with Snakemake's `conda:` directive. `run.sh` already passes `--software-deployment-method conda apptainer`, so **Snakemake builds this environment automatically on the first run** and no manual step is required.
+
+Two caveats:
+
+- The build needs outbound network access to PyPI, `pypi.nvidia.com` and `data.pyg.org`. On clusters whose compute nodes are offline, pre-build the environment from a node that has access using `--conda-create-envs-only`, or create it manually and point Snakemake at it with `--conda-prefix`:
+
+  ```bash
+  # the current working directory is the root of this repo
+  mamba env create -f workflow/envs/segger_new_cuda.yml
+  mamba run -n segger_new_cuda segger segment --help  # smoke test
+  ```
+
+- RAPIDS, PyTorch and Segger are installed as pip wheels rather than conda packages. The reason is documented at the top of the environment file: the recipe dpeerlab ships (`environment_cuda121.yml`) no longer solves against current conda-forge, because RAPIDS 24.10 pins `libjpeg-turbo` 2.x while current `geopandas` → `pyogrio` → `libgdal` requires 3.x. Installing the `-cu12` wheels instead mirrors dpeerlab's own `pixi.lock` and avoids the conflict.
+
+Because those wheels ship versioned CUDA libraries only, `workflow/scripts/_segmentation/segger_cuda_env.sh` is sourced before `segger segment`, to put the pip `nvidia/*/lib` directories on `LD_LIBRARY_PATH` and to add the unversioned `libX.so` symlinks that `cudf`/`numba` `dlopen`. It derives the environment prefix from `command -v segger`, so it works with a Snakemake-managed hashed prefix as well as with a named environment. A GPU is required at run time, but not to build the environment.
+
 ## Configuration
 
 ### Configuration for the workflow
