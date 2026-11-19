@@ -27,6 +27,8 @@ dependencies:
   # - aws-c-event-stream
   # - aws-c-common
   - git
+  # setuptools 81+ no longer ships pkg_resources, which spatialdata and Segger import
+  - setuptools=78.1.0
   - pip
   - pip:
       - cupy-cuda12x==13.3.0

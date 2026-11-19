@@ -112,6 +112,15 @@ Stage: main
 # Create a new environment: rctd_py (rctd-py needs torch>=2.3, general_cuda has torch 2.1.2)
     mamba env create -q -y -f /opt/_env/rctd_py.yml
 
+# Use the envs' libstdc++ (conda-forge, GCC 16) as the system one: pip wheels such as pyarrow (loaded by
+# pandas) load the system libstdc++ of Ubuntu 22.04 (GCC 12) first, and conda-forge libraries built with
+# newer compilers (numba/llvmlite, matplotlib, ...) then fail to load (CXXABI_1.3.15 not found).
+# libstdc++ is backward compatible, and it only needs libgcc_s symbols that Ubuntu 22.04 has.
+    LIBSTDCXX=$(readlink -f /opt/conda/envs/general_cuda/lib/libstdc++.so.6)
+    cp "${LIBSTDCXX}" /usr/lib/x86_64-linux-gnu/
+    ln -sf "$(basename ${LIBSTDCXX})" /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+    ldconfig
+
 # Download the rctd-py Q-matrices (data file of the rctd-py v0.1.1 release) and check it
     mkdir -p /opt/rctd
     curl -fsSL -o /opt/rctd/q_matrices.npz "${RCTD_Q_MATRICES_URL}"
@@ -124,6 +133,11 @@ Stage: main
     for env in segger_cuda general_cuda rctd_py; do
         mamba run -n ${env} python -c "import numpy; assert numpy.__version__ == '1.26.4', f'${env}: numpy {numpy.__version__}'"
     done
+
+# Fail the build if the main packages cannot be imported, after pandas (pyarrow loads the system libstdc++ first)
+    mamba run -n segger_cuda python -c "import pandas, numba, anndata, matplotlib.pyplot, scanpy, segger.prediction.boundary; print('segger_cuda: imports ok')"
+    mamba run -n general_cuda python -c "import pandas, numba, anndata, matplotlib.pyplot, scanpy, scvi, spatialdata, spatialdata_io, ovrlpy; print('general_cuda: imports ok')"
+    mamba run -n rctd_py python -c "import pandas, anndata, rctd; print('rctd_py: imports ok')"
 
     cd /
 
