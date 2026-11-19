@@ -139,7 +139,7 @@ rule runReferenceBasedRCTDPy:
         annotation_id=r"reference_based/.+/rctd_.+",
         normalisation_id=r"lognorm"
     threads:
-        1
+        lambda wildcards: get_param4runReferenceBasedRCTDPy(wildcards, "_py_threads", 1)
     resources:
         mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 16000) * attempt, 500000),
         runtime=lambda wildcards, attempt: 60 * attempt,

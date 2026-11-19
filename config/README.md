@@ -206,6 +206,7 @@ This section for now only supports reference based approach (specified with key 
      - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, lognorm only, container `rctd_py`). Only the base RCTD rule switches; it writes the same output files, and the RCTD copies after count correction stay in R. Switching an existing dataset reruns RCTD and everything downstream of it.
      - `_py_batch_size`: Cells per GPU batch for rctd-py. `10000` by default.
      - `_py_dtype`: Float precision for rctd-py (`float64` matches R arithmetic). `float64` by default.
+     - `_py_threads`: CPU threads for rctd-py. The fit runs on the GPU, so `1` (the default) is enough; `_threads` only applies to the R version.
      - `UMI_min_sigma`: #TODO
      - `_threads`: The maximum amount of memory (in GB) to use. `20` bu default.
      - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.

@@ -166,12 +166,15 @@ cell_type_annotation:
       # rctd-py only: cells per GPU batch and float precision (float64 = R arithmetic)
       _py_batch_size: 10000
       _py_dtype: float64
+      # rctd-py only: CPU threads; the fit runs on the GPU, so 1 is enough
+      _py_threads: 1
 
       # Min UMI in xenium cells to consider cell for sigma extimation (sigma of Log-Poisson distribution).
       UMI_min_sigma:
         - 100 # low UMI in single-cell mode
         - 300 # higher UMI in cluster mode
 
+      # R (spacexr) only, also used by the RCTD runs after count correction
       _threads: 20
       _other_options:
 
