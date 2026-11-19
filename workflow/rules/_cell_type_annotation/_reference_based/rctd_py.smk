@@ -59,6 +59,7 @@ def get_param4runReferenceBasedRCTDPy(wildcards, key: str, default=None):
         extract_layers_from_experiments(wildcards.annotation_id, [4])[0],
         key,
         replace_none=default,
+        inexist_key_ok=True,
     )
 
 
