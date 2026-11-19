@@ -145,6 +145,7 @@ rule reprocessRawData:
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/logs/reprocessRawData.log'
         ),
+        link_morphology=lambda wildcards: get_link_morphology_cmd(wildcards),
         localmem=lambda wildcards: get_dict_value(
             config,
             "reprocess",
@@ -172,7 +173,8 @@ rule reprocessRawData:
         "--xenium-bundle={params.abs_input} "
         "--panel={params.abs_gene_panel} "
         "--localcores={threads} "
-        "--localmem={params.localmem} &> {params.abs_log}"
+        "--localmem={params.localmem} &> {params.abs_log} && "
+        "{{ {params.link_morphology} results/outs >> {params.abs_log} 2>&1 || echo 'link_morphology: failed, kept the copy' >> {params.abs_log}; }}"
 
 rule changeParquetCompressionType:
     input:

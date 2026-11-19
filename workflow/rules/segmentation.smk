@@ -23,12 +23,22 @@ def get_slurm_extra(wildcards, num_device: int = 1) -> str:
 
 def get_link_morphology_cmd(wildcards) -> str:
     """
-    Command run after xeniumranger as `<cmd> <xenium bundle> normalised_results/outs`: replaces the
-    copied morphology.ome.tif with a symlink to the bundle image (`segmentation._link_morphology`,
-    default true), or does nothing.
+    Command run after xeniumranger as `<cmd> normalised_results/outs`: replaces the copied
+    morphology.ome.tif with a symlink to the image in the raw Xenium folder, also for reprocessed
+    samples (`segmentation._link_morphology`, default true), or does nothing.
     """
     if get_dict_value(config, "segmentation", "_link_morphology", replace_none=True, inexist_key_ok=True):
-        return "bash " + os.path.join(workflow.basedir, "scripts/_segmentation/link_morphology.sh")
+        raw_dir: str = normalise_path(
+            f'{config["experiments"][cc.EXPERIMENTS_BASE_PATH_NAME]}/{wildcards.sample_id}',
+            pat_flags=re.IGNORECASE,
+            return_dir=True,
+            check_exist=True,
+        )
+        return " ".join([
+            "bash",
+            os.path.join(workflow.basedir, "scripts/_segmentation/link_morphology.sh"),
+            os.path.abspath(raw_dir),
+        ])
 
     return "true"
 

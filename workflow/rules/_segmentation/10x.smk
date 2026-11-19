@@ -129,4 +129,4 @@ rule run10x:
         "--localcores={threads} "
         "--localmem={params.localmem} "
         "{params.other_options} &> {params.abs_log} && "
-        "{params.link_morphology} {params.abs_input} normalised_results/outs >> {params.abs_log} 2>&1"
+        "{{ {params.link_morphology} normalised_results/outs >> {params.abs_log} 2>&1 || echo 'link_morphology: failed, kept the copy' >> {params.abs_log}; }}"

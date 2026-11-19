@@ -86,7 +86,7 @@ segmentation:
     _threads: 16
     _memory: 128
 
-  # Replace the morphology.ome.tif copy in each segmentation output with a symlink to the input bundle image
+  # Replace the morphology.ome.tif copy in each segmentation output with a symlink to the image in the raw Xenium folder
   _link_morphology: true
 
   _qc:

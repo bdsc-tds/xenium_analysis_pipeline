@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Replace the copy of morphology.ome.tif that xeniumranger writes into outs/ with a relative symlink to
-# the image of the input Xenium bundle, when both files are byte-identical. Saves one full copy of the
-# image per segmentation output. Any other case keeps the copy and only prints why.
+# the image in the raw Xenium folder (also for reprocessed samples), when both files are byte-identical.
+# Saves one full copy of the image per segmentation output. Any other case keeps the copy and only prints why.
 #
-# Usage: link_morphology.sh <xenium_bundle_dir> <outs_dir>
+# Usage: link_morphology.sh <raw_xenium_dir> <outs_dir>
 set -euo pipefail
 
 bundle_img="$1/morphology.ome.tif"
