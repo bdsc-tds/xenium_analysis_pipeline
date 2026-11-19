@@ -6,7 +6,6 @@ containers:
   10x:
   baysor:
   proseg:
-  rctd_py:
 
 experiments: experiments.yml
 

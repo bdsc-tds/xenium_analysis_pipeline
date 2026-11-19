@@ -7,7 +7,8 @@
 #      next to the .rds; only scheduled when the configured reference path ends in .rds. With sctransform,
 #      runConvertSeuratReferenceSCTToH5 also writes the SCT assay counts to {stem}_SCT_counts.h5.
 #   2. exportQuery4runReferenceBasedRCTDPy: Xenium Seurat object -> 10x h5 counts + coordinates.
-#   3. runReferenceBasedRCTDPy: rctd-py in doublet mode (GPU), same reference filtering and settings as rctd.R.
+#   3. runReferenceBasedRCTDPy: rctd-py in doublet mode (GPU, rctd_py env of the python_cuda container),
+#      same reference filtering and settings as rctd.R.
 #   4. assembleReferenceBasedRCTDPy: spacexr RCTD object + output parquets, as written by rctd.R.
 # The RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch the same way: steps 2-4 run on the
 # corrected query, with the query export and the rctd-py outputs in the output folder of the R rule they replace.
@@ -156,9 +157,9 @@ rule runReferenceBasedRCTDPy:
     log:
         f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/logs/runReferenceBasedRCTDPy.log'
     container:
-        config["containers"]["rctd_py"]
+        config["containers"]["python_cuda"]
     shell:
-        "python3 workflow/scripts/_cell_type_annotation/_reference_based/rctd_py.py "
+        "mamba run --no-capture-output -n rctd_py python3 workflow/scripts/_cell_type_annotation/_reference_based/rctd_py.py "
         "--ref_counts {input.ref_counts} "
         "--ref_metadata {input.ref_metadata} "
         "--query_counts {input.query_counts} "

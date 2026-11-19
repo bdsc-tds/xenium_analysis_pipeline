@@ -47,7 +47,7 @@ This section specifies the path to the output directory, which can either be rel
 
 This section specifies the paths to the prebuilt singularity containers, following the instructions in `README.md` in the root directory. The corresponding definition files can be found in `reproducibility` in the root directory.
 
-`rctd_py` is the container with rctd-py, used when `cell_type_annotation.reference_based.rctd.language` is `python`.
+`python_cuda` is also needed for cell type annotation with rctd-py, when `cell_type_annotation.reference_based.rctd.language` is `python`.
 
 ## Experiments (key: `experiments`)
 
@@ -203,7 +203,7 @@ This section for now only supports reference based approach (specified with key 
    - `rctd`
      RCTD is used for annotation.
 
-     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `rctd_py`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Both the base RCTD rule and the RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch; they write the same output files as the R rules. Switching an existing dataset reruns RCTD and everything downstream of it.
+     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `python_cuda`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Both the base RCTD rule and the RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch; they write the same output files as the R rules. Switching an existing dataset reruns RCTD and everything downstream of it.
      - `_py_batch_size`: Cells per GPU batch for rctd-py. `10000` by default.
      - `_py_dtype`: Float precision for rctd-py (`float64` matches R arithmetic). `float64` by default.
      - `_py_threads`: CPU threads for rctd-py. The fit runs on the GPU, so `1` (the default) is enough; `_threads` only applies to the R version.
