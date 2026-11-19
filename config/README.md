@@ -47,7 +47,7 @@ This section specifies the path to the output directory, which can either be rel
 
 This section specifies the paths to the prebuilt singularity containers, following the instructions in `README.md` in the root directory. The corresponding definition files can be found in `reproducibility` in the root directory.
 
-`python_cuda` is also needed for cell type annotation with rctd-py, when `cell_type_annotation.reference_based.rctd.language` is `python`.
+`python_cuda` is also needed for cell type annotation with rctd-py, when `config["cell_type_annotation"]["reference_based"]["rctd"]["language"]` is `"python"`.
 
 ## Experiments (key: `experiments`)
 

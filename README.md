@@ -76,17 +76,15 @@ singularity build --fakeroot --force /path/to/the/built/container reproducibilit
 
 #### Segger
 
-The [Segger](https://github.com/EliHei2/segger_dev) version we use here is a [fix](https://github.com/senbaikang/segger_dev/tree/96e531dd7313dfe9c19111b029b49e582531044f) by us.
+The [Segger](https://github.com/EliHei2/segger_dev) version we use here is a [fix](https://github.com/bdsc-tds/segger_dev/tree/4bf56dec2a364de8eee4fcab663e798eb106e21a) by us. It is installed in the `python_cuda` container (see [Python with CUDA](#python-with-cuda)).
 
-```bash
-# the current working directory is the root of this repo
-cd reproducibility/segger
-singularity build --fakeroot --force /path/to/the/built/container segger.def
-```
+#### rctd-py
+
+The [rctd-py](https://github.com/p-gueguen/rctd-py) version we use here is 0.4.4. It is only needed when `config["cell_type_annotation"]["reference_based"]["rctd"]["language"]` is `"python"`. It is installed in the `python_cuda` container (see [Python with CUDA](#python-with-cuda)), together with its precomputed likelihood tables, since compute nodes may have no internet access.
 
 #### Python with CUDA
 
-The `python_cuda` container is needed for cell type annotation with rctd-py (`cell_type_annotation.reference_based.rctd.language: python`):
+The `python_cuda` container is needed for Segger and rctd-py:
 
 ```bash
 # the current working directory is the root of this repo
