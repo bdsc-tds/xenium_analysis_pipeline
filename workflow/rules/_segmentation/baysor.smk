@@ -97,9 +97,9 @@ rule runBaysor:
         data_file=f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet',
         xr_version=f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
     output:
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation.csv'),
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_2d.json'),
-        protected(f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_3d.json')
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation.csv',
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_2d.json',
+        f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/raw_results/segmentation_polygons_3d.json'
     log:
         f'{config["output_path"]}/segmentation/baysor/{{sample_id}}/logs/runBaysor.log'
     params:
@@ -180,6 +180,7 @@ rule normaliseBaysor:
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/segmentation/baysor/{wildcards.sample_id}/logs/normaliseBaysor.log'
         ),
+        link_morphology=get_link_morphology_cmd,
         localmem=get_dict_value(
             config,
             "segmentation",
@@ -212,4 +213,5 @@ rule normaliseBaysor:
         "--viz-polygons={params.abs_input_polygons} "
         "--units=microns "
         "--localcores={threads} "
-        "--localmem={params.localmem} &> {params.abs_log}"
+        "--localmem={params.localmem} &> {params.abs_log} && "
+        "{{ {params.link_morphology} normalised_results/outs >> {params.abs_log} 2>&1 || echo 'link_morphology: failed, kept the copy' >> {params.abs_log}; }}"

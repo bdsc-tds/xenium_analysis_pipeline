@@ -7,7 +7,7 @@ rule generateStandardSeuratReport:
         raw=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/standard_seurat_analysis.html')
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/standard_seurat_analysis.html'
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -30,7 +30,7 @@ use rule generateStandardSeuratReport as generatePostCountCorrectionBySplitStand
         raw=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/standard_seurat_analysis.html')
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/standard_seurat_analysis.html'
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -49,7 +49,7 @@ use rule generateStandardSeuratReport as generatePostCountCorrectionByOvrlpyStan
         raw=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/standard_seurat_analysis.html')
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/standard_seurat_analysis.html'
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -68,7 +68,7 @@ use rule generateStandardSeuratReport as generatePostCountCorrectionByResolviUns
         raw=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/standard_seurat_analysis.html')
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/standard_seurat_analysis.html'
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,
@@ -87,7 +87,7 @@ use rule generateStandardSeuratReport as generatePostCountCorrectionByResolviSup
         raw=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/raw_seurat.rds',
         preprocessed=f'{config["output_path"]}/post_count_correction_std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds'
     output:
-        protected(f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/standard_seurat_analysis.html')
+        f'{config["output_path"]}/reports/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{normalisation_id}}/standard_seurat_analysis.html'
     params:
         default_assay=sec.SEURAT_DEFAULT_ASSAY,
         segmentation_id=lambda wildcards: wildcards.segmentation_id,

@@ -124,7 +124,7 @@ rule loadSegmentation2Seurat:
     input:
         get_input2_or_params4loadSegmentation2Seurat
     output:
-        protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds')
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds'
     params:
         data_dir=lambda wildcards: get_input2_or_params4loadSegmentation2Seurat(
             wildcards,
@@ -169,7 +169,7 @@ rule loadProseg2Seurat:
     input:
         unpack(get_input2_or_params4loadProseg2Seurat)
     output:
-        protected(f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds')
+        f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/raw_seurat.rds'
     params:
         input_data=lambda wildcards: get_input2_or_params4loadProseg2Seurat(
             wildcards,

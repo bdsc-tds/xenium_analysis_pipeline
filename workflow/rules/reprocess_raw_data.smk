@@ -111,7 +111,7 @@ checkpoint check10xVersions:
     input:
         get_input2check10xVersions
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/versions.json'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/check10xVersions.log'
     resources:
@@ -145,6 +145,7 @@ rule reprocessRawData:
         abs_log=lambda wildcards: os.path.abspath(
             f'{config["output_path"]}/reprocessed/{wildcards.sample_id}/logs/reprocessRawData.log'
         ),
+        link_morphology=lambda wildcards: get_link_morphology_cmd(wildcards),
         localmem=lambda wildcards: get_dict_value(
             config,
             "reprocess",
@@ -172,13 +173,14 @@ rule reprocessRawData:
         "--xenium-bundle={params.abs_input} "
         "--panel={params.abs_gene_panel} "
         "--localcores={threads} "
-        "--localmem={params.localmem} &> {params.abs_log}"
+        "--localmem={params.localmem} &> {params.abs_log} && "
+        "{{ {params.link_morphology} results/outs >> {params.abs_log} 2>&1 || echo 'link_morphology: failed, kept the copy' >> {params.abs_log}; }}"
 
 rule changeParquetCompressionType:
     input:
         get_input2_or_params4changeParquetCompressionType
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/transcripts_snappy.parquet'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/changeParquetCompressionType.log'
     params:
@@ -198,7 +200,7 @@ rule zipReprocessedAuxiliary10xFiles:
     input:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/results'
     output:
-        protected(f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar')
+        f'{config["output_path"]}/reprocessed/{{sample_id}}/results/_auxiliary_files.tar'
     log:
         f'{config["output_path"]}/reprocessed/{{sample_id}}/logs/zipReprocessedAuxiliary10xFiles.log'
     params:

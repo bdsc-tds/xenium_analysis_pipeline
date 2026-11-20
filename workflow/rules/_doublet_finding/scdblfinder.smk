@@ -7,7 +7,7 @@ rule runScdblfinder:
         xe=f'{config["output_path"]}/std_seurat_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/preprocessed/preprocessed_seurat.rds',
         post_processed_rctd=f'{config["output_path"]}/cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/post_processed_output.rds'
     output:
-        doublet_scores=protected(f'{config["output_path"]}/doublet_finding/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{doublet_id}}/doublet_scores.parquet')
+        doublet_scores=f'{config["output_path"]}/doublet_finding/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{doublet_id}}/doublet_scores.parquet'
     params:
         label_aware=lambda wildcards: re.fullmatch(
             "scdblfinder_label_aware",

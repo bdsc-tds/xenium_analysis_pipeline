@@ -146,6 +146,10 @@ In addition, after acquiring results from Baysor, Proseg, and Segger, an extra s
 
 - `localmem`: The maximum amount of memory (in GB) to use.
 
+Xenium Ranger copies `morphology.ome.tif` from the input bundle into every segmentation output (`normalised_results/outs/`) and into reprocessed bundles (`reprocessed/<sample>/results/outs/`). With `_link_morphology: true` (the default), the copy is replaced by a symlink to the image in the raw Xenium folder once Xenium Ranger has finished (also for reprocessed samples, so links never depend on pipeline outputs), if both files are byte-identical; otherwise the copy is kept. The link is relative, or absolute when the output and the bundle only share the filesystem root (e.g. two different storage mounts). If linking fails, the copy is kept and the rule still succeeds. Set it to `false` to keep full copies, e.g. when an output folder will be moved or shared without the raw data.
+
+> **Warning:** with linking on, `morphology.ome.tif` in `<output_path>/segmentation/` and `<output_path>/reprocessed/` points to the image in the raw Xenium folder. Be careful when deleting these folders with `rm -rf`: remove the output folders themselves (this deletes only the links), never a path that resolves through a link into the raw folder, and do not write to or overwrite `morphology.ome.tif` in an output, as that changes the raw image.
+
 ## Standard Seurat analysis (key: `standard_seurat_analysis`)
 
 This section specifies parameters in the standard Seurat analysis workflow.

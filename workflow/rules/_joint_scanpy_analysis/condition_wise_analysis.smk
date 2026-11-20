@@ -9,7 +9,7 @@ rule gatherConditionWiseSegmentedSamples:
             level=0,
         )
     output:
-        protected(f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/condition_wise_samples.json')
+        f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/condition_wise_samples.json'
     params:
         lambda wildcards: get_input2_or_params4gatherSegmentedSamples(
             wildcards,
@@ -27,7 +27,7 @@ rule runConditionWiseAnalysis:
     input:
         f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/condition_wise_samples.json'
     output:
-        protected(f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/umap.parquet')
+        f'{config["output_path"]}/joint_scanpy_analysis/{{segmentation_id}}/{{condition_id}}/umap.parquet'
     params:
         lambda wildcards: get_params4runAnalysis(
             wildcards,

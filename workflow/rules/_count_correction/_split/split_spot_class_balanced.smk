@@ -11,8 +11,8 @@ rule runSplitSpotClassBalanced:
         fully_purified_counts_metadata=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_fully_purified/corrected_counts_metadata.parquet',
         transcriptomic_neighborhood_scores=f'{config["output_path"]}/neighborhood_analysis/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/transcriptomic_neighborhood_scores.parquet'
     output:
-        corrected_counts=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_spot_class_balanced/corrected_counts.h5'),
-        corrected_counts_metadata=protected(f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_spot_class_balanced/corrected_counts_metadata.parquet')
+        corrected_counts=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_spot_class_balanced/corrected_counts.h5',
+        corrected_counts_metadata=f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_spot_class_balanced/corrected_counts_metadata.parquet'
     log:
         f'{config["output_path"]}/count_correction/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/split_spot_class_balanced/logs/runSplitSpotClassBalanced.log'
     wildcard_constraints:

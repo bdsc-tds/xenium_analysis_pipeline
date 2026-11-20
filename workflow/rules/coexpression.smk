@@ -6,8 +6,8 @@ rule computeCoexpression:
     input:
         get_input2_or_params4loadSegmentation2Seurat
     output:
-        co_exp=protected(f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/coexpression.parquet'),
-        pos_rate=protected(f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/positivity_rate.parquet')
+        co_exp=f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/coexpression.parquet',
+        pos_rate=f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/positivity_rate.parquet'
     log:
         f'{config["output_path"]}/coexpression/{{segmentation_id}}/{{sample_id}}/{{coexpression_id}}/logs/computeCoexpression.log'
     params:

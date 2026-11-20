@@ -99,7 +99,8 @@ rule run10x:
             wildcards.compact_segmentation_id,
             "localmem"
         ),
-        other_options=get_other_options4run10x
+        other_options=get_other_options4run10x,
+        link_morphology=get_link_morphology_cmd
     wildcard_constraints:
         compact_segmentation_id=r"10x_\w+um"
     threads:
@@ -127,4 +128,5 @@ rule run10x:
         "--expansion-distance={params.expansion_distance} "
         "--localcores={threads} "
         "--localmem={params.localmem} "
-        "{params.other_options} &> {params.abs_log}"
+        "{params.other_options} &> {params.abs_log} && "
+        "{{ {params.link_morphology} normalised_results/outs >> {params.abs_log} 2>&1 || echo 'link_morphology: failed, kept the copy' >> {params.abs_log}; }}"
