@@ -23,6 +23,8 @@ Some reserved keys are listed as follows:
 
     - `path`: Absolute path to the reference dataset. An empty path (either `None` or `""`) indicates that the corresponding reference is unavailable, and thus the corresponding reference type won't be used in the pipeline for a specific condition. Note that it is required for the reference dataset to have a column named "nCount", representing the number of counts per cell.
 
+      With `rctd.language: python` (see section `cell_type_annotation`), the path may be a Seurat `{stem}.rds`, which is converted once to `{stem}_counts.h5` and `{stem}_metadata.parquet` next to it (that folder must be writable), or directly `{stem}_counts.h5`, with `{stem}_metadata.parquet` (a `cell_id` column plus the level columns) next to it. With `sctransform` (see section `normalisation`), the counts are the reference's `SCT` assay: a `.rds` needs an `SCT` assay (converted to `{stem}_SCT_counts.h5`), and a direct `{stem}_counts.h5` path needs `{stem}_SCT_counts.h5` (the `SCT` assay counts) next to it as well. The RCTD runs after count correction use the same reference.
+
     - `levels`: A list of level names in the reference dataset. A valid reference dataset also requires a valid list of levels.
 
     - `cell_min_instance`: The minimum number of cells required per cell type (by default `25`). Can be decreased for smaller references.
@@ -44,6 +46,8 @@ This section specifies the path to the output directory, which can either be rel
 ## Singularity containers (key: `containers`)
 
 This section specifies the paths to the prebuilt singularity containers, following the instructions in `README.md` in the root directory. The corresponding definition files can be found in `reproducibility` in the root directory.
+
+`python_cuda` is also needed for cell type annotation with rctd-py, when `config["cell_type_annotation"]["reference_based"]["rctd"]["language"]` is `"python"`.
 
 ## Experiments (key: `experiments`)
 
@@ -199,6 +203,10 @@ This section for now only supports reference based approach (specified with key 
    - `rctd`
      RCTD is used for annotation.
 
+     - `language`: `R` (spacexr, default if absent) or `python` (rctd-py on GPU, container `python_cuda`; with `sctransform` the reference `.rds` needs an `SCT` assay, as for R). Both the base RCTD rule and the RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch; they write the same output files as the R rules. Switching an existing dataset reruns RCTD and everything downstream of it.
+     - `_py_batch_size`: Cells per GPU batch for rctd-py. `10000` by default.
+     - `_py_dtype`: Float precision for rctd-py (`float64` matches R arithmetic). `float64` by default.
+     - `_py_threads`: CPU threads for rctd-py. The fit runs on the GPU, so `1` (the default) is enough; `_threads` only applies to the R version.
      - `UMI_min_sigma`: #TODO
      - `_threads`: The maximum amount of memory (in GB) to use. `20` bu default.
      - `_other_options`: For options not defined in the configuration, in a form similar to that mentioned above.

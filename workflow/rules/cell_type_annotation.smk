@@ -127,11 +127,52 @@ def get_assay_name4annotation(wildcards, for_ref: bool) -> str:
     raise RuntimeError(f"Error! Unknown normalisation method: {wildcards.normalisation_id}. Valid methods include 'lognorm' and 'sctransform'.")
 
 
+# Shared by rctd.smk (R) and rctd_py.smk (python)
+def get_class_level4runReferenceBasedRCTD(wildcards) -> str | None:
+    method_name: str = extract_layers_from_experiments(wildcards.annotation_id, [2])[0]
+
+    if method_name == "rctd_class_unaware":
+        return None
+    elif method_name == "rctd_class_aware":
+        current_level: str = extract_layers_from_experiments(wildcards.annotation_id, [3])[0]
+        available_levels: list[str] = get_dict_value(
+                config,
+                "experiments",
+                cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_NAME,
+                cc.EXPERIMENTS_CELL_TYPE_ANNOTATION_LEVELS_NAME,
+                extract_layers_from_experiments(wildcards.sample_id, [0])[0],
+                extract_layers_from_experiments(wildcards.annotation_id, [0, 1])[0],
+            )
+
+        try:
+            current_level_idx: int = available_levels.index(current_level)
+        except ValueError:
+            raise RuntimeError(f"Error! Cannot find {current_level} in [{",".join(available_levels)}].")
+        
+        return available_levels[0] if current_level_idx == 0 else available_levels[current_level_idx - 1]
+    else:
+        raise RuntimeError(f"Error! Unknown method name: {method_name}.")
+
+
 ######################################
 #              Subrules              #
 ######################################
 
-include: "_cell_type_annotation/_reference_based/rctd.smk"
+# RCTD implementation from cell_type_annotation.reference_based.rctd.language: R (spacexr, default) or
+# python (rctd-py); only the selected one is included, both write the same output files
+_RCTD_LANGUAGE: set[str] = {
+    str(v.get("language", "R"))
+    for v in (get_dict_value(config, "cell_type_annotation", "reference_based", "rctd", inexist_key_ok=True) or {}).values()
+    if isinstance(v, dict)
+}
+
+if _RCTD_LANGUAGE == {"python"}:
+    include: "_cell_type_annotation/_reference_based/rctd_py.smk"
+elif _RCTD_LANGUAGE <= {"R"}:
+    include: "_cell_type_annotation/_reference_based/rctd.smk"
+else:
+    raise RuntimeError(f"Error! cell_type_annotation.reference_based.rctd.language must be 'R' or 'python', got {_RCTD_LANGUAGE}.")
+
 include: "_cell_type_annotation/_reference_based/singler.smk"
 include: "_cell_type_annotation/_reference_based/seurat.smk"
 include: "_cell_type_annotation/_reference_based/xgboost.smk"

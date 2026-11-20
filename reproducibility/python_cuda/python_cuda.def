@@ -34,12 +34,15 @@ Stage: main
 %files
     segger_cuda.yml /opt/_env
     general_cuda.yml /opt/_env
+    rctd_py.yml /opt/_env
 
 %environment
     export PATH=/opt/conda/bin:/opt/conda/condabin:$PATH
     export MAMBA_ROOT_PREFIX=/opt/conda
     export DEBIAN_FRONTEND=noninteractive
     export TZ="Europe/Zurich"
+    # rctd-py likelihood tables baked into the image (compute nodes have no internet)
+    export RCTD_Q_MATRICES=/opt/rctd/q_matrices.npz
 
 %post
 # Set up build time environment variables, such as versions
@@ -50,9 +53,13 @@ Stage: main
     export SCVI_REPO=https://github.com/scverse/scvi-tools
     export SCVI_VERSION=c3926eb7a0b83e869d17b5b05fe247aa9bc36019
 
+    export RCTD_Q_MATRICES_URL=https://github.com/p-gueguen/rctd-py/releases/download/v0.1.1/q_matrices.npz
+    export RCTD_Q_MATRICES_SHA256=b04c7cc6d79b0a373cd932ce32882470595712e18b7580cfb02e1c151cae1c92
+
 # DNS
     # echo "nameserver 8.8.8.8" >> /etc/resolv.conf
-    sed -i 's/ch.archive.ubuntu.com/en.archive.ubuntu.com/g' /etc/apt/sources.list
+    # Swiss Ubuntu mirror: archive.ubuntu.com and security.ubuntu.com are not always reachable from the cluster
+    sed -i -E 's#http://(archive|security)\.ubuntu\.com#http://ch.archive.ubuntu.com#g' /etc/apt/sources.list
 
 # Force ipv4
     echo 'Acquire::ForceIPv4 "true";' | tee /etc/apt/apt.conf.d/99force-ipv4
@@ -74,6 +81,11 @@ Stage: main
 
 # Install system packages
     apt-get install -y git vim cmake wget curl
+
+# Keep NumPy 1 in every pip install (env pip sections, Segger, scvi-tools, rctd-py): the conda pin
+# alone does not stop pip from upgrading it, and torch 2.1 cannot convert NumPy 2 arrays
+    echo "numpy==1.26.4" > /opt/_env/pip_constraints.txt
+    export PIP_CONSTRAINT=/opt/_env/pip_constraints.txt
 
 # Create a new environment: segger_cuda
     mamba env create -q -y -f /opt/_env/segger_cuda.yml
@@ -97,4 +109,38 @@ Stage: main
     
     mamba run -n general_cuda pip install "."
 
+# Create a new environment: rctd_py (rctd-py needs torch>=2.3, general_cuda has torch 2.1.2)
+    mamba env create -q -y -f /opt/_env/rctd_py.yml
+
+# Use the envs' libstdc++ (conda-forge, GCC 16) as the system one: pip wheels such as pyarrow (loaded by
+# pandas) load the system libstdc++ of Ubuntu 22.04 (GCC 12) first, and conda-forge libraries built with
+# newer compilers (numba/llvmlite, matplotlib, ...) then fail to load (CXXABI_1.3.15 not found).
+# libstdc++ is backward compatible, and it only needs libgcc_s symbols that Ubuntu 22.04 has.
+    LIBSTDCXX=$(readlink -f /opt/conda/envs/general_cuda/lib/libstdc++.so.6)
+    cp "${LIBSTDCXX}" /usr/lib/x86_64-linux-gnu/
+    ln -sf "$(basename ${LIBSTDCXX})" /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+    ldconfig
+
+# Download the rctd-py Q-matrices (data file of the rctd-py v0.1.1 release) and check it
+    mkdir -p /opt/rctd
+    curl -fsSL -o /opt/rctd/q_matrices.npz "${RCTD_Q_MATRICES_URL}"
+    echo "${RCTD_Q_MATRICES_SHA256}  /opt/rctd/q_matrices.npz" | sha256sum -c -
+
+# Check that rctd-py imports with the env's torch and finds the tables
+    RCTD_Q_MATRICES=/opt/rctd/q_matrices.npz mamba run -n rctd_py python -c "import importlib.metadata as md, rctd, torch; from rctd._likelihood import load_cached_q_matrices; load_cached_q_matrices(); print('rctd-py', md.version('rctd-py'), 'torch', torch.__version__)"
+
+# Fail the build if pip replaced NumPy 1.26.4 in any environment
+    for env in segger_cuda general_cuda rctd_py; do
+        mamba run -n ${env} python -c "import numpy; assert numpy.__version__ == '1.26.4', f'${env}: numpy {numpy.__version__}'"
+    done
+
+# Fail the build if the main packages cannot be imported, after pandas (pyarrow loads the system libstdc++ first)
+    mamba run -n segger_cuda python -c "import pandas, numba, anndata, matplotlib.pyplot, scanpy, segger.prediction.boundary; print('segger_cuda: imports ok')"
+    mamba run -n general_cuda python -c "import pandas, numba, anndata, matplotlib.pyplot, scanpy, scvi, spatialdata, spatialdata_io, ovrlpy; print('general_cuda: imports ok')"
+    mamba run -n rctd_py python -c "import pandas, anndata, rctd; print('rctd_py: imports ok')"
+
     cd /
+
+%labels
+    rctd_py 0.4.4
+    rctd_py_torch 2.5.1+cu124
