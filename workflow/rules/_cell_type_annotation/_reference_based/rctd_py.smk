@@ -11,7 +11,8 @@
 #      same reference filtering and settings as rctd.R.
 #   4. assembleReferenceBasedRCTDPy: spacexr RCTD object + output parquets, as written by rctd.R.
 # The RCTD runs after count correction (SPLIT, ovrlpy, resolVI) switch the same way: steps 2-4 run on the
-# corrected query, with the query export and the rctd-py outputs in the output folder of the R rule they replace.
+# corrected query, with the query export and the rctd-py outputs in the same output folders as the R rules.
+# rctd.smk (R) is not included alongside this file, so no ruleorder against the R rules is needed.
 
 #######################################
 #              Functions              #
@@ -88,8 +89,6 @@ if len(_RCTD_PY_RDS_STEMS) > 0:
 #######################################
 #                Rules                #
 #######################################
-
-ruleorder: assembleReferenceBasedRCTDPy > runReferenceBasedRCTD
 
 rule exportQuery4runReferenceBasedRCTDPy:
     input:
@@ -240,6 +239,7 @@ rule assembleReferenceBasedRCTDPy:
 #   After count correction (Python)   #
 #######################################
 
+# Output folders: same paths as the R rules in rctd.smk (runPostCountCorrectionBy*ReferenceBasedRCTD)
 # File names of the three steps inside an output folder; the counts are not integers after count correction
 
 def _rctd_py_query_files(out_dir: str, prefix: str = "") -> dict[str, str]:
@@ -274,7 +274,7 @@ def _rctd_py_output_files(out_dir: str) -> dict[str, str]:
     }
 
 # Split
-_RCTD_PY_SPLIT_DIR: str = os.path.dirname(rules.runPostCountCorrectionBySplitReferenceBasedRCTD.output.rds_output)
+_RCTD_PY_SPLIT_DIR: str = f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/{{normalisation_id}}/{{annotation_id}}'
 
 use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionBySplitReferenceBasedRCTDPy with:
     input:
@@ -316,10 +316,8 @@ use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionBySplitRefer
         count_correction_id=r"split.+",
         annotation_id=r"reference_based/.+/rctd_.+"
 
-ruleorder: assemblePostCountCorrectionBySplitReferenceBasedRCTDPy > runPostCountCorrectionBySplitReferenceBasedRCTD
-
 # Ovrlpy
-_RCTD_PY_OVRLPY_DIR: str = os.path.dirname(rules.runPostCountCorrectionByOvrlpyReferenceBasedRCTD.output.rds_output)
+_RCTD_PY_OVRLPY_DIR: str = f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/signal_integrity_threshold={config["count_correction"]["ovrlpy"]["signal_integrity_threshold"]}/{{normalisation_id}}/{{annotation_id}}'
 
 use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByOvrlpyReferenceBasedRCTDPy with:
     input:
@@ -361,10 +359,8 @@ use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByOvrlpyRefe
         count_correction_id=r"ovrlpy",
         annotation_id=r"reference_based/.+/rctd_.+"
 
-ruleorder: assemblePostCountCorrectionByOvrlpyReferenceBasedRCTDPy > runPostCountCorrectionByOvrlpyReferenceBasedRCTD
-
 # ResolviUnsupervised
-_RCTD_PY_RESOLVIUNSUPERVISED_DIR: str = os.path.dirname(rules.runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTD.output.rds_output)
+_RCTD_PY_RESOLVIUNSUPERVISED_DIR: str = f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}'
 
 use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy with:
     input:
@@ -406,10 +402,8 @@ use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByResolviUns
         count_correction_id=r"resolvi_unsupervised",
         annotation_id=r"reference_based/.+/rctd_.+"
 
-ruleorder: assemblePostCountCorrectionByResolviUnsupervisedReferenceBasedRCTDPy > runPostCountCorrectionByResolviUnsupervisedReferenceBasedRCTD
-
 # ResolviSupervised
-_RCTD_PY_RESOLVISUPERVISED_DIR: str = os.path.dirname(rules.runPostCountCorrectionByResolviSupervisedReferenceBasedRCTD.output.rds_output)
+_RCTD_PY_RESOLVISUPERVISED_DIR: str = f'{config["output_path"]}/post_count_correction_cell_type_annotation/{{segmentation_id}}/{{sample_id}}/{{normalisation_id}}/{{annotation_id}}/{{count_correction_id}}/mixture_k={config["count_correction"]["resolvi"]["train"]["mixture_k"]}/num_samples={config["count_correction"]["resolvi"]["predict"]["num_samples"]}/{{normalisation_id}}/{{annotation_id}}'
 
 use rule exportQuery4runReferenceBasedRCTDPy as exportQuery4runPostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy with:
     input:
@@ -450,5 +444,3 @@ use rule assembleReferenceBasedRCTDPy as assemblePostCountCorrectionByResolviSup
     wildcard_constraints:
         count_correction_id=r"resolvi_supervised",
         annotation_id=r"reference_based/.+/rctd_.+"
-
-ruleorder: assemblePostCountCorrectionByResolviSupervisedReferenceBasedRCTDPy > runPostCountCorrectionByResolviSupervisedReferenceBasedRCTD
