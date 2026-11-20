@@ -30,7 +30,7 @@ rule computeCoexpression:
     threads:
         1
     resources:
-        mem_mb=lambda wildcards, attempt: attempt**2 * 512
+        mem_mb=lambda wildcards, attempt: attempt**2 * 2048
     shell:
         "mamba run -n general_cuda python3 workflow/scripts/_coexpression/compute_coexpression.py "
         "-i {params.data_dir} "
