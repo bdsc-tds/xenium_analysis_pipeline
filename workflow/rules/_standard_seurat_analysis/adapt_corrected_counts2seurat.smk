@@ -150,7 +150,7 @@ rule adaptCorrectedCountsBySplit2Seurat:
     wildcard_constraints:
         count_correction_id=r"split.+"
     resources:
-        mem_mb=lambda wildcards, attempt: min(attempt**3 * 2048, 512000)
+        mem_mb=lambda wildcards, attempt: min(attempt**3 * 20000, 512000)
     script:
         "../../scripts/_standard_seurat_analysis/adapt_corrected_counts2seurat.R"
 

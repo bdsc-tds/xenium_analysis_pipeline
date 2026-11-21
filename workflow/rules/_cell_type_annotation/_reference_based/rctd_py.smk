@@ -147,7 +147,7 @@ rule runReferenceBasedRCTDPy:
     threads:
         lambda wildcards: get_param4runReferenceBasedRCTDPy(wildcards, "_py_threads", 1)
     resources:
-        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 16000) * attempt, 500000),
+        mem_mb=lambda wildcards, input, attempt: min(max(input.size_mb * 10, 32000) * attempt, 500000),
         runtime=lambda wildcards, attempt: 240 * attempt,
         slurm_partition=lambda wildcards: get_slurm_gpu_partition_name(
             wildcards,
