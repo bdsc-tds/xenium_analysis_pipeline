@@ -3,7 +3,7 @@
 #######################################
 
 def get_input2_or_params4loadSegmentation2Seurat(wildcards, for_input: bool = True) -> str:
-    seg_method: str = "proseg" if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
+    seg_method: str = get_proseg_compact_id(wildcards.segmentation_id) if wildcards.segmentation_id.startswith("proseg") else wildcards.segmentation_id
 
     ret = f'{config["output_path"]}/segmentation/{seg_method}/{wildcards.sample_id}/normalised_results'
 
@@ -45,9 +45,10 @@ def get_mapped_cell_ids(
     return is_xr_v4, ret
 
 def get_input2_or_params4loadProseg2Seurat(wildcards, for_input: bool = True) -> dict[str, str]:
+    compact_id: str = get_proseg_compact_id(wildcards.segmentation_id)
     ret: dict[str, str] = {
-        "cell_metadata": f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz',
-        "expected_counts": f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/expected-counts.csv.gz',
+        "cell_metadata": f'{config["output_path"]}/segmentation/{compact_id}/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz',
+        "expected_counts": f'{config["output_path"]}/segmentation/{compact_id}/{wildcards.sample_id}/raw_results/expected-counts.csv.gz',
         "dir": get_input2_or_params4loadSegmentation2Seurat(
             wildcards,
             for_input=for_input,
@@ -56,7 +57,7 @@ def get_input2_or_params4loadProseg2Seurat(wildcards, for_input: bool = True) ->
 
     is_xr_v4, path2mapping = get_mapped_cell_ids(
         wildcards.sample_id,
-        "proseg",
+        compact_id,
         ret["dir"],
     )
 
@@ -66,19 +67,13 @@ def get_input2_or_params4loadProseg2Seurat(wildcards, for_input: bool = True) ->
     return ret
 
 def use_mode_counts4loadProseg2Seurat(wildcards) -> bool:
-    matched = re.match(
-        r"^proseg_(\w+)",
-        wildcards.segmentation_id,
-        flags=re.IGNORECASE,
-    )
-    assert matched is not None
-
-    if matched.group(1) == "mode":
+    # proseg_*_mode -> mode counts; proseg_*_expected -> expected counts
+    if wildcards.segmentation_id.endswith("_mode"):
         return True
-    elif matched.group(1) == "expected":
+    elif wildcards.segmentation_id.endswith("_expected"):
         return False
 
-    raise RunError(f"Error! Invalid segmentation method: {matched.group(1)}")
+    raise RuntimeError(f"Error! Invalid segmentation method: {wildcards.segmentation_id}")
 
 def get_mapping_param4loadProseg2Seurat(wildcards) -> bool:
     use_mode_counts: bool = use_mode_counts4loadProseg2Seurat(wildcards)

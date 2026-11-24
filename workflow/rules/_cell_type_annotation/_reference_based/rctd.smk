@@ -10,8 +10,9 @@ def is_int_counts4runReferenceBasedRCTD(wildcards, input) -> bool:
     ) is not None:
         return False
 
+    # proseg expected counts (proseg_expected, proseg_<mask>_expected) are not integers
     return False if re.match(
-        "proseg_expected",
+        r"^proseg(_\w+)?_expected$",
         wildcards.segmentation_id,
         flags=re.IGNORECASE,
     ) else True

@@ -596,6 +596,11 @@ def _process_experiments(file_path: str, root_path: str) -> tuple[Any, ...]:
     )
 
 
+def get_proseg_compact_id(segmentation_id: str) -> str:
+    # proseg_expected / proseg_mode -> proseg; proseg_<mask>_expected -> proseg_<mask>
+    return re.sub(r"_(mode|expected)$", "", segmentation_id, flags=re.IGNORECASE)
+
+
 def _process_segmentation(
     data: dict[str, Any],
 ) -> tuple[list[str], list[str], dict[str, Any]]:
@@ -695,8 +700,8 @@ def _process_segmentation(
             methods.append(m)
 
             if m.startswith("proseg"):
-                if "proseg" not in compact_methods:
-                    compact_methods.append("proseg")
+                if get_proseg_compact_id(m) not in compact_methods:
+                    compact_methods.append(get_proseg_compact_id(m))
             else:
                 compact_methods.append(m)
 

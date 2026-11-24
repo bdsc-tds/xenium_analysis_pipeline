@@ -3,6 +3,12 @@
 #######################################
 
 def get_input2_or_params4runProseg(wildcards, for_input: bool = True) -> str:
+    # proseg_<mask>: transcripts of the imported <mask> segmentation (file, not the normalised_results
+    # dir, whose mtime changes when zipNormalisedAuxiliary10xFiles runs)
+    if wildcards.compact_segmentation_id != "proseg":
+        mask: str = wildcards.compact_segmentation_id[len("proseg_"):]
+        return f'{config["output_path"]}/segmentation/{mask}/{wildcards.sample_id}/normalised_results/outs/transcripts.parquet'
+
     use_raw_data, ret = get_raw_data_dir(wildcards.sample_id)
 
     if for_input:
@@ -28,15 +34,15 @@ def get_input2_or_params4runProseg(wildcards, for_input: bool = True) -> str:
 
 def get_input2_or_params4mapProsegRawAndNormalisedCells(wildcards, for_input: bool = True) -> list[str]:
     ret: list[str] = [
-        f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz'
+        f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/raw_results/cell-metadata.csv.gz'
     ]
 
     if for_input:
-        ret.append(f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/normalised_results')
+        ret.append(f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/normalised_results')
     else:
         ret.append(
             normalise_path(
-                f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/normalised_results',
+                f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/normalised_results',
                 candidate_paths=("outs",),
                 pat_anchor_file="cells.parquet",
                 pat_flags=re.IGNORECASE,
@@ -56,18 +62,18 @@ rule runProseg:
     input:
         get_input2_or_params4runProseg
     output:
-        directory(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'),
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-metadata.csv.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/transcript-metadata.csv.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons.geojson.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz'
+        directory(f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/proseg-output.zarr'),
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/expected-counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/cell-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/transcript-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/gene-metadata.csv.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/cell-polygons.geojson.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/cell-polygons-layers.geojson.gz'
     log:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/runProseg.log'
     params:
-        work_dir=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results',
+        work_dir=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results',
         abs_input=lambda wildcards: os.path.abspath(
             get_input2_or_params4runProseg(
                 wildcards,
@@ -75,7 +81,7 @@ rule runProseg:
             )
         ),
         abs_log=lambda wildcards: os.path.abspath(
-            f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/logs/runProseg.log'
+            f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/logs/runProseg.log'
         ),
         other_options=get_dict_value(
             config,
@@ -103,6 +109,8 @@ rule runProseg:
             "_memory",
             replace_none=20,
         ) * 1024 * attempt
+    wildcard_constraints:
+        compact_segmentation_id=r"proseg\w*"
     container:
         config["containers"]["proseg"]
     shell:
@@ -120,14 +128,16 @@ rule runProseg:
 
 rule runProseg2Baysor:
     input:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/proseg-output.zarr'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/proseg-output.zarr'
     output:
-        segmentation=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-transcript-metadata.csv',
-        polygons=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson'
+        segmentation=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/processed_results/baysor-transcript-metadata.csv',
+        polygons=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/processed_results/baysor-cell-polygons.geojson'
     log:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg2Baysor.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/runProseg2Baysor.log'
     resources:
         mem_mb=lambda wildcards, input, attempt: min(2048 * attempt**2, 51200)
+    wildcard_constraints:
+        compact_segmentation_id=r"proseg\w*"
     container:
         config["containers"]["proseg"]
     shell:
@@ -138,16 +148,18 @@ rule runProseg2Baysor:
 
 rule convertProsegCountsFormat:
     input:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.mtx.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.mtx.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/gene-metadata.csv.gz'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/expected-counts.mtx.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/gene-metadata.csv.gz'
     output:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/counts.csv.gz',
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/raw_results/expected-counts.csv.gz'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/counts.csv.gz',
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/raw_results/expected-counts.csv.gz'
     log:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/runProseg.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/runProseg.log'
     threads:
         1
+    wildcard_constraints:
+        compact_segmentation_id=r"proseg\w*"
     conda:
         "../../envs/coexpression.yml"
     shell:
@@ -162,14 +174,14 @@ rule convertProsegCountsFormat:
 rule normaliseProseg:
     input:
         data_dir=lambda wildcards: get_input2_or_params4run10x(wildcards),
-        segmentation=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-transcript-metadata.csv',
-        polygons=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/processed_results/baysor-cell-polygons.geojson'
+        segmentation=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/processed_results/baysor-transcript-metadata.csv',
+        polygons=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/processed_results/baysor-cell-polygons.geojson'
     output:
-        directory(f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/normalised_results')
+        directory(f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/normalised_results')
     log:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/normaliseProseg.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/normaliseProseg.log'
     params:
-        work_dir=f'{config["output_path"]}/segmentation/proseg/{{sample_id}}',
+        work_dir=f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}',
         abs_input_data_dir=lambda wildcards: os.path.abspath(
             get_input2_or_params4run10x(wildcards, for_input=False)
         ),
@@ -180,7 +192,7 @@ rule normaliseProseg:
             input["polygons"]
         ),
         abs_log=lambda wildcards: os.path.abspath(
-            f'{config["output_path"]}/segmentation/proseg/{wildcards.sample_id}/logs/normaliseProseg.log'
+            f'{config["output_path"]}/segmentation/{wildcards.compact_segmentation_id}/{wildcards.sample_id}/logs/normaliseProseg.log'
         ),
         link_morphology=get_link_morphology_cmd,
         localmem=get_dict_value(
@@ -205,6 +217,8 @@ rule normaliseProseg:
             "_normalisation",
             "_memory"
         ) * 1024
+    wildcard_constraints:
+        compact_segmentation_id=r"proseg\w*"
     container:
         config["containers"]["10x"]
     shell:
@@ -225,14 +239,14 @@ rule mapProsegRawAndNormalisedCells:
             for_input=True,
         )
     output:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/mapped_cell_ids/mapped_cell_ids.parquet'
     params:
         lambda wildcards: get_input2_or_params4mapProsegRawAndNormalisedCells(
             wildcards,
             for_input=False,
         )
     log:
-        f'{config["output_path"]}/segmentation/proseg/{{sample_id}}/logs/mapProsegRawAndNormalisedCells.log'
+        f'{config["output_path"]}/segmentation/{{compact_segmentation_id}}/{{sample_id}}/logs/mapProsegRawAndNormalisedCells.log'
     resources:
         mem_mb=lambda wildcards, attempt: max(
             sum(
@@ -243,6 +257,8 @@ rule mapProsegRawAndNormalisedCells:
             ) * 10**-6 * attempt * 10,
             2048
         )
+    wildcard_constraints:
+        compact_segmentation_id=r"proseg\w*"
     conda:
         "../../envs/pyarrow.yml"
     shell:

@@ -72,8 +72,9 @@ def get_donor4runReferenceBasedRCTDPy(wildcards) -> str:
 
 
 def is_int_counts4runReferenceBasedRCTDPy(wildcards) -> bool:
-    # Same rule as is_int_counts4runReferenceBasedRCTD for the base (non count-corrected) query
-    return re.match("proseg_expected", wildcards.segmentation_id, flags=re.IGNORECASE) is None
+    # Same rule as is_int_counts4runReferenceBasedRCTD for the base (non count-corrected) query:
+    # proseg expected counts (proseg_expected, proseg_<mask>_expected) are not integers
+    return re.match(r"^proseg(_\w+)?_expected$", wildcards.segmentation_id, flags=re.IGNORECASE) is None
 
 
 # Only the configured .rds references can be converted
